@@ -28,11 +28,11 @@ import org.slf4j.LoggerFactory;
  * @date 2015年6月8日 下午5:10:18 
  *
  */
-public abstract class BaseQuartz implements Runnable {
+public abstract class BaseQuartz implements Runnable, Cloneable {
 	protected static Logger LOG = LoggerFactory.getLogger(BaseQuartz.class);
 	
 	private QuartzConfig config;
-	private boolean close = false;
+	private boolean close = true;
 	private boolean isRunning = false;
 	private int nowTimes = 0;
 	private Object LOCK = new Object();
@@ -87,7 +87,6 @@ public abstract class BaseQuartz implements Runnable {
 						
 						if(builder != null)
 							throw new QuartzException(builder.toString());
-						
 					} catch(Throwable e) {
 						errorProcess(e);
 						
@@ -131,7 +130,6 @@ public abstract class BaseQuartz implements Runnable {
 					}
 				}
 			}
-			
 		} finally {
 			QuartzFactory.getInstance().unbind(this);
 			destroy();
@@ -240,5 +238,14 @@ public abstract class BaseQuartz implements Runnable {
 	
 	public void setConfig(QuartzConfig config) {
 		this.config = config;
+	}
+	
+	@Override
+	public BaseQuartz clone() {
+		try {
+			return (BaseQuartz) super.clone();
+		} catch(CloneNotSupportedException e) {
+			throw new QuartzException(e.getMessage(), e);
+		}
 	}
 }

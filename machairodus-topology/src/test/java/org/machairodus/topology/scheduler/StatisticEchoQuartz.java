@@ -25,14 +25,11 @@ import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.quartz.defaults.StatisticQuartz;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 
 @Quartz(name = "StatisticEchoQuartz", interval = 1000, parallel = 1)
 public class StatisticEchoQuartz extends BaseQuartz {
-	private Logger LOG = LoggerFactory.getLogger(StatisticQuartz.class);
 	private BlockingQueue<List<Map<String , Object>>> pointerQueue;
 	
 	@Override
@@ -63,7 +60,7 @@ public class StatisticEchoQuartz extends BaseQuartz {
 
 	@Override
 	public void destroy() throws QuartzException {
-		LOG = null;
+		
 	}
 
 }

@@ -64,7 +64,7 @@ public class MachairodusServlet extends HttpServlet {
 			QuartzFactory.load(properties);
 			boolean autoRun = Boolean.valueOf(properties.getProperty(QuartzFactory.AUTO_RUN, "true"));
 			if(autoRun)
-				QuartzFactory.startAll();
+				QuartzFactory.getInstance().startAll();
 			
 		} catch(Exception e) {
 			LOG.error("加载任务异常: " + e.getMessage());

@@ -36,6 +36,69 @@ public class ClassCast {
 	public static final String _boolean = "boolean";
 	public static final String _BigDecimal = "java.math.BigDecimal";
 	
+	public enum Type {
+		_Integer(ClassCast._Integer),
+		_int(ClassCast._int),
+		_Long(ClassCast._Long),
+		_long(ClassCast._long),
+		_Double(ClassCast._Double), 
+		_double(ClassCast._double), 
+		_Float(ClassCast._Float), 
+		_float(ClassCast._float), 
+		_String(ClassCast._String), 
+		_Date_util(ClassCast._Date_util), 
+		_Date_sql(ClassCast._Date_sql),
+		_Timestamp(ClassCast._Timestamp), 
+		_Boolean(ClassCast._Boolean), 
+		_boolean(ClassCast._boolean), 
+		_BigDecimal(ClassCast._BigDecimal),
+		UNKNOWN("unknown");
+		
+		private String value;
+		private Type(String value) {
+			this.value = value;
+		}
+		
+		public String value() {
+			return value;
+		}
+		
+		public static Type value(String value) {
+			if(ClassCast._Integer.equals(value))
+				return _Integer;
+			else if(ClassCast._int.equals(value))
+				return _int;
+			else if(ClassCast._Long.equals(value))
+				return _Long;
+			else if(ClassCast._long.equals(value))
+				return _long;
+			else if(ClassCast._Double.equals(value))
+				return _Double;
+			else if(ClassCast._double.equals(value))
+				return _double;
+			else if(ClassCast._Float.equals(value))
+				return _Float;
+			else if(ClassCast._float.equals(value))
+				return _float;
+			else if(ClassCast._String.equals(value))
+				return _String;
+			else if(ClassCast._Date_util.equals(value))
+				return _Date_util;
+			else if(ClassCast._Date_sql.equals(value))
+				return _Date_sql;
+			else if(ClassCast._Timestamp.equals(value))
+				return _Timestamp;
+			else if(ClassCast._Boolean.equals(value))
+				return _Boolean;
+			else if(ClassCast._boolean.equals(value))
+				return _boolean;
+			else if(ClassCast._BigDecimal.equals(value))
+				return _BigDecimal;
+			else 
+				return UNKNOWN;
+		}
+	}
+	
 	/**
 	 * 根据Class进行转换，转换简单数据类型
 	 * @param value 值
@@ -47,7 +110,7 @@ public class ClassCast {
 			return null;
 		
 		try {
-			switch(typeName) {
+			switch(Type.value(typeName)) {
 				case _Integer :
 					return new Integer(value);
 					
@@ -82,7 +145,7 @@ public class ClassCast {
 					return JSON.parseObject(value, Class.forName(typeName));
 					
 			}
-		} catch(ClassCastException | ClassNotFoundException | ParseException e) {
+		} catch(Exception e) {
 			throw new org.machairodus.topology.entity.ClassCastException(e.getMessage(), e);
 			
 		}
@@ -103,7 +166,7 @@ public class ClassCast {
 			return null;
 		
 		try {
-			switch(typeName) {
+			switch(Type.value(typeName)) {
 				case _Integer :
 					if(value instanceof String) {
 						if(StringUtils.isEmpty((String) value))

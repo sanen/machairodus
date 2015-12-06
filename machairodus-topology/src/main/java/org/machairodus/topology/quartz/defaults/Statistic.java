@@ -30,7 +30,7 @@ public class Statistic {
 		if(!isSetPointer) {
 			MAX_POINTER = maxPointer;
 			pointerQueue.clear();
-			pointerQueue = new LinkedBlockingQueue<>(maxPointer);
+			pointerQueue = new LinkedBlockingQueue<List<Map<String , Object>>>(maxPointer);
 			isSetPointer = true;
 		} else 
 			throw new IllegalStateException("Can not reset maxPointer again. You can restart application to reset maxPointer.");

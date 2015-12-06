@@ -63,7 +63,7 @@
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://http://gitlab.yto.net.cn/machairodus-projects/machairodus/issues</url>
+		<url>https://github.com/machairodus-projects/machairodus/issues</url>
 	</issueManagement>
 
 	<modules>
@@ -72,9 +72,9 @@
 	</modules>
 
 	<scm>
-		<connection>scm:git:git@gitlab.yto.net.cn:machairodus-projects/machairodus.git</connection>
-		<developerConnection>scm:git:git@gitlab.yto.net.cn:machairodus-projects/machairodus.git</developerConnection>
-		<url>http://gitlab.yto.net.cn/machairodus-projects/machairodus</url>
+		<connection>scm:git:git@github.com:machairodus-projects/machairodus.git</connection>
+		<developerConnection>scm:git:git@github.com:machairodus-projects/machairodus.git</developerConnection>
+		<url>https://github.com/machairodus-projects/machairodus</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -403,7 +403,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.2</version>
 				<configuration>
-					<tagBase>http://gitlab.yto.net.cn/machairodus-projects/machairodus/tags</tagBase>
+					<tagBase>https://github.com/machairodus-projects/machairodus/tags</tagBase>
 					<useReleaseProfile>false</useReleaseProfile>
 				</configuration>
 			</plugin>

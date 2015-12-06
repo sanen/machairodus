@@ -18,6 +18,8 @@ package org.machairodus.topology.cmd;
 public enum Command {
 	START("start"), START_GROUP("start_group"), START_ALL("start_all"),
 	STOP("stop"), STOP_GROUP("stop_group"), STOP_ALL("stop_all"), 
+	APPEND("append"), 
+	REMOVE("remove"),
 	QUARTZ("quartz"), CMD("cmd");
 	
 	private String value;
@@ -42,6 +44,10 @@ public enum Command {
 			return STOP_GROUP;
 		else if("stop_all".equals(value))
 			return STOP_ALL;
+		else if("append".equals(value))
+			return APPEND;
+		else if("remove".equals(value))
+			return REMOVE;
 		else if("quartz".equals(value))
 			return QUARTZ;
 		else if("cmd".equals(value))
@@ -58,6 +64,8 @@ public enum Command {
 			"command=stop&id=?",
 			"command=stop_group&group=?",
 			"command=stop_all",
+			"command=append&group=?&size=?&auto_start=?",
+			"command=remove&group=?&size=?",
 			"command=quartz",
 			"command=cmd"
 		};

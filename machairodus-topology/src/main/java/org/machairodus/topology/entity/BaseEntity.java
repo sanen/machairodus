@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.machairodus.topology.util.StringUtils;
 
@@ -68,7 +69,7 @@ public abstract class BaseEntity implements Cloneable {
 					return (T) fieldGetMet.invoke(this);
 				}
 			}
-		} catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch(Exception e) {
 			throw new EntityException(e.getMessage(), e);
 		}
 
@@ -131,7 +132,7 @@ public abstract class BaseEntity implements Cloneable {
 					break;
 				} 
 			}
-		} catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch(Exception e) {
 			throw new EntityException(e.getMessage(), e);
 			
 		}
@@ -197,7 +198,7 @@ public abstract class BaseEntity implements Cloneable {
 	 * @return Map<String, Object>
 	 */
 	public Map<String, Object> _getBeanToMap() {
-		Map<String, Object> beanToMap = new HashMap<>();
+		Map<String, Object> beanToMap = new HashMap<String, Object>();
 		for (String key : _getAttributeNames()) {
 			Object value = _getAttributeValue(key);
 			if(value != null)
@@ -223,9 +224,9 @@ public abstract class BaseEntity implements Cloneable {
 		
 		try {
 			T bean = beanType.newInstance();
-			beanMap.forEach((key, value) -> bean._setAttributeValue(key, value));
+			for(Entry<String, Object> entry : beanMap.entrySet()) bean._setAttributeValue(entry.getKey(), entry.getValue());
 			return bean;
-		} catch(InstantiationException | IllegalAccessException e) {
+		} catch(Exception e) {
 			throw new EntityException(e.getMessage(), e);
 		}
 	}
@@ -234,7 +235,7 @@ public abstract class BaseEntity implements Cloneable {
 		if(beanMaps == null || beanMaps.size() == 0)
 			return null;
 		
-		List<T> beans = new ArrayList<>(beanMaps.size());
+		List<T> beans = new ArrayList<T>(beanMaps.size());
 		for(Map<String, Object> beanMap : beanMaps) {
 			beans.add(_getMapToBean(beanMap, beanType));
 		}
@@ -247,9 +248,9 @@ public abstract class BaseEntity implements Cloneable {
 	 * @return Field[]
 	 */
 	protected Method[] _getParamMethods() {
-		List<Method> methods = _getAllMethods(new ArrayList<>(), this.getClass());
+		List<Method> methods = _getAllMethods(new ArrayList<Method>(), this.getClass());
 		
-		List<Method> methodList = new ArrayList<>();
+		List<Method> methodList = new ArrayList<Method>();
 		for(Method method : methods) {
 			if(Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers()))
 				continue;
@@ -274,9 +275,9 @@ public abstract class BaseEntity implements Cloneable {
 	 * @return Field[]
 	 */
 	protected Field[] _getParamFields() {
-		List<Field> fields = _getAllFields(new ArrayList<>(), this.getClass());
+		List<Field> fields = _getAllFields(new ArrayList<Field>(), this.getClass());
 		
-		List<Field> filterList = new ArrayList<>();
+		List<Field> filterList = new ArrayList<Field>();
 		for(Field field : fields) {
 			if(Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers()))
 				continue;

@@ -18,19 +18,15 @@ package org.machairodus.topology.scheduler;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.machairodus.topology.cmd.DataLoaderQuartz;
 import org.machairodus.topology.domain.Test;
+import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Quartz(name = "TestDataLoaderQuartz", parallelProperty = "quartz.data-loader.test.parallel")
-public class TestDataLoaderQuartz extends DataLoaderQuartz {
-
-	private Logger LOG = LoggerFactory.getLogger(TestDataLoaderQuartz.class);
+public class TestDataLoaderQuartz extends BaseQuartz {
 	private List<Test> data;
 	
 	static {
@@ -41,7 +37,7 @@ public class TestDataLoaderQuartz extends DataLoaderQuartz {
 	public void before() throws QuartzException {
 		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName()).size() < 100) {
 			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
-			LOG.debug("抓取数据: " + data.size());
+			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		} else {
 			thisWait(1000);
 		}

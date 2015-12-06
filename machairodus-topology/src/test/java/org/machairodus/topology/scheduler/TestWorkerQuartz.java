@@ -19,19 +19,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.machairodus.topology.cmd.WorkerQuartz;
 import org.machairodus.topology.domain.Test;
+import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Quartz(name = "TestWorkerQuartz", parallelProperty = "quartz.worker.test.parallel")
-public class TestWorkerQuartz extends WorkerQuartz {
-	private Logger LOG = LoggerFactory.getLogger(TestWorkerQuartz.class);
+public class TestWorkerQuartz extends BaseQuartz {
 	private List<Test> data;
 	private Random random = new Random();
 	
@@ -45,11 +42,11 @@ public class TestWorkerQuartz extends WorkerQuartz {
 	public void execute() throws QuartzException {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
-				thisWait(random.nextInt(100));
+				thisWait(random.nextInt(10));
 				Statistic.incrementAndGet(Test.class.getSimpleName());
 			}
 			
-			LOG.debug("消费数据: " + data.size());
+			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 

@@ -27,7 +27,6 @@ import org.nanoframework.commons.util.UUIDUtils;
 
 @Quartz(name = "DataCreatorQuartz", beforeAfterOnly = true, parallel = 1)
 public class DataCreatorQuartz extends BaseQuartz {
-
 	private AtomicLong id = new AtomicLong(0);
 	private Test test;
 	
