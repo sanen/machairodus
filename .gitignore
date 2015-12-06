@@ -1,0 +1,13 @@
+.DS_Store
+.project
+.classpath
+.settings/
+target/
+build/
+bin/
+tags
+logs/
+assembly/
+conf/
+*.log
+webRoot/
