@@ -51,21 +51,21 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<resources>
-			<resource>
+		<testResources>
+			<testResource>
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>webRoot/**</exclude>
 					<exclude>assembly.xml</exclude>
 				</excludes>
-			</resource>
-			<resource>
+			</testResource>
+			<testResource>
 				<directory>src/test/resources</directory>
 				<targetPath>${project.basedir}/</targetPath>
 				<includes>
 					<include>webRoot/**</include>
 				</includes>
-			</resource>
-		</resources>
+			</testResource>
+		</testResources>
 	</build>
 </project>
