@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.machairodus</groupId>
-			<artifactId>machairodus-manager-mapper</artifactId>
+			<artifactId>machairodus-mappers</artifactId>
 		</dependency>
 	</dependencies>
 	<build>

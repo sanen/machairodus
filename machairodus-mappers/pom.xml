@@ -8,8 +8,8 @@
 		<artifactId>machairodus</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>machairodus-balancer-mapper</artifactId>
-	<name>Machairodus Balancer Mapper</name>
+	<artifactId>machairodus-mappers</artifactId>
+	<name>Machairodus Mappers</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.machairodus</groupId>
@@ -74,10 +73,8 @@
 		<module>machairodus-manager</module>
 		<module>machairodus-balancer</module>
 		<module>machairodus-scheduler</module>
-		<module>machairodus-balancer-mapper</module>
-		<module>machairodus-manager-mapper</module>
-		<module>machairodus-scheduler-mapper</module>
-	</modules>
+		<module>machairodus-mappers</module>
+  </modules>
 
 	<scm>
 		<connection>scm:git:git@github.com:machairodus-projects/machairodus.git</connection>
@@ -359,17 +356,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-manager-mapper</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
 				<artifactId>machairodus-balancer</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-balancer-mapper</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -379,7 +366,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-scheduler-mapper</artifactId>
+				<artifactId>machairodus-mappers</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
