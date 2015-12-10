@@ -16,8 +16,6 @@
 package org.machairodus.topology;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -25,52 +23,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.machairodus.topology.cmd.Executor;
-import org.machairodus.topology.quartz.QuartzFactory;
-import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.util.ContentType;
-import org.machairodus.topology.util.PropertiesLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MachairodusServlet extends HttpServlet {
 	private static final long serialVersionUID = 8516684399529206854L;
-	private Logger LOG = LoggerFactory.getLogger(MachairodusServlet.class);
-	
 	public static final String QUARTZ_CONFIG = "quartz-config";
 	public static final String UTF8 = "UTF-8";
 	
 	@Override
 	public void init() throws ServletException {
 		String configPath = this.getInitParameter(QUARTZ_CONFIG);
-		InputStream input = this.getClass().getResourceAsStream(configPath);
-		if(input == null) {
-			LOG.warn("未配置quartz-config或配置错误");
-			return ;
-		}
-		
-		Properties properties = null;
-		try {
-			properties = PropertiesLoader.load(configPath, input);
-		} catch(Exception e) {
-			LOG.error("加载配置异常: " + e.getMessage());
-		}
-		
-		if(properties == null || properties.isEmpty()) {
-			LOG.warn("无法正确加载quartz-config属性文件");
-			return ;
-		}
-		
-		try {
-			QuartzFactory.load(properties);
-			boolean autoRun = Boolean.valueOf(properties.getProperty(QuartzFactory.AUTO_RUN, "true"));
-			if(autoRun)
-				QuartzFactory.getInstance().startAll();
-			
-		} catch(Exception e) {
-			LOG.error("加载任务异常: " + e.getMessage());
-		}
-		
-		Statistic.setMaxPointer(Integer.parseInt(properties.getProperty(QuartzFactory.MAX_POINTER, "1200")));
+		new MachairodusPortal(configPath).init();
 	}
 	
 	@Override

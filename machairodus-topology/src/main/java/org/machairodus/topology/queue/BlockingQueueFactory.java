@@ -189,7 +189,13 @@ public class BlockingQueueFactory {
 	public <T> List<T> poll(String key, int size, long time, TimeUnit unit) {
 		List<T> batch = new ArrayList<T>();
 		try {
-			while(batch.size() < size) batch.add((T) getQueue(key).poll(time, unit));
+			while(batch.size() < size) {
+				T value = (T) getQueue(key).poll(time, unit);
+				if(value == null)
+					break;
+				
+				batch.add(value);
+			}
 		} catch(InterruptedException e) { }
 		
 		return batch;
