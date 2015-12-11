@@ -48,6 +48,7 @@
 		<dependency>
 			<groupId>org.nanoframework</groupId>
 			<artifactId>nano-server</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
