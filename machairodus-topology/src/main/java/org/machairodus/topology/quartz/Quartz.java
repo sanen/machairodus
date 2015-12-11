@@ -93,4 +93,29 @@ public @interface Quartz {
 	 * @return
 	 */
 	boolean daemon() default false;
+	
+	/**
+	 * 针对剑齿虎扩展包的扩展实现, 只在数据获取线程中有效
+	 * @return
+	 */
+	Class<? extends BaseQuartz> workerClass() default BaseQuartz.class;
+	
+	String workerClassProperty() default "";
+	
+	/**
+	 * 针对剑齿虎扩展包的扩展实现, 增加队列名称, Default: "", 只在工作线程(worker)中有效
+	 * @return
+	 */
+	String queueName() default "";
+	
+	String queueNameProperty() default "";
+	
+	/**
+	 * 针对剑齿虎扩展包的扩展实现，停止工作线程(worker)超时时长，默认: 0，当timeout为0时，表示无限等待，单位: ms
+	 * @return
+	 */
+	long closeTimeout() default 180000;
+	
+	String closeTimeoutProperty() default "";
+	
 }

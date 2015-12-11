@@ -2,6 +2,7 @@ package org.machairodus.topology.queue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +66,10 @@ public class BlockingQueueFactory {
 			
 		return queueMap.get(key);
 		
+	}
+	
+	public Set<String> getQueueKeys() {
+		return queueMap.keySet();
 	}
 	
 	/**

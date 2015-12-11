@@ -27,14 +27,14 @@ import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestWorkerQuartz", queueName = "Test", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
-public class TestWorkerQuartz extends BaseQuartz {
+@Quartz(name = "TestWorkerQuartz2", queueName = "Test2", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
+public class TestWorkerQuartz2 extends BaseQuartz {
 	private List<Test> data;
 	private Random random = new Random();
 	
 	@Override
 	public void before() throws QuartzException {
-		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName(), 100, 1000, TimeUnit.MILLISECONDS);
+		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName() + "2", 100, 1000, TimeUnit.MILLISECONDS);
 		
 	}
 
@@ -43,10 +43,10 @@ public class TestWorkerQuartz extends BaseQuartz {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
 				thisWait(random.nextInt(100));
-				Statistic.incrementAndGet(Test.class.getSimpleName());
+				Statistic.incrementAndGet(Test.class.getSimpleName() + "2");
 			}
 			
-			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+			LOG.debug("消费数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 

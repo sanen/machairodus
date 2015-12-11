@@ -35,6 +35,10 @@ public class QuartzConfig extends BaseEntity {
 	private Integer total = 0;
 	private CronExpression cron;
 	private Boolean daemon = false;
+//	private QuartzType type = QuartzType.OTHER;
+	private String queueName = "";
+	private Class<? extends BaseQuartz> workerClass;
+	private Long timeout = 0L;
 	
 	public String getId() {
 		return id;
@@ -122,6 +126,38 @@ public class QuartzConfig extends BaseEntity {
 
 	public void setDaemon(Boolean daemon) {
 		this.daemon = daemon;
+	}
+
+//	public QuartzType getType() {
+//		return type;
+//	}
+//
+//	public void setType(QuartzType type) {
+//		this.type = type;
+//	}
+//
+	public String getQueueName() {
+		return queueName;
+	}
+
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
+	}
+	
+	public Long getTimeout() {
+		return timeout;
+	}
+
+	public Class<? extends BaseQuartz> getWorkerClass() {
+		return workerClass;
+	}
+
+	public void setWorkerClass(Class<? extends BaseQuartz> workerClass) {
+		this.workerClass = workerClass;
+	}
+
+	public void setTimeout(Long timeout) {
+		this.timeout = timeout;
 	}
 
 }

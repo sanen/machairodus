@@ -16,43 +16,54 @@
 package org.machairodus.topology.scheduler;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.machairodus.topology.domain.Test;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestWorkerQuartz", queueName = "Test", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
-public class TestWorkerQuartz extends BaseQuartz {
+@Quartz(name = "TestDataLoaderQuartz2", workerClass = TestWorkerQuartz2.class, parallelProperty = "quartz.data-loader.test.parallel")
+public class TestDataLoaderQuartz2 extends BaseQuartz {
 	private List<Test> data;
-	private Random random = new Random();
+	
+	static {
+		BlockingQueueFactory.getInstance().initQueue(Test.class.getSimpleName(), 10000);
+	}
 	
 	@Override
 	public void before() throws QuartzException {
-		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName(), 100, 1000, TimeUnit.MILLISECONDS);
-		
+		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName() + "2").size() < 100) {
+			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
+			LOG.debug("抓取数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+		} else {
+			thisWait(1000);
+		}
 	}
 
 	@Override
 	public void execute() throws QuartzException {
 		if(!CollectionUtils.isEmpty(data)) {
-			for(@SuppressWarnings("unused") Test test : data) {
-				thisWait(random.nextInt(100));
-				Statistic.incrementAndGet(Test.class.getSimpleName());
+			for(Test item : data) {
+				boolean offed = false;
+				while(!offed) {
+					try { 
+						BlockingQueueFactory.getInstance().offer(Test.class.getSimpleName() + "2", item, 1000, TimeUnit.MILLISECONDS);
+						offed = true;
+					} catch(InterruptedException e) { }
+				}
 			}
-			
-			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 
 	@Override
 	public void after() throws QuartzException {
-
+		if(data != null) {
+			data.clear();
+			data = null;
+		}
 	}
 
 	@Override

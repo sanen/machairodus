@@ -41,7 +41,7 @@ public class QuartzException extends RuntimeException {
 	
 	@Override
 	public String getMessage() {
-		return "调度任务异常: " + super.getMessage();
+		return super.getMessage();
 	}
 	
 }

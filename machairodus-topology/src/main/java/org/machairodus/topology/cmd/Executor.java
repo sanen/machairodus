@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzFactory;
+import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
 import org.slf4j.Logger;
@@ -113,6 +115,10 @@ public class Executor {
 					}
 					
 					resultMap = remove(request.getParameter(GROUP), Integer.parseInt(size));
+					break;
+					
+				case QUEUE: 
+					queue(out);
 					break;
 					
 				case QUARTZ:
@@ -265,6 +271,19 @@ public class Executor {
 			return ResultMap.create(200, "任务组列表只存在一个任务", "SUCCESS");
 		
 		return ResultMap.create(200, "移除任务完成", "SUCCESS");
+	}
+	
+	private static final void queue(Writer out) throws IOException {
+		Map<String, Object> map = ResultMap.create(200, "任务队列信息", "SUCCESS")._getBeanToMap();
+		Set<String> keys = BlockingQueueFactory.getInstance().getQueueKeys();
+		Map<String, Integer> sizes = new HashMap<String, Integer>();
+		for(String key : keys) {
+			int size = BlockingQueueFactory.getInstance().getQueue(key).size();
+			sizes.put(key, size);
+		}
+		
+		map.put("Queue", sizes);
+		out.write(JSON.toJSONString(map));
 	}
 	
 	private static final void quartz(Writer out) throws IOException {
