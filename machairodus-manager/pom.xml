@@ -18,15 +18,55 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>org.nanoframework</groupId>
-			<artifactId>nano-server</artifactId>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-web</artifactId>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.eclipse.jetty.orbit</groupId>
+		    <artifactId>javax.servlet.jsp</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.jetty.orbit</groupId>
+		    <artifactId>org.apache.jasper.glassfish</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifactId>tiles-jsp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.nanoframework</groupId>
 			<artifactId>nano-orm-jedis</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-ext-shiro</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-server</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.machairodus</groupId>
 			<artifactId>machairodus-commons</artifactId>
