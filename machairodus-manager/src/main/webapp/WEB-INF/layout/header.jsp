@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <!-- BEGIN HEADER -->
 <div class="header navbar navbar-inverse navbar-fixed-top">
 	<!-- BEGIN TOP NAVIGATION BAR -->
@@ -26,17 +27,17 @@
 					</a>
 					<ul class="dropdown-menu extended notification">
 						<li>
-							<p>You have 1 new notifications</p>
+							<p>您有{num}个新的通知</p>
 						</li>
 						<li>
 							<a href="#">
 								<span class="label label-success"><i class="icon-plus"></i></span>
-								New user registered. 
+								通知样例
 								<span class="time">Just now</span>
 							</a>
 						</li>
 						<li class="external">
-							<a href="#">See all notifications <i class="m-icon-swapright"></i></a>
+							<a href="#">查看所有通知 <i class="m-icon-swapright"></i></a>
 						</li>
 					</ul>
 				</li>
@@ -50,23 +51,21 @@
 					</a>
 					<ul class="dropdown-menu extended inbox">
 						<li>
-							<p>You have 1 new messages</p>
+							<p>您有{num}个新的消息</p>
 						</li>
 						<li>
 							<a href="inbox.html?a=view">
-								<span class="photo"><img src="${pageContext.request.contextPath}/media/image/avatar2.jpg" alt="" /></span>
 								<span class="subject">
-									<span class="from">Lisa Wong</span>
-									<span class="time">Just Now</span>
+									<span class="from">{发件人}</span>
+									<span class="time">{时间}</span>
 								</span>
 								<span class="message">
-								Vivamus sed auctor nibh congue nibh. auctor nibh
-								auctor nibh...
+								{消息内容}
 								</span>  
 							</a>
 						</li>
 						<li class="external">
-							<a href="inbox.html">See all messages <i class="m-icon-swapright"></i></a>
+							<a href="inbox.html">查看所有消息 <i class="m-icon-swapright"></i></a>
 						</li>
 					</ul>
 				</li>
@@ -80,41 +79,41 @@
 					</a>
 					<ul class="dropdown-menu extended tasks">
 						<li>
-							<p>You have 1 pending tasks</p>
+							<p>您有{num}个在执行的任务</p>
 						</li>
 						<li>
 							<a href="#">
 								<span class="task">
-									<span class="desc">New release v1.2</span>
-									<span class="percent">30%</span>
+									<span class="desc">{任务名}</span>
+									<span class="percent">{进度}</span>
 								</span>
 								<span class="progress progress-success ">
+									<!-- 进度: width -->
 									<span style="width: 30%;" class="bar"></span>
 								</span>
 							</a>
 						</li>
 						<li class="external">
-							<a href="#">See all tasks <i class="m-icon-swapright"></i></a>
+							<a href="#">查看所有任务 <i class="m-icon-swapright"></i></a>
 						</li>
 					</ul>
 				</li>
 				<!-- END TODO DROPDOWN -->
 
 				<!-- BEGIN USER LOGIN DROPDOWN -->
-				<li class="dropdown user">
+				<li class="dropdown user" style="padding-top: 5px;">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-						<img alt="" src="${pageContext.request.contextPath}/media/image/avatar1_small.jpg" />
-						<span class="username">Bob Nilson</span>
+						<span class="username"><shiro:principal/></span>
 						<i class="icon-angle-down"></i>
 					</a>
 					<ul class="dropdown-menu">
-						<li><a href="javascript:;"><i class="icon-user"></i> My Profile</a></li>
-						<li><a href="javascript:;"><i class="icon-calendar"></i> My Calendar</a></li>
-						<li><a href="javascript:;"><i class="icon-envelope"></i> My Inbox</a></li>
-						<li><a href="javascript:;"><i class="icon-tasks"></i> My Tasks</a></li>
+						<li><a href="javascript:;"><i class="icon-user"></i> 个人档案</a></li>
+						<li><a href="javascript:;"><i class="icon-calendar"></i> 日历</a></li>
+						<li><a href="javascript:;"><i class="icon-envelope"></i> 收件箱</a></li>
+						<li><a href="javascript:;"><i class="icon-tasks"></i> 任务</a></li>
 						<li class="divider"></li>
-						<li><a href="javascript:;"><i class="icon-lock"></i> Lock Screen</a></li>
-						<li><a href="permissions/users/logout"><i class="icon-key"></i> Log Out</a></li>
+						<li><a href="javascript:;"><i class="icon-lock"></i> 锁定</a></li>
+						<li><a href="permissions/users/logout"><i class="icon-key"></i> 退出</a></li>
 					</ul>
 				</li>
 				<!-- END USER LOGIN DROPDOWN -->

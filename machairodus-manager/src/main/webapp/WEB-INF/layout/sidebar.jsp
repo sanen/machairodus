@@ -13,7 +13,7 @@
 			<form class="sidebar-search">
 				<div class="input-box">
 					<a href="javascript:;" class="remove"></a>
-					<input type="text" placeholder="Search..." />
+					<input type="text" placeholder="搜索..." />
 					<a href="javascript:;" class="submit"></a>
 				</div>
 			</form>
