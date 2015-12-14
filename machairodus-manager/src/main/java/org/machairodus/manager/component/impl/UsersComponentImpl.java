@@ -31,9 +31,9 @@ public class UsersComponentImpl implements UsersComponent {
 		String errorClassName = (String) request.getAttribute("shiroLoginFailure");
 
         if(UnknownAccountException.class.getName().equals(errorClassName)) {
-            model.addAttribute("error", "用户名/密码错误");
+            model.addAttribute("error", "用户不存在");
         } else if(IncorrectCredentialsException.class.getName().equals(errorClassName)) {
-        	model.addAttribute("error", "用户名/密码错误");
+        	model.addAttribute("error", "密码错误");
         } else if(errorClassName != null) {
         	model.addAttribute("error", "未知错误：" + errorClassName);
         }

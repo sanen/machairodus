@@ -7,5 +7,5 @@
 
 <script type="text/javascript">
 if(window.location.pathname == "<%=request.getContextPath() %>/" || window.location.pathname == "<%=request.getContextPath() %>/index.jsp")
-	window.location.href = "<%=request.getContextPath() %>/pages/main"; 
+	window.location.href = "<%=request.getContextPath() %>/index"; 
 </script>

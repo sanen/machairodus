@@ -9,7 +9,7 @@
 <!-- BEGIN HEAD -->
 <head>
 	<tiles:insertAttribute name="meta" />
-	<tiles:insertAttribute name="title" />
+	<title><tiles:insertAttribute name="title" /></title>
 	<tiles:insertAttribute name="global_style" />
 	<tiles:insertAttribute name="content_css" />
 	

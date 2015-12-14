@@ -5,7 +5,7 @@
 	<div class="navbar-inner">
 		<div class="container-fluid">
 			<!-- BEGIN LOGO -->
-			<a class="brand" href="index.html">
+			<a class="brand" href="index">
 				<img src="${pageContext.request.contextPath}/media/image/logo.png" alt="logo" />
 			</a>
 			<!-- END LOGO -->
@@ -22,7 +22,7 @@
 				<li class="dropdown" id="header_notification_bar">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 						<i class="icon-warning-sign"></i>
-						<span class="badge">1</span>
+						<!-- <span class="badge">0</span> -->
 					</a>
 					<ul class="dropdown-menu extended notification">
 						<li>
@@ -46,7 +46,7 @@
 				<li class="dropdown" id="header_inbox_bar">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 					<i class="icon-envelope"></i>
-					<span class="badge">1</span>
+					<!-- <span class="badge">0</span> -->
 					</a>
 					<ul class="dropdown-menu extended inbox">
 						<li>
@@ -76,7 +76,7 @@
 				<li class="dropdown" id="header_task_bar">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 					<i class="icon-tasks"></i>
-					<span class="badge">1</span>
+					<!-- <span class="badge">0</span> -->
 					</a>
 					<ul class="dropdown-menu extended tasks">
 						<li>

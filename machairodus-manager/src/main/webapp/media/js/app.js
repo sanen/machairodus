@@ -329,6 +329,9 @@ var App = function () {
             $('.sidebar-search').removeClass("open");
         });
 
+        /**
+         * 废除搜索功能
+         * 
         // handle the search query submit on enter press
         $('.page-sidebar').on('keypress', '.sidebar-search input', function (e) {
             if (e.which == 13) {
@@ -354,6 +357,7 @@ var App = function () {
                     window.location.href = "extra_search.html";
                 }
         });
+        */
     }
 
     var handleHorizontalMenu = function () {
@@ -369,6 +373,9 @@ var App = function () {
                 e.preventDefault();
             });
 
+        /** 
+         * 废除搜索功能
+         * 
         //handle hor menu search button click
         $('.header').on('click', '.hor-menu .search-form .btn', function (e) {
                 window.location.href = "extra_search.html";
@@ -382,6 +389,7 @@ var App = function () {
                     return false;
                 }
             });
+        */
     }
 
     var handleGoTop = function () {
@@ -709,6 +717,26 @@ var App = function () {
             });
         }
     }
+    
+    var cacheRememberMeCheckbox = function() {
+    	if($('input[name=rememberMe]')) {
+	    	try {
+	    		var checked;
+	    		if(typeof (checked = $.cookie('RememberMe_CHK')) != 'undefined') {
+	    			$('input[name=rememberMe]')[0].checked = (checked = checked == 'true' ? true : false);
+	    			if(checked)
+	    				$($('input[name=rememberMe]').parent()).addClass('checked');
+	    			else 
+	    				$($('input[name=rememberMe]').parent()).removeClass('checked');
+	    			
+	    		}
+	    		
+	    		$('input[name=rememberMe]').bind('click', function() {
+    				$.cookie('RememberMe_CHK', $('input[name=rememberMe]')[0].checked, { expires: 7 });
+    			});
+	    	} catch(error) { }
+    	}
+    }
 
     //* END:CORE HANDLERS *//
 
@@ -744,7 +772,8 @@ var App = function () {
             handlePopovers(); // handles bootstrap popovers
             handleAccordions(); //handles accordions
             handleChoosenSelect(); // handles bootstrap chosen dropdowns     
-
+            cacheRememberMeCheckbox();
+            
             App.addResponsiveHandler(handleChoosenSelect); // reinitiate chosen dropdown on main content resize. disable this line if you don't really use chosen dropdowns.
         },
 

@@ -19,15 +19,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.machairodus.manager.component.MainComponent;
+import org.machairodus.manager.service.SideBarService;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 import org.nanoframework.web.server.mvc.support.ForwardView;
 
+import com.google.inject.Inject;
+
 public class MainComponentImpl implements MainComponent {
 
+	@Inject
+	private SideBarService sidebarSerivce;
+
 	@Override
-	public View main(HttpServletRequest request, HttpServletResponse response, Model model) {
+	public View main(Long id, HttpServletRequest request, HttpServletResponse response, Model model) {
+		String sidebarContent = sidebarSerivce.build(id);
+		if(sidebarContent != null) {
+			model.addAttribute("sidebar", sidebarContent);
+		}
+		
 		return new ForwardView("/index.jsp");
 	}
-
+	
 }

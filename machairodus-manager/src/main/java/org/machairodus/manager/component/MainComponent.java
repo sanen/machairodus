@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.machairodus.manager.component.impl.MainComponentImpl;
 import org.nanoframework.core.component.stereotype.Component;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
+import org.nanoframework.core.component.stereotype.bind.RequestParam;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 
@@ -28,9 +29,8 @@ import com.google.inject.ImplementedBy;
 
 @Component
 @ImplementedBy(MainComponentImpl.class)
-@RequestMapping("/pages")
 public interface MainComponent {
-	@RequestMapping("/main")
-	View main(HttpServletRequest request, HttpServletResponse response, Model model);
+	@RequestMapping("/index")
+	View main(@RequestParam(name = "_id", required = false) Long id, HttpServletRequest request, HttpServletResponse response, Model model);
 	
 }
