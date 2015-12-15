@@ -35,6 +35,7 @@ import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scan.ComponentScan;
 import org.machairodus.topology.util.Assert;
 import org.machairodus.topology.util.CollectionUtils;
+import org.machairodus.topology.util.ObjectCompare;
 import org.machairodus.topology.util.RuntimeUtil;
 import org.machairodus.topology.util.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +62,8 @@ public class QuartzFactory {
 	public static final String BASE_PACKAGE = "context.quartz-scan.base-package";
 	public static final String AUTO_RUN = "context.quartz.run.auto";
 	public static final String MAX_POINTER = "context.statistic.max.pointer";
+	public static final String INCLUDES = "context.quartz.group.includes";
+	public static final String EXCLUSIONS = "context.quartz.group.exclusions";
 	
 	private QuartzFactory() {
 		
@@ -256,6 +259,9 @@ public class QuartzFactory {
 	
 	private void closeByQueue(final BaseQuartz quartz, final String queueName) {
 		if(quartz.isClose())
+			return ;
+		
+		if(StringUtils.isEmpty(queueName))
 			return ;
 		
 		threadFactory.setBaseQuartz(null);
@@ -470,6 +476,13 @@ public class QuartzFactory {
 			LOG.info("Quartz size: " + componentClasses.size());
 		
 		if(componentClasses.size() > 0) {
+			String[] includes = properties.getProperty(INCLUDES, ".").split(",");
+			String[] exclusions;
+			if(!StringUtils.isEmpty(properties.getProperty(EXCLUSIONS)))
+				exclusions = properties.getProperty(EXCLUSIONS).split(",");
+			else 
+				exclusions = new String[0];
+			
 			for(Class<?> clz : componentClasses) {
 				if(BaseQuartz.class.isAssignableFrom(clz)) {
 					if(LOG.isInfoEnabled())
@@ -478,6 +491,11 @@ public class QuartzFactory {
 					Quartz quartz = clz.getAnnotation(Quartz.class);
 					if(quartz.name() == null && quartz.name().isEmpty()) 
 						throw new QuartzException("任务名不能为空, 类名 [ " + clz.getName()+ " ]");
+					
+					if(!ObjectCompare.isInListByRegEx(quartz.name(), includes) || ObjectCompare.isInListByRegEx(quartz.name(), exclusions)) {
+						LOG.warn("过滤任务组: " + quartz.name() + ", 类名 [ " + clz.getName()+ " ]");
+						continue ;
+					}
 					
 					String parallelProperty = quartz.parallelProperty();
 					int parallel = 0;

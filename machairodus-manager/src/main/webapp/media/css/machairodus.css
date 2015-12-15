@@ -1,0 +1,21 @@
+.form-horizontal .control-label {
+	width: 80px;
+}
+
+.form-horizontal .controls {
+	margin-left: 90px;
+}
+
+@media (max-width: 500px) {
+	.form-horizontal .controls {
+		margin-left: 0px;
+	}
+}
+
+.separator {
+	background-color: #e5e5e5;
+    border-bottom: 1px solid #fff;
+    height: 1px;
+    margin: 9px 1px;
+    overflow: hidden;
+}

@@ -20,7 +20,7 @@
 			<!-- END RESPONSIVE QUICK SEARCH FORM -->
 		</li>
 		<li class="start ">
-			<a href="index">
+			<a href="${pageContext.request.contextPath}/index">
 				<i class="icon-home"></i> 
 				<span class="title">首页</span>
 			</a>

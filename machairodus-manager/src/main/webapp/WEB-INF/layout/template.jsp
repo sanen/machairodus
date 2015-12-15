@@ -9,10 +9,8 @@
 <!-- BEGIN HEAD -->
 <head>
 	<tiles:insertAttribute name="meta" />
-	<title><tiles:insertAttribute name="title" /></title>
-	<tiles:insertAttribute name="global_style" />
-	<tiles:insertAttribute name="content_css" />
-	
+	<title>${title}</title>
+	<tiles:insertAttribute name="css" />
 </head>
 <!-- END HEAD -->
 
@@ -23,13 +21,17 @@
 	<!-- BEGIN CONTAINER -->
 	<div class="page-container row-fluid">
 		<tiles:insertAttribute name = "sidebar" />
-		<tiles:insertAttribute name = "content" />
+		<!-- BEGIN PAGE -->
+		<div class="page-content">
+			<tiles:insertAttribute name = "navigate" />
+			<tiles:insertAttribute name = "content" />
+		</div>
 	</div>
 	<!-- END CONTAINER -->
 
 	<!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
 	<tiles:insertAttribute name = "script" />
-	<tiles:insertAttribute name = "content_js" />
+	<tiles:insertAttribute name = "content.js" />
 	<tiles:insertAttribute name = "footer" />
 </body>
 <!-- END BODY -->

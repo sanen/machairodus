@@ -14,3 +14,12 @@
 <script src="${pageContext.request.contextPath}/media/js/api/jquery.cookie.min.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/media/js/api/jquery.uniform.min.js" type="text/javascript" ></script>
 <!-- END CORE PLUGINS -->
+
+<!-- APP INIT -->
+<script src="${pageContext.request.contextPath}/media/js/app.js"></script>      
+<script>
+	jQuery(document).ready(function() {       
+	   App.init();
+	});
+</script>
+<!-- END APP INIT -->

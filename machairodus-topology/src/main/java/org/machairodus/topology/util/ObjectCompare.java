@@ -1,5 +1,6 @@
 package org.machairodus.topology.util;
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -76,6 +77,13 @@ public class ObjectCompare {
 		}
 		
 		return false;
+	}
+	
+	public static final boolean isInListByRegEx(String target, Set<String> regExs) {
+		if(CollectionUtils.isEmpty(regExs))
+			return false;
+		
+		return isInListByRegEx(target, regExs.toArray(new String[regExs.size()]));
 	}
 	
 	public static final boolean isInEndWiths(String target, String... source) {
