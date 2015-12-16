@@ -113,7 +113,7 @@
 						<li><a href="javascript:;"><i class="icon-tasks"></i> 任务</a></li>
 						<li class="divider"></li>
 						<li><a href="javascript:;"><i class="icon-lock"></i> 锁定</a></li>
-						<li><a href="permissions/users/logout"><i class="icon-key"></i> 退出</a></li>
+						<li><a href="${pageContext.request.contextPath}/permissions/users/logout"><i class="icon-key"></i> 退出</a></li>
 					</ul>
 				</li>
 				<!-- END USER LOGIN DROPDOWN -->

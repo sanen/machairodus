@@ -1,12 +1,12 @@
 .form-horizontal .control-label {
-	width: 80px;
+	width: 100px;
 }
 
 .form-horizontal .controls {
-	margin-left: 90px;
+	margin-left: 110px;
 }
 
-@media (max-width: 500px) {
+@media ( max-width : 500px) {
 	.form-horizontal .controls {
 		margin-left: 0px;
 	}
@@ -14,8 +14,23 @@
 
 .separator {
 	background-color: #e5e5e5;
-    border-bottom: 1px solid #fff;
-    height: 1px;
-    margin: 9px 1px;
-    overflow: hidden;
+	border-bottom: 1px solid #fff;
+	height: 1px;
+	margin: 9px 1px;
+	overflow: hidden;
+}
+
+/*bootstrap兼容问题和easyui的bug*/
+.panel-header, .panel-body {
+	border-width: 0px;
+}
+
+.datagrid, .combo-p {
+	border: solid 1px #D4D4D4;
+}
+
+.datagrid * {
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
 }
