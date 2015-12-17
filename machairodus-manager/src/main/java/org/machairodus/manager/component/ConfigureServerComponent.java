@@ -16,6 +16,7 @@
 package org.machairodus.manager.component;
 
 import org.machairodus.manager.component.impl.ConfigureServerComponentImpl;
+import org.machairodus.mappers.domain.ServerConfig;
 import org.nanoframework.core.component.stereotype.Component;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
 import org.nanoframework.core.component.stereotype.bind.RequestParam;
@@ -27,11 +28,20 @@ import com.google.inject.ImplementedBy;
 @RequestMapping("/configure/server")
 public interface ConfigureServerComponent {
 	@RequestMapping("/find")
-	Object find(@RequestParam(name = "name", required = false) String name,
-			@RequestParam(name = "address", required = false) String address, 
+	Object find(@RequestParam(name = "name[]", required = false) String[] name,
+			@RequestParam(name = "address[]", required = false) String[] address, 
 			@RequestParam(name = "init", required = false) Boolean init, 
 			@RequestParam(name = "sort", required = false) String sort, 
 			@RequestParam(name = "order", required = false) String order, 
 			@RequestParam(name = "offset") Integer offset, 
 			@RequestParam(name = "limit") Integer limit);
+	
+	@RequestMapping("/add")
+	Object add(@RequestParam(name = "serverConfig") ServerConfig serverConfig);
+	
+	@RequestMapping("/update")
+	Object update(@RequestParam(name = "serverConfig") ServerConfig serverConfig);
+	
+	@RequestMapping("/delete")
+	Object delete(@RequestParam(name = "id") Long id);
 }

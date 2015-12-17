@@ -25,8 +25,12 @@ Configure.Server = function(){
 			init = false;
 		}
 		
-		params.name = $('#dlgFind #name').val();
-		params.address = $('#dlgFind #address').val();
+		if($('#dlgFind #name').val() != '')
+			params["name[]"] = $('#dlgFind #name').getTags();
+		
+		if($('#dlgFind #address').val() != '')
+			params["address[]"] = $('#dlgFind #address').getTags();
+		
 		return params;
 	}
 	
@@ -77,11 +81,102 @@ Configure.Server = function(){
 	}
 	
 	var addRequest = function() {
+		var name = $('#dlgOption #name').val();
+		var address = $('#dlgOption #address').val();
+		var username = $('#dlgOption #username').val();
+		var passwd = $('#dlgOption #passwd').val();
+		if(!validServerConfig(name, address, username, passwd)) {
+			return ;
+		} 
 		
+		var serverConfig = JSON.stringify({ name: name, address: address, username: username, passwd: passwd});
+		$.ajax({
+			url: context + '/configure/server/add',
+			type: "POST", 
+			contentType: "application/x-www-form-urlencoded; charset=utf-8", 
+			data: { serverConfig: serverConfig }, 
+			success: function(data) {
+				if(data.status) {
+					if(data.status == '2001') {
+						$('#dlgOption').dialog('close');
+						$table.bootstrapTable('append', [ data.item ]);
+					} else if(data.status == '2099') {
+						$.messager.alert('错误', data.message);
+					}
+				} else {
+					$.messager.alert('错误', '未知错误');
+				}
+			}, 
+			error: function(data) {
+				$.messager.alert('错误', data);
+			}
+		});
 	}
 	
 	var modifyRequest = function() {
+		var ids = getIdSelections();
+		if(ids.length == 0) {
+			$.messager.alert('错误', '请选择一行数据进行修改');
+			return ;
+		}
+			
+		var name = $('#dlgOption #name').val();
+		var address = $('#dlgOption #address').val();
+		var username = $('#dlgOption #username').val();
+		var passwd = $('#dlgOption #passwd').val();
+		if(!validServerConfig(name, address, username, passwd)) {
+			return ;
+		} 
+			
+		var serverConfig = JSON.stringify({ id: ids[0], name: name, address: address, username: username, passwd: passwd});
+		$.ajax({
+			url: context + '/configure/server/update',
+			type: "POST", 
+			contentType: "application/x-www-form-urlencoded; charset=utf-8", 
+			data: { serverConfig: serverConfig }, 
+			success: function(data) {
+				if(data.status) {
+					if(data.status == '2001') {
+						$('#dlgOption').dialog('close');
+						$table.bootstrapTable('updateByUniqueId', {
+							id: ids[0], 
+							row: data.item
+						});
+					} else if(data.status == '2099') {
+						$.messager.alert('错误', data.message);
+					}
+				} else {
+					$.messager.alert('错误', '未知错误');
+				}
+			}, 
+			error: function(data) {
+				$.messager.alert('错误', data);
+			}
+		});
+	}
+	
+	var validServerConfig = function(name, address, username, passwd) {
+		if($.trim(name) == '') {
+			$.messager.alert('错误', '名称不能为空');
+			return false;
+		}
 		
+		if($.trim(address) == '') {
+			$.messager.alert('错误', '地址不能为空');
+			return false;
+		}
+		
+		if($.trim(username) == '') {
+			$.messager.alert('错误', '用户名不能为空');
+			return false;
+		}
+		
+		if($.trim(passwd) == '') {
+			$.messager.alert('错误', '密码不能为空');
+			return false;
+		}
+		
+		return true;
 	}
 	
 	var optionCancle = function() {
@@ -100,12 +195,31 @@ Configure.Server = function(){
 		if(selections.length > 0) {
 			$.messager.confirm('提示', '确定要删除选中选吗?', function(check) {
 				if(check) {
-					$table.bootstrapTable('remove', {
-		                field: 'id',
-		                values: selections
-		            });
-					
-					updateButtonStatus();
+					$.ajax({
+						url: context + '/configure/server/delete',
+						type: "POST", 
+						contentType: "application/x-www-form-urlencoded; charset=utf-8", 
+						data: { id: selections[0] }, 
+						success: function(data) {
+							if(data.status) {
+								if(data.status == '2001') {
+									$table.bootstrapTable('remove', {
+						                field: 'id',
+						                values: selections
+						            });
+									
+									updateButtonStatus();
+								} else if(data.status == '2099') {
+									$.messager.alert('错误', data.message);
+								}
+							} else {
+								$.messager.alert('错误', '未知错误');
+							}
+						}, 
+						error: function(data) {
+							$.messager.alert('错误', data);
+						}
+					});
 				}
 			});
 		} else {
@@ -127,7 +241,8 @@ Configure.Server = function(){
 			sidePagination: 'server', 
 			url: context + '/configure/server/find',
 			queryParams: function(params) { return queryParams(params); }, 
-			contentType: 'application/x-www-form-urlencoded; charset=utf-8'
+			contentType: 'application/x-www-form-urlencoded; charset=utf-8', 
+			uniqueId: 'id'
 		});
 		
 		$table.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function () {
@@ -181,11 +296,24 @@ Configure.Server = function(){
 		dialogExtend();
 	}
 	
+	var initTagsInput = function() {
+		$('#dlgFind #name').tagsInput({
+			defaultText: '添加条件', 
+			height: 34
+		});
+		
+		$('#dlgFind #address').tagsInput({
+			defaultText: '添加条件', 
+			height: 34
+		});
+	}
+	
 	return {
 		init: function() {
-			initTable();
+			initTagsInput();
 			initButtonEvent();
 			initDialog();
+			initTable();
 		}
 	}
 }();

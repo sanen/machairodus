@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <link href="${pageContext.request.contextPath}/media/css/api/bootstrap-table.css" rel="stylesheet" type="text/css"/>
 <link href="${pageContext.request.contextPath}/media/css/api/easyui.css" rel="stylesheet" type="text/css"/>
+<link href="${pageContext.request.contextPath}/media/css/api/jquery.tagsinput.min.css" type="text/css" rel="stylesheet">
+
 <!-- BEGIN PAGE CONTENT-->          
 <div class="container-fluid">
 	<div class="row-fluid">
@@ -41,13 +43,13 @@
 				<div class="control-group">
 					<label class="control-label" for="name">名称</label>
 					<div class="controls">
-						<input type="text" placeholder="" class="m-wrap span12" id="name">
+						<input type="text" placeholder="" class="m-wrap span12 tags" id="name">
 					</div>
 				</div>
 				<div class="control-group">
 					<label class="control-label" for="address">地址</label>
 					<div class="controls">
-						<input type="text" placeholder="" class="m-wrap span12" id="address">
+						<input type="text" placeholder="" class="m-wrap span12 tags" id="address">
 					</div>
 				</div>
 			</form>

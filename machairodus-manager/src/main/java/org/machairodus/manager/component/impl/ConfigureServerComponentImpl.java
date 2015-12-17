@@ -15,60 +15,180 @@
  */
 package org.machairodus.manager.component.impl;
 
+import static org.machairodus.manager.util.ResponseStatus.FAIL;
 import static org.machairodus.manager.util.ResponseStatus.OK;
 
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.machairodus.manager.component.ConfigureServerComponent;
+import org.machairodus.manager.service.PermissionService;
+import org.machairodus.manager.util.MachairodusConstants;
 import org.machairodus.mappers.domain.ServerConfig;
+import org.machairodus.mappers.domain.User;
+import org.machairodus.mappers.mapper.manager.ConfigureServerMapper;
+import org.nanoframework.commons.crypt.CryptUtil;
+import org.nanoframework.commons.support.logging.Logger;
+import org.nanoframework.commons.support.logging.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 	
+	private Logger LOG = LoggerFactory.getLogger(ConfigureServerComponentImpl.class);
+	
+	@Inject
+	private ConfigureServerMapper configureServerMapper;
+	
+	@Inject
+	private PermissionService permissionService;
+	
 	@Override
-	public Object find(String name, String address, Boolean init, String sort, String order, Integer offset, Integer limit) {
-		if(init != null && init) return OK;
-		Map<String, Object> map = OK._getBeanToMap();
-		map.put("total", 100);
-		List<ServerConfig> serverConfigList = Lists.newArrayList();
-		Random random = new Random();
-		for(long idx = 1; idx <= limit; idx ++) {
-			Timestamp now = new Timestamp(System.currentTimeMillis() + random.nextInt(1000000));
-			ServerConfig config = new ServerConfig();
-			config.setId(idx);
-			config.setName("Server" + idx);
-			config.setAddress("localhost");
-			config.setUsername("root");
-			config.setPasswd("******");
-			config.setCreateTime(now);
-			config.setCreateUserId(1L);
-			config.setCreateUserName("admin");
-			config.setModifyTime(now);
-			config.setModifyUserId(1L);
-			config.setModifyUserName("admin");
-			config.setDeleted(0);
-			serverConfigList.add(config);
+	public Object find(String name[], String address[], Boolean init, String sort, String order, Integer offset, Integer limit) {
+		try {
+			if(init != null && init)
+				return OK;
+			
+			List<ServerConfig> serverConfigs = configureServerMapper.find(name, address, sort, order, offset, limit);
+			long total = configureServerMapper.findTotal(name, address);
+			
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", serverConfigs);
+			map.put("total", total);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureServer异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureServer异常");
+			return map;
 		}
-		
-		if(StringUtils.isNotBlank(sort)) {
-			Collections.sort(serverConfigList, (before, after) -> {
-				if("desc".equals(order)) {
-					return ObjectUtils.compare(after._getAttributeValue(sort), before._getAttributeValue(sort));
-				} else 
-					return ObjectUtils.compare(before._getAttributeValue(sort), after._getAttributeValue(sort));
-			});
-		}
-		
- 		map.put("rows", serverConfigList);
-		return map;
 	}
 
+	@Override
+	public Object add(ServerConfig serverConfig) {
+		if(serverConfig.getId() != null) {
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "无效的ServerConfig新增对象");
+			return map;
+		}
+		
+		if(!serverConfig.validate()) {
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "新增对象数据内容无效，[名称，地址，用户名，密码]不能为空");
+			return map;
+		}
+		
+		serverConfig.setPasswd(CryptUtil.encrypt(serverConfig.getPasswd()));
+		
+		Timestamp time = new Timestamp(System.currentTimeMillis());
+		serverConfig.setCreateTime(time);
+		serverConfig.setModifyTime(time);
+		serverConfig.setDeleted(0);
+		
+		try {
+			User user = permissionService.findPrincipal();
+			if(user != null) {
+				serverConfig.setCreateUserId(user.getId());
+				serverConfig.setCreateUserName(user.getUsername());
+				serverConfig.setModifyUserId(user.getId());
+				serverConfig.setModifyUserName(user.getUsername());
+			} else {
+				Map<String, Object> map = FAIL._getBeanToMap();
+				map.put("message", "无效的登陆用户信息");
+				return map;
+			}
+			
+			if(configureServerMapper.insert(serverConfig) > 0) {
+				serverConfig.setPasswd(MachairodusConstants.PASSWD_VIEW);
+				Map<String, Object> map = OK._getBeanToMap();
+				map.put("item", serverConfig);
+				return map;
+			}
+		} catch(Exception e) {
+			LOG.error("新增ServerConfig对象异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "新增ServerConfig对象异常");
+			return map;
+		}
+		
+		return FAIL;
+	}
+
+	@Override
+	public Object update(ServerConfig serverConfig) {
+		if(serverConfig.getId() == null) {
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "无效的ServerConfig修改对象");
+			return map;
+		}
+		
+		if(!serverConfig.validate()) {
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "修改对象数据内容无效，[名称，地址，用户名，密码]不能为空");
+			return map;
+		}
+		
+		try {
+			if(configureServerMapper.findExistsById(serverConfig.getId()) == 0) {
+				Map<String, Object> map = FAIL._getBeanToMap();
+				map.put("message", "当前更新的对象已不存在");
+				return map;
+			}
+			
+			if(!MachairodusConstants.PASSWD_VIEW.equals(serverConfig.getPasswd()))
+				serverConfig.setPasswd(CryptUtil.encrypt(serverConfig.getPasswd()));
+			
+			User user = permissionService.findPrincipal();
+			if(user != null) {
+				serverConfig.setModifyUserId(user.getId());
+				serverConfig.setModifyUserName(user.getUsername());
+			} else {
+				Map<String, Object> map = FAIL._getBeanToMap();
+				map.put("message", "无效的登陆用户信息");
+				return map;
+			}
+			
+			serverConfig.setModifyTime(new Timestamp(System.currentTimeMillis()));
+			if(configureServerMapper.update(serverConfig) > 0) {
+				serverConfig.setPasswd(MachairodusConstants.PASSWD_VIEW);
+				Map<String, Object> map = OK._getBeanToMap();
+				map.put("item", serverConfig);
+				return map;
+			}
+		} catch(Exception e) {
+			LOG.error("更新ServerConfig对象异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "更新ServerConfig对象异常");
+			return map;
+		}
+		
+		return FAIL;
+	}
+
+	@Override
+	public Object delete(Long id) {
+		try {
+			User user = permissionService.findPrincipal();
+			if(user == null) {
+				Map<String, Object> map = FAIL._getBeanToMap();
+				map.put("message", "无效的登陆用户信息");
+				return map;
+			}
+			
+			if(configureServerMapper.delete(id, user.getId()) > 0) {
+				return OK;
+			} else {
+				Map<String, Object> map = OK._getBeanToMap();
+				map.put("message", "当前更新的对象已不存在");
+				return map;
+			}
+		} catch(Exception e) {
+			LOG.error("删除ServerConfig对象异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "删除ServerConfig对象异常");
+			return map;
+		}
+	}
 	
 }

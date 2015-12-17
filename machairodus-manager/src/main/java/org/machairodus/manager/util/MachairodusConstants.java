@@ -13,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.service;
+package org.machairodus.manager.util;
 
-import org.apache.shiro.authz.AuthorizationInfo;
-import org.machairodus.manager.service.impl.PermissionServiceImpl;
-import org.machairodus.mappers.domain.User;
+public class MachairodusConstants {
 
-import com.google.inject.ImplementedBy;
-
-@ImplementedBy(PermissionServiceImpl.class)
-public interface PermissionService {
-	AuthorizationInfo findPermissions();
-	User findPrincipal();
+	public static final String PASSWD_VIEW = "******";
 }

@@ -18,6 +18,7 @@ package org.machairodus.mappers.domain;
 import java.sql.Timestamp;
 
 import org.nanoframework.commons.entity.BaseEntity;
+import org.nanoframework.commons.util.StringUtils;
 
 public class ServerConfig extends BaseEntity {
 	private static final long serialVersionUID = 6334193116614361971L;
@@ -47,6 +48,22 @@ public class ServerConfig extends BaseEntity {
 	public static final String MODIFY_USER_ID = "modifyUserId";
 	public static final String MODIFY_USER_NAME = "modifyUserName";
 	public static final String DELETED = "deleted";
+	
+	public boolean validate() {
+		if(StringUtils.isBlank(name))
+			return false;
+		
+		if(StringUtils.isBlank(address))
+			return false;
+		
+		if(StringUtils.isBlank(username))
+			return false;
+		
+		if(StringUtils.isBlank(passwd))
+			return false;
+		
+		return true;
+	}
 
 	public Long getId() {
 		return id;

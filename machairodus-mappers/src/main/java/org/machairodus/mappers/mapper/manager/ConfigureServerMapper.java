@@ -21,12 +21,18 @@ import org.apache.ibatis.annotations.Param;
 import org.machairodus.mappers.domain.ServerConfig;
 
 public interface ConfigureServerMapper {
-	List<ServerConfig> find(@Param("name") String name, @Param("address") String address, @Param("sort") String sort,
+	List<ServerConfig> find(@Param("name") String[] name, @Param("address") String[] address, @Param("sort") String sort,
 			@Param("order") String order, @Param("offset") Integer offset, @Param("limit") Integer limit);
+	
+	long findTotal(@Param("name") String[] name, @Param("address") String[] address);
+	
+	ServerConfig findById(@Param("id") Long id);
+	
+	long findExistsById(@Param("id") Long id);
 	
 	long insert(ServerConfig serverConfig);
 	
 	long update(ServerConfig serverConfig);
 	
-	long delete(@Param("id") Long id);
+	long delete(@Param("id") Long id, @Param("modifyUserId") Long modifyUserId);
 }

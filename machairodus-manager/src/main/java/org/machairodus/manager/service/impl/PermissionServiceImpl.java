@@ -18,14 +18,24 @@ package org.machairodus.manager.service.impl;
 import java.util.Collection;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.machairodus.manager.auth.MachairodusAuthenticationInfo;
+import org.machairodus.manager.realm.MachairodusRealm;
 import org.machairodus.manager.service.PermissionService;
+import org.machairodus.mappers.domain.User;
+import org.machairodus.mappers.mapper.manager.UserMapper;
+
+import com.google.inject.Inject;
 
 public class PermissionServiceImpl implements PermissionService {
+	
+	@Inject
+	private UserMapper userMapper;
 	
 	@Override
 	public AuthorizationInfo findPermissions() {
@@ -38,6 +48,26 @@ public class PermissionServiceImpl implements PermissionService {
 		}
 		
 		return info;
+	}
+	
+	@Override
+	public User findPrincipal() {
+		Collection<Realm> realms = ((DefaultWebSecurityManager) SecurityUtils.getSecurityManager()).getRealms();
+		MachairodusRealm realm = ((MachairodusRealm) realms.iterator().next());
+		Cache<Object, AuthenticationInfo> cache = realm.getAuthenticationCache();
+		MachairodusAuthenticationInfo info = (MachairodusAuthenticationInfo) cache.get(SecurityUtils.getSubject().getPrincipals());
+		if(info != null) {
+			return info.getUser();
+		} else {
+			User user = userMapper.findUserByUsername((String) SecurityUtils.getSubject().getPrincipal());
+			if(user != null) {
+				info = new MachairodusAuthenticationInfo(user.getUsername(), user.getPassword().toCharArray(), realm.getName(), user);
+				cache.put(SecurityUtils.getSubject().getPrincipals(), info);
+				return user; 
+			}
+		}
+		
+		return null;
 	}
 	
 }
