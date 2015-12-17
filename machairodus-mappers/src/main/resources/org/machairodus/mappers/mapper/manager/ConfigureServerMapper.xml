@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.machairodus.mappers.mapper.manager.ConfigureServerMapper">
+	<select id="find" resultType="org.machairodus.mappers.domain.ServerConfig" parameterType="java.util.Map">
+		select t1.id, t1.name, t1.address, t1.username, t1.create_time as createTime, 
+		t1.create_user_id as createUserId, t1.modify_time as modifyTime, t1.modify_user_id as modifyUserId, 
+		t2.username as createUserName, t3.username as modifyUserName
+		from t_scd_server_config t1 left join t_scd_user t2 on t1.create_user_id = t2.id
+		left join t_scd_user t3 on t1.modify_user_id = t3.id
+		where t1.deleted = 0
+		<if test="name != null"> and name = #{name}</if>
+		<if test="address != null"> and address = #{address}</if>
+		<if test="sort != null"> order by #{sort} #{order}</if>
+		<if test="limit != null">limit <if test="offset != null">#{offset}, </if> #{limit}</if>
+	</select>
+	
+	<insert id="insert" parameterType="org.machairodus.mappers.domain.ServerConfig">
+		insert into t_scd_server_config(name, address, username, passwd, create_time, create_user_id, modify_user_id)
+		values(#{name}, #{address}, #{username}, #{passwd}, CURRENT_TIMESTAMP, #{userId}, #{userId})
+	</insert>
+	
+	<update id="update" parameterType="org.machairodus.mappers.domain.ServerConfig">
+		update t_scd_server_config set name = #{name}, address = #{address}, username = #{username}, passwd = #{passwd}, 
+		modify_user_id = #{modifyUserId} where id = #{id}
+	</update>
+	
+	<update id="delete" parameterType="java.lang.Long">
+		update t_scd_server_config set deleted = 1 where id = #{id}
+	</update>
+</mapper>

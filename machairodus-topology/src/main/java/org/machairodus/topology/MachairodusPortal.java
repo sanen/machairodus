@@ -15,6 +15,8 @@
  */
 package org.machairodus.topology;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.util.PropertiesLoader;
+import org.machairodus.topology.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,10 @@ public class MachairodusPortal {
 	}
 	
 	protected void init() {
+		init(this.getClass().getResourceAsStream(quartzConfigPath));
+	}
+	
+	protected void init(InputStream input) {
 		if(isInit.get()) {
 			LOG.warn("quartz已经初始化");
 			return ;
@@ -50,7 +57,24 @@ public class MachairodusPortal {
 				return ;
 			}
 			
-			InputStream input = this.getClass().getResourceAsStream(quartzConfigPath);
+			if(input == null) {
+				try {
+					File file = ResourceUtils.getFile(quartzConfigPath);
+					if(file != null) {
+						input = new FileInputStream(file);
+						LOG.debug("quartz-config path: " + file.getAbsolutePath());
+					}
+				} catch(Exception e) {
+					LOG.error("ResourceUtils.getFile load Error: " + e.getMessage());
+				}
+				
+				if(input == null)
+					input = ClassLoader.class.getResourceAsStream(quartzConfigPath);
+				
+				if(input == null)
+					input = this.getClass().getResourceAsStream(quartzConfigPath);
+			}
+			
 			if(input == null) {
 				LOG.warn("未配置quartz-config或配置错误");
 				return ;

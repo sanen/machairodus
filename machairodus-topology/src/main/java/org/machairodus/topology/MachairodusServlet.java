@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.machairodus.topology.cmd.Executor;
+import org.machairodus.topology.io.ClassPathResource;
+import org.machairodus.topology.io.Resource;
 import org.machairodus.topology.util.ContentType;
 import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.ResultMap;
@@ -50,10 +52,14 @@ public class MachairodusServlet extends HttpServlet {
 		if(key != null && !StringUtils.isEmpty(key.trim()))
 			this.key = key;
 		
-		if(LOG.isInfoEnabled())
-			LOG.info("Validation Key is [ " + this.key + " ]");
-		
-		new MachairodusPortal(configPath).init();
+		MachairodusPortal portal = new MachairodusPortal(configPath);
+		try {
+			Resource resource = new ClassPathResource(configPath);
+			portal.init(resource.getInputStream());
+		} catch(IOException e) {
+			LOG.error("Resource must not found config file: " + e.getMessage());
+			portal.init(null);
+		}
 	}
 	
 	@Override

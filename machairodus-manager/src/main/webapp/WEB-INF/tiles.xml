@@ -12,60 +12,50 @@
 		<put-attribute name="navigate" value="/WEB-INF/layout/navigate.jsp" />
 		<put-attribute name="script" value="/WEB-INF/layout/script.jsp" />
 		<put-attribute name="footer" value="/WEB-INF/layout/footer.jsp" />
+		<put-attribute name="content.js" value="/WEB-INF/pages/js/content.js.jsp" />
 	</definition>
 
 	<definition name="index" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/index.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/index.js.jsp" />
 	</definition>
 	
 	<definition name="permission.user" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/permission.user.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/permission.user.js.jsp" />
 	</definition>
 	
 	<definition name="permission.role" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/permission.role.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/permission.role.js.jsp" />
 	</definition>
 	
 	<definition name="permission.func" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/permission.func.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/permission.func.js.jsp" />
 	</definition>
 	
 	<definition name="configure.server" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/configure.server.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/configure.server.js.jsp" />
 	</definition>
 	
 	<definition name="configure.node" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/configure.node.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/configure.node.js.jsp" />
 	</definition>
 	
 	<definition name="configure.service" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/configure.service.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/configure.service.js.jsp" />
 	</definition>
 	
 	<definition name="schedule.balancer" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/schedule.balancer.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/schedule.balancer.js.jsp" />
 	</definition>
 	
 	<definition name="schedule.scheduler" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/schedule.scheduler.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/schedule.scheduler.js.jsp" />
 	</definition>
 	
 	<definition name="monitor.load" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/monitor.load.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/monitor.load.js.jsp" />
 	</definition>
 	
 	<definition name="statistics.scheduler" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/statistics.scheduler.jsp" />
-		<put-attribute name="content.js" value="/WEB-INF/pages/js/statistics.scheduler.js.jsp" />
 	</definition>
 </tiles-definitions>

@@ -5,9 +5,10 @@
 <div class="container-fluid">
 	<div class="row-fluid">
 		<div class="row-fluid">
-			<button id="btnQuery" class="btn black" type="button" data-toggle="modal" data-target="#modalFind">查询</button>
-			<button id="btnAdd" class="btn black" type="button" data-toggle="modal" data-target="#modalAdd">新增</button>
-			<button id="btnModify" class="btn black" type="button" data-toggle="modal" data-target="#modalModify" disabled>修改</button>
+			<button id="btnQuery" class="btn black" type="button">查询</button>
+			<button id="btnAdd" class="btn black" type="button">新增</button>
+			<button id="btnRefresh" class="btn black" type="button">刷新</button>
+			<button id="btnModify" class="btn black" type="button" disabled>修改</button>
 			<button id="btnDelete" class="btn black" type="button" disabled>删除</button>
 		</div>
 		<p>
@@ -54,7 +55,7 @@
 	</div>
 	<div class="modal-footer">
 		<button id="btnFindEnter" data-dismiss="modal" class="btn black" type="button">确定</button>
-		<button data-dismiss="modal" class="btn black" type="button">取消</button>
+		<button id="btnFindCancle" data-dismiss="modal" class="btn black" type="button">取消</button>
 	</div>
 </div>
 <div id="dlgOption">
@@ -66,7 +67,6 @@
 						<span class="required">*</span>
 					</label>
 					<div class="controls">
-						<input type="hidden" id="type">
 						<input type="text" placeholder="" class="m-wrap span12" id="name">
 					</div>
 				</div>
@@ -98,8 +98,8 @@
 		</div>
 	</div>
 	<div class="modal-footer">
-		<button data-dismiss="modal" class="btn black optionEnter" type="button">确定</button>
-		<button data-dismiss="modal" class="btn black option" type="button">取消</button>
+		<button id="btnOptionEnter" data-dismiss="modal" class="btn black" type="button">确定</button>
+		<button id="btnOptionCancle" data-dismiss="modal" class="btn black" type="button">取消</button>
 	</div>
 </div>
 <!-- END PAGE CONTENT-->

@@ -1,9 +1,9 @@
 .form-horizontal .control-label {
-	width: 100px;
+	width: 60px;
 }
 
 .form-horizontal .controls {
-	margin-left: 110px;
+	margin-left: 65px;
 }
 
 @media ( max-width : 500px) {
@@ -20,17 +20,6 @@
 	overflow: hidden;
 }
 
-/*bootstrap兼容问题和easyui的bug*/
-.panel-header, .panel-body {
-	border-width: 0px;
-}
-
-.datagrid, .combo-p {
-	border: solid 1px #D4D4D4;
-}
-
-.datagrid * {
-	-webkit-box-sizing: content-box;
-	-moz-box-sizing: content-box;
-	box-sizing: content-box;
+.fixed-table-pagination .pagination-info {
+	margin-left: 10px;
 }

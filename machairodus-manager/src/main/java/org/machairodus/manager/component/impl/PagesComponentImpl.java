@@ -37,67 +37,78 @@ public class PagesComponentImpl implements PagesComponent {
 	@Override
 	public View index(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
+		model.addAttribute("definition", "index");
 		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View permissionUser(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/permission.user.jsp");
+		model.addAttribute("definition", "permission.user");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View permissionRole(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/permission.role.jsp");
+		model.addAttribute("definition", "permission.role");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View permissionFunc(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/permission.func.jsp");
+		model.addAttribute("definition", "permission.func");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View configureServer(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/configure.server.jsp");
+		model.addAttribute("definition", "configure.server");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View configureNode(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/configure.node.jsp");
+		model.addAttribute("definition", "configure.node");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View configureService(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/configure.service.jsp");
+		model.addAttribute("definition", "configure.service");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View scheduleBalancer(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/schedule.balancer.jsp");
+		model.addAttribute("definition", "schedule.balancer");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View scheduleScheduler(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/schedule.scheduler.jsp");
+		model.addAttribute("definition", "schedule.scheduler");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View monitorLoad(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/monitor.load.jsp");
+		model.addAttribute("definition", "monitor.load");
+		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View statisticsScheduler(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		return new ForwardView("/statistics.scheduler.jsp");
+		model.addAttribute("definition", "statistics.scheduler");
+		return new ForwardView("/index.jsp");
 	}
 	
 	private void build(HttpServletRequest request, Model model) {

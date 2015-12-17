@@ -261,8 +261,12 @@ public class QuartzFactory {
 		if(quartz.isClose())
 			return ;
 		
-		if(StringUtils.isEmpty(queueName))
+		if(StringUtils.isEmpty(queueName)) {
+			quartz.setClose(true);
+			_tmpQuartz.put(quartz.getConfig().getId(), quartz);
+			quartzs.remove(quartz.getConfig().getId(), quartz);
 			return ;
+		}
 		
 		threadFactory.setBaseQuartz(null);
 		quartz.getConfig().getService().execute(new Runnable() {

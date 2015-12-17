@@ -18,6 +18,18 @@
 <!-- APP INIT -->
 <script src="${pageContext.request.contextPath}/media/js/app.js"></script>      
 <script>
+	var context = "${pageContext.request.contextPath}";
+	var dialogExtend = function() {
+		$('div.window-mask').bind('click', function() {
+			$.each(['div.window-mask', 'div.panel.window', 'div.window-shadow'], function(idx, element) {
+				$.each($(element), function(itemIdx, item) {
+					if($(item).css('display') && $(item).css('display') == 'block')
+						$(item).css({display: 'none'});
+				});
+			});
+		});
+	};
+	
 	jQuery(document).ready(function() {       
 	   App.init();
 	});
