@@ -18,7 +18,7 @@
 				address like #{item}
 			</foreach>
 		</if>
-		<if test="sort != null"> order by #{sort} #{order}</if>
+		<if test="sort != null"> order by ${sort} ${order}</if>
 		<if test="limit != null">limit <if test="offset != null">#{offset}, </if> #{limit}</if>
 	</select>
 	

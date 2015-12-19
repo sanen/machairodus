@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,12 +51,15 @@ public class QuartzFactory {
 	private static Logger LOG = LoggerFactory.getLogger(QuartzFactory.class);
 	private static QuartzFactory FACTORY;
 	private static final Object LOCK = new Object();
-	private AtomicInteger quartzSize = new AtomicInteger(0);
-	private final ConcurrentMap<String , BaseQuartz> quartzs = new ConcurrentHashMap<String , BaseQuartz>();
-	private final ConcurrentMap<String , BaseQuartz> _tmpQuartz = new ConcurrentHashMap<String , BaseQuartz>();
+	private AtomicInteger startedQuartzSize = new AtomicInteger(0);
+	private final ConcurrentMap<String , BaseQuartz> startedQuartz = new ConcurrentHashMap<String , BaseQuartz>();
+	private final ConcurrentMap<String , BaseQuartz> stoppingQuartz = new ConcurrentHashMap<String , BaseQuartz>();
+	private final ConcurrentMap<String , BaseQuartz> stoppedQuartz = new ConcurrentHashMap<String , BaseQuartz>();
 	private final ConcurrentMap<String, Set<BaseQuartz>> group = new ConcurrentHashMap<String, Set<BaseQuartz>>();
 	private static final QuartzThreadFactory threadFactory = new QuartzThreadFactory();
 	private static final ThreadPoolExecutor service = (ThreadPoolExecutor) Executors.newCachedThreadPool(threadFactory);
+	private static final ThreadPoolExecutor closeQuartzService = (ThreadPoolExecutor) new ThreadPoolExecutor(0, RuntimeUtil.AVAILABLE_PROCESSORS, 5L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
+	private static final ThreadPoolExecutor closeQuartzCallableService = (ThreadPoolExecutor) new ThreadPoolExecutor(0, RuntimeUtil.AVAILABLE_PROCESSORS, 5L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
 	
 	private static boolean isLoaded = false;
 	
@@ -72,9 +76,12 @@ public class QuartzFactory {
 	public static final QuartzFactory getInstance() {
 		if(FACTORY == null) {
 			synchronized (LOCK) {
-				if(FACTORY == null)
+				if(FACTORY == null) {
 					FACTORY = new QuartzFactory();
-				
+					StatusMonitorQuartz statusMonitor = FACTORY.new StatusMonitorQuartz();
+					statusMonitor.getConfig().getService().execute(statusMonitor);
+					Runtime.getRuntime().addShutdownHook(new Thread(FACTORY.new ShutdownHook()));
+				}
 			}
 		}
 		
@@ -91,11 +98,9 @@ public class QuartzFactory {
 	public BaseQuartz bind(BaseQuartz quartz) {
 		try {
 			quartz.setClose(false);
-			quartzs.put(quartz.getConfig().getId(), quartz);
-			quartzSize.incrementAndGet();
-			
+			startedQuartz.put(quartz.getConfig().getId(), quartz);
+			startedQuartzSize.incrementAndGet();
 			return quartz;
-			
 		} finally {
 			if(LOG.isInfoEnabled())
 				LOG.info("绑定任务: 任务号[ " + quartz.getConfig().getId() + " ]");
@@ -110,25 +115,21 @@ public class QuartzFactory {
 	 * @return 返回当前任务
 	 */
 	public BaseQuartz unbind(BaseQuartz quartz) {
-		try {
-			quartzs.remove(quartz.getConfig().getId());
-			quartzSize.decrementAndGet();
-			
-			return quartz;
-			
-		} finally {
-			if(LOG.isDebugEnabled())
-				LOG.debug("解绑任务 : 任务号[ " + quartz.getConfig().getId() + " ], 现存任务数: " + quartzSize.get());
-			
-		}
+		startedQuartz.remove(quartz.getConfig().getId());
+		startedQuartzSize.decrementAndGet();
+		
+		if(LOG.isDebugEnabled())
+			LOG.debug("解绑任务 : 任务号[ " + quartz.getConfig().getId() + " ], 现存任务数: " + startedQuartzSize.get());
+		
+		return quartz;
 	}
 	
 	/**
 	 * 获取现在正在执行的任务数
 	 * @return 任务数
 	 */
-	public int getQuartzSize() {
-		return quartzSize.get();
+	public int getStartedQuartzSize() {
+		return startedQuartzSize.get();
 		
 	}
 	
@@ -136,16 +137,24 @@ public class QuartzFactory {
 	 * 返回所有任务
 	 * @return 任务集合
 	 */
-	public Collection<BaseQuartz> getQuartzs() {
-		return quartzs.values();
+	public Collection<BaseQuartz> getStartedQuartz() {
+		return startedQuartz.values();
+	}
+	
+	public int getStoppingQuartzSize() {
+		return stoppingQuartz.size();
+	}
+	
+	public Collection<BaseQuartz> getStoppingQuartz() {
+		return stoppingQuartz.values();
 	}
 	
 	public int getStopedQuartzSize() {
-		return _tmpQuartz.size();
+		return stoppedQuartz.size();
 	}
 	
 	public Collection<BaseQuartz> getStopedQuratz() {
-		return _tmpQuartz.values();
+		return stoppedQuartz.values();
 	}
 	
 	/**
@@ -154,7 +163,7 @@ public class QuartzFactory {
 	 */
 	public void close(final String id) {
 		try {
-			final BaseQuartz quartz = quartzs.get(id);
+			final BaseQuartz quartz = startedQuartz.get(id);
 			close(quartz);
 		} finally {
 			if(LOG.isDebugEnabled())
@@ -167,12 +176,12 @@ public class QuartzFactory {
 		if(quartz != null && !quartz.isClose()) {
 			if(quartz.getConfig().getWorkerClass() != BaseQuartz.class) {
 				quartz.setClose(true);
-				_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-				quartzs.remove(quartz.getConfig().getId(), quartz);
+				stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+				startedQuartz.remove(quartz.getConfig().getId(), quartz);
 			} else {
 				int size = 0;
 				Set<BaseQuartz> dataLoaders = new LinkedHashSet<BaseQuartz>();
-				for(BaseQuartz _quartz : quartzs.values()) {
+				for(BaseQuartz _quartz : startedQuartz.values()) {
 					if(_quartz.getClass() == quartz.getClass()) {
 						size ++;
 					}
@@ -184,13 +193,13 @@ public class QuartzFactory {
 				
 				if(size > 1) {
 					quartz.setClose(true);
-					_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-					quartzs.remove(quartz.getConfig().getId(), quartz);
+					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+					startedQuartz.remove(quartz.getConfig().getId(), quartz);
 				} else if(size == 1) {
 					for(BaseQuartz _quartz : dataLoaders) {
 						_quartz.setClose(true);
-						_tmpQuartz.put(_quartz.getConfig().getId(), _quartz);
-						quartzs.remove(_quartz.getConfig().getId(), _quartz);
+						stoppingQuartz.put(_quartz.getConfig().getId(), _quartz);
+						startedQuartz.remove(_quartz.getConfig().getId(), _quartz);
 					}
 					
 					closeByQueue(quartz, quartz.getConfig().getQueueName());
@@ -206,9 +215,9 @@ public class QuartzFactory {
 	public void closeGroup(String groupName) {
 		Assert.hasLength(groupName, "groupName must not be null");
 		Set<BaseQuartz> dataLoaders = new LinkedHashSet<BaseQuartz>();
-		for(BaseQuartz quartz : quartzs.values()) {
+		for(BaseQuartz quartz : startedQuartz.values()) {
 			if(quartz.getConfig().getGroup().equals(groupName)) {
-				for(BaseQuartz _quartz : quartzs.values()) {
+				for(BaseQuartz _quartz : startedQuartz.values()) {
 					if(_quartz.getConfig().getWorkerClass() == quartz.getClass()) {
 						dataLoaders.add(_quartz);
 					}
@@ -220,18 +229,18 @@ public class QuartzFactory {
 		
 		for(BaseQuartz quartz : dataLoaders) {
 			quartz.setClose(true);
-			_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-			quartzs.remove(quartz.getConfig().getId(), quartz);
+			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+			startedQuartz.remove(quartz.getConfig().getId(), quartz);
 		}
 		
-		for(BaseQuartz quartz : quartzs.values()) {
+		for(BaseQuartz quartz : startedQuartz.values()) {
 			if(quartz.getConfig().getGroup().equals(groupName)) {
 				if(!"".equals(quartz.getConfig().getQueueName()))
 					closeByQueue(quartz, quartz.getConfig().getQueueName());
 				else {
 					quartz.setClose(true);
-					_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-					quartzs.remove(quartz.getConfig().getId(), quartz);
+					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+					startedQuartz.remove(quartz.getConfig().getId(), quartz);
 				}
 			}
 		}
@@ -241,19 +250,16 @@ public class QuartzFactory {
 	 * 关闭所有任务
 	 */
 	public synchronized void closeAll() {
-		if(quartzs.size() > 0) {
+		if(startedQuartz.size() > 0) {
 			LOG.warn("现在关闭所有的任务");
 			Set<String> groupNames = new LinkedHashSet<String>();
-			for(BaseQuartz quartz : quartzs.values()) {
+			for(BaseQuartz quartz : startedQuartz.values()) {
 				groupNames.add(quartz.getConfig().getGroup());
 			}
 			
 			for(String groupName : groupNames) {
 				closeGroup(groupName);
 			}
-			
-			while(getQuartzSize() > 0) try { Thread.sleep(100L); } catch(InterruptedException e) { }
-			quartzs.clear();
 		}
 	}
 	
@@ -263,16 +269,16 @@ public class QuartzFactory {
 		
 		if(StringUtils.isEmpty(queueName)) {
 			quartz.setClose(true);
-			_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-			quartzs.remove(quartz.getConfig().getId(), quartz);
+			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+			startedQuartz.remove(quartz.getConfig().getId(), quartz);
 			return ;
 		}
 		
 		threadFactory.setBaseQuartz(null);
-		quartz.getConfig().getService().execute(new Runnable() {
+		closeQuartzService.execute(new Runnable() {
 			@Override
 			public void run() {
-				Future<Boolean> isOK = quartz.getConfig().getService().submit(new Callable<Boolean>() {
+				Future<Boolean> future = closeQuartzCallableService.submit(new Callable<Boolean>() {
 					@Override
 					public Boolean call() throws Exception {
 						while(BlockingQueueFactory.getInstance().getQueue(queueName).size() > 0) Thread.sleep(100L);
@@ -283,19 +289,17 @@ public class QuartzFactory {
 				try {
 					long timeout = quartz.getConfig().getTimeout();
 					if(timeout <= 0) {
-						boolean ok = isOK.get();
-						if(ok) {
-							quartz.setClose(true);
-							_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-							quartzs.remove(quartz.getConfig().getId(), quartz);
-						}
+						LOG.warn("现在开始无限等待队列数据消费，请注意线程阻塞: " + quartz.getConfig().getId());
+						future.get();
+						LOG.info("队列数据消费结束: " + quartz.getConfig().getId());
+						quartz.setClose(true);
+						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 					} else {
-						boolean ok = isOK.get(timeout, TimeUnit.MILLISECONDS);
-						if(ok) {
-							quartz.setClose(true);
-							_tmpQuartz.put(quartz.getConfig().getId(), quartz);
-							quartzs.remove(quartz.getConfig().getId(), quartz);
-						}
+						future.get(timeout, TimeUnit.MILLISECONDS);
+						quartz.setClose(true);
+						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 					}
 				} catch(Exception e) {
 					LOG.error("等待队列数据消费超时: " + e.getMessage());
@@ -308,8 +312,8 @@ public class QuartzFactory {
 	 * 启动所有缓冲区中的任务并清理任务缓冲区
 	 */
 	public final void startAll() {
-		if(_tmpQuartz.size() > 0) {
-			for(Entry<String, BaseQuartz> entry : _tmpQuartz.entrySet()) {
+		if(stoppedQuartz.size() > 0) {
+			for(Entry<String, BaseQuartz> entry : stoppedQuartz.entrySet()) {
 				String name = entry.getKey();
 				BaseQuartz quartz = entry.getValue();
 				if(LOG.isInfoEnabled())
@@ -320,14 +324,14 @@ public class QuartzFactory {
 				service.execute(quartz);
 			}
 			
-			_tmpQuartz.clear();
+			stoppedQuartz.clear();
 		}
 	}
 	
 	public final void startGroup(String groupName) {
-		if(_tmpQuartz.size() > 0) {
+		if(stoppedQuartz.size() > 0) {
 			Set<String> keys = new HashSet<String>();
-			for(Entry<String, BaseQuartz> entry : _tmpQuartz.entrySet()) {
+			for(Entry<String, BaseQuartz> entry : stoppedQuartz.entrySet()) {
 				String id = entry.getKey();
 				BaseQuartz quartz = entry.getValue();
 				if(groupName.equals(quartz.getConfig().getGroup())) {
@@ -344,13 +348,13 @@ public class QuartzFactory {
 			}
 			
 			for(String key : keys) {
-				_tmpQuartz.remove(key);
+				stoppedQuartz.remove(key);
 			}
 		}
 	}
 	
 	public final void start(String id) {
-		BaseQuartz quartz = _tmpQuartz.get(id);
+		BaseQuartz quartz = stoppedQuartz.get(id);
 		if(quartz != null && quartz.isClose()) {
 			if(LOG.isInfoEnabled())
 				LOG.info("Start quartz [ " + id + " ], class with [ " + quartz.getClass().getName() + " ]");
@@ -358,21 +362,21 @@ public class QuartzFactory {
 			getInstance().bind(quartz);
 			threadFactory.setBaseQuartz(quartz);
 			service.execute(quartz);
-			_tmpQuartz.remove(id);
+			stoppedQuartz.remove(id);
 		}
 	}
 	
 	public final boolean closed(String id) {
-		return _tmpQuartz.containsKey(id);
+		return stoppedQuartz.containsKey(id);
 	}
 	
 	public final boolean started(String id) {
-		return quartzs.containsKey(id);
+		return startedQuartz.containsKey(id);
 	}
 	
 	public final boolean hasClosedGroup(String group) {
-		if(_tmpQuartz.size() > 0) {
-			for(BaseQuartz quartz : _tmpQuartz.values()) {
+		if(stoppedQuartz.size() > 0) {
+			for(BaseQuartz quartz : stoppedQuartz.values()) {
 				if(quartz.getConfig().getGroup().equals(group))
 					return true;
 			}
@@ -382,8 +386,8 @@ public class QuartzFactory {
 	}
 	
 	public final boolean hasStartedGroup(String group) {
-		if(quartzs.size() > 0) {
-			for(BaseQuartz quartz : quartzs.values()) {
+		if(startedQuartz.size() > 0) {
+			for(BaseQuartz quartz : startedQuartz.values()) {
 				if(quartz.getConfig().getGroup().equals(group))
 					return true;
 			}
@@ -398,10 +402,10 @@ public class QuartzFactory {
 		groupQuartz.add(quartz);
 		group.put(quartz.getConfig().getGroup(), groupQuartz);
 		
-		if(_tmpQuartz.containsKey(quartz.getConfig().getId()) || quartzs.containsKey(quartz.getConfig().getId()))
+		if(stoppedQuartz.containsKey(quartz.getConfig().getId()) || startedQuartz.containsKey(quartz.getConfig().getId()))
 			throw new QuartzException("exists quartz in memory");
 		
-		_tmpQuartz.put(quartz.getConfig().getId(), quartz);
+		stoppedQuartz.put(quartz.getConfig().getId(), quartz);
 		rebalance(quartz.getConfig().getGroup());
 	}
 	
@@ -411,7 +415,7 @@ public class QuartzFactory {
 		
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
-			_tmpQuartz.remove(quartz.getConfig().getId(), quartz);
+			stoppedQuartz.remove(quartz.getConfig().getId(), quartz);
 		}
 		
 		rebalance(quartz.getConfig().getGroup());
@@ -587,11 +591,11 @@ public class QuartzFactory {
 							
 							baseQuartz.setConfig(config);
 							
-							if(getInstance()._tmpQuartz.containsKey(quartz.name() + "-" + p)) {
-								throw new QuartzException("\n\t任务调度重复: " + quartz.name() + "-" + p + ", 组件类: {'" + clz.getName() + "', '" + getInstance()._tmpQuartz.get(quartz.name() + "-" + p).getClass().getName() +"'}");
+							if(getInstance().stoppedQuartz.containsKey(quartz.name() + "-" + p)) {
+								throw new QuartzException("\n\t任务调度重复: " + quartz.name() + "-" + p + ", 组件类: {'" + clz.getName() + "', '" + getInstance().stoppedQuartz.get(quartz.name() + "-" + p).getClass().getName() +"'}");
 							}
 							
-							getInstance()._tmpQuartz.put(config.getId(), baseQuartz);
+							getInstance().stoppedQuartz.put(config.getId(), baseQuartz);
 							
 							Set<BaseQuartz> groupQuartz = getInstance().group.get(baseQuartz.getConfig().getGroup());
 							if(groupQuartz == null) groupQuartz = new LinkedHashSet<BaseQuartz>();
@@ -616,13 +620,13 @@ public class QuartzFactory {
 	 * @param injector Guice Injector
 	 */
 	public static final void reload(final Properties properties) {
-		getInstance()._tmpQuartz.clear();
+		getInstance().stoppedQuartz.clear();
 		getInstance().closeAll();
 		service.execute(new Runnable() {
 			
 			@Override
 			public void run() {
-				try { while(QuartzFactory.getInstance().getQuartzSize() > 0) Thread.sleep(100L); } catch(InterruptedException e) { }
+				try { while(QuartzFactory.getInstance().getStartedQuartzSize() > 0) Thread.sleep(100L); } catch(InterruptedException e) { }
 				if(LOG.isInfoEnabled())
 					LOG.info("所有任务已经全部关闭");
 				
@@ -634,6 +638,80 @@ public class QuartzFactory {
 				
 			}
 		});
+		
+	}
+	
+	private class StatusMonitorQuartz extends BaseQuartz {
+		private final ConcurrentMap<String, BaseQuartz> closed;
+		
+		public StatusMonitorQuartz() {
+			QuartzConfig config = new QuartzConfig();
+			config.setId("StatusMonitorQuartz-0");
+			config.setName("StatusMonitorQuartz");
+			config.setGroup("StatusMonitorQuartz");
+			threadFactory.setBaseQuartz(this);
+			config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
+			try { config.setCron(new CronExpression("* * * * * ?")); } catch(ParseException e) {}
+			config.setTotal(1);
+			config.setDaemon(true);
+			setConfig(config);
+			setClose(false);
+			closed = new ConcurrentHashMap<String, BaseQuartz>();
+		}
+		
+		@Override
+		public void before() throws QuartzException {
+			for(Entry<String, BaseQuartz> entry : stoppingQuartz.entrySet()) {
+				if(entry.getValue().isClosed()) {
+					closed.put(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+
+		@Override
+		public void execute() throws QuartzException {
+			for(Entry<String, BaseQuartz> entry : closed.entrySet()) {
+				String id = entry.getKey();
+				BaseQuartz quartz = entry.getValue();
+				stoppedQuartz.put(id, quartz);
+				stoppingQuartz.remove(id, quartz);
+			}
+		}
+
+		@Override
+		public void after() throws QuartzException {
+			closed.clear();
+		}
+
+		@Override
+		public void destroy() throws QuartzException {
+			
+		}
+		
+	}
+	
+	private class ShutdownHook implements Runnable {
+		@Override
+		public void run() {
+			LOG.info("等待队列中的所有元素被执行完成后停止系统");
+			while((int) BlockingQueueFactory.howManyElementInQueues() > 0) 
+				try { Thread.sleep(10L); } catch(InterruptedException e) { }
+			
+			LOG.info("队列中的所有元素已被执行完成");
+			
+			long time = System.currentTimeMillis();
+			LOG.info("开始停止任务调度");
+			FACTORY.closeAll();
+			Collection<BaseQuartz> quartzs = FACTORY.getStoppingQuartz();
+			for(BaseQuartz quartz : quartzs) {
+				quartz.thisNotify();
+			}
+			
+			while((FACTORY.getStartedQuartzSize() > 0 || FACTORY.getStoppingQuartzSize() > 0) && System.currentTimeMillis() - time < 300000L) 
+				try { Thread.sleep(10L); } catch(InterruptedException e) { }
+			
+ 			LOG.info("停止任务调度完成, 耗时: " + (System.currentTimeMillis() - time) + "ms");
+		}
 		
 	}
 }

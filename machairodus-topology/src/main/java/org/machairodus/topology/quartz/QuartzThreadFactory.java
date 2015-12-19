@@ -23,11 +23,14 @@ import java.util.concurrent.ThreadFactory;
  */
 public class QuartzThreadFactory implements ThreadFactory {
 	private BaseQuartz baseQuartz;
-
+	
 	@Override
 	public Thread newThread(Runnable runnable) {
-		if(baseQuartz == null)
-			return new Thread(runnable);
+		if(baseQuartz == null) {
+			Thread thread = new Thread(runnable);
+			thread.setName("Quartz-Thread-" + System.currentTimeMillis());
+			return thread;
+		}
 		
 		Thread thread = new Thread(baseQuartz);
 		thread.setName(baseQuartz.getConfig().getName());
