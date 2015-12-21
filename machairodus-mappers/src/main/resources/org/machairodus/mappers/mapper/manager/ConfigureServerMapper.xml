@@ -42,14 +42,14 @@
 		t2.username as createUserName, t3.username as modifyUserName
 		from t_scd_server_config t1 left join t_scd_user t2 on t1.create_user_id = t2.id
 		left join t_scd_user t3 on t1.modify_user_id = t3.id
-		where t1.deleted = 0 and id = #{id}
+		where t1.deleted = 0 and t1.id = #{id}
 	</select>
 	
 	<select id="findExistsById" resultType="java.lang.Long" parameterType="java.lang.Long">
 		select count(1) from t_scd_server_config where deleted = 0 and id = #{id}
 	</select>
 	
-	<insert id="insert" parameterType="org.machairodus.mappers.domain.ServerConfig">
+	<insert id="insert" parameterType="org.machairodus.mappers.domain.ServerConfig" useGeneratedKeys="true" keyProperty="id">
 		insert into t_scd_server_config(name, address, username, passwd, create_time, create_user_id, modify_time, modify_user_id)
 		values(#{name}, #{address}, #{username}, #{passwd}, #{createTime}, #{createUserId}, #{modifyTime}, #{modifyUserId})
 	</insert>
@@ -62,4 +62,22 @@
 	<update id="delete" parameterType="java.util.Map">
 		update t_scd_server_config set deleted = 1, modify_user_id = #{modifyUserId} where id = #{id}
 	</update>
+	
+	<select id="findSimple" resultType="org.machairodus.mappers.domain.ServerConfig" parameterType="java.util.Map">
+		select t1.id, t1.name, t1.address from t_scd_server_config t1 
+		where t1.deleted = 0
+		<if test="param != null">
+			and (t1.name like '%${param}%' or t1.address like '%${param}%')
+		</if>
+		order by t1.name asc
+		<if test="limit != null">limit <if test="offset != null">#{offset}, </if> #{limit}</if>
+	</select>
+	
+	<select id="findSimpleTotal" resultType="java.lang.Long" parameterType="java.util.Map">
+		select count(1) from t_scd_server_config t1 
+		where t1.deleted = 0
+		<if test="param != null">
+			and (t1.name like '%${param}%' or t1.address like '%${param}%')
+		</if>
+	</select>
 </mapper>

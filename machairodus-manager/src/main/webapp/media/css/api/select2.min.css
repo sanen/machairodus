@@ -120,6 +120,11 @@
 	border-top-right-radius: 0
 }
 
+/** add by yanghe */
+.select2-container--open .select2-dropdown--below {
+	top: 42px;
+}
+
 .select2-search--dropdown {
 	display: block;
 	padding: 4px

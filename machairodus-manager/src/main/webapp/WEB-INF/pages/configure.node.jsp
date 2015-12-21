@@ -22,11 +22,11 @@
                     <th data-field="state" data-checkbox="true" />
 					<th data-field="id" data-visible="false">ID</th>
 					<th data-field="serverId" data-visible="false">SERVER_ID</th>
-					<th data-field="server" data-width="100" data-align="center" data-valign="middle" data-sortable="true">服务器</th>
+					<th data-field="serverName" data-width="100" data-align="center" data-valign="middle" data-sortable="true">服务器</th>
 					<th data-field="name" data-width="100" data-align="center" data-valign="middle" data-sortable="true">节点名称</th>
 					<th data-field="port" data-width="100" data-align="center" data-valign="middle" data-sortable="true">端口</th>
 					<th data-field="jmxPort" data-width="100" data-align="center" data-valign="middle" data-sortable="true">JMX端口</th>
-					<th data-field="type" data-width="100" data-align="center" data-valign="middle" data-sortable="true">类型</th>
+					<th data-field="type" data-width="100" data-align="center" data-valign="middle" data-sortable="true" data-formatter="Configure.Node.typeFormatter">类型</th>
 					<th data-field="weight" data-width="100" data-align="center" data-valign="middle" data-sortable="true">权重</th>
 					<th data-field="pid" data-width="100" data-align="center" data-valign="middle" data-sortable="true">进程号</th>
 					<th data-field="createTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建时间</th>
@@ -47,7 +47,9 @@
 				<div class="control-group">
 					<label class="control-label" for="server">服务器</label>
 					<div class="controls">
-						<input type="text" class="m-wrap span12 tags" id="server">
+						<select id="server" multiple="multiple" style="width: 312px;">
+							<option value="" selected="selected"></option>
+						</select>
 					</div>
 				</div>
 				<div class="control-group">
@@ -59,7 +61,11 @@
 				<div class="control-group">
 					<label class="control-label" for="type">类型</label>
 					<div class="controls">
-						<select id="type"></select>
+						<select id="type" multiple="multiple" style="width: 312px;">
+							<option value="1">均衡器</option>
+							<option value="2">调度器</option>
+							<option value="3">服务节点</option>
+						</select>
 					</div>
 				</div>
 			</form>
@@ -79,15 +85,7 @@
 						<span class="required">*</span>
 					</label>
 					<div class="controls">
-						<input type="hidden" id="serverId">
-						<select id="server" class="">
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-							<option value="5">5</option>
-							<option value="6">6</option>
-						</select>
+						<select id="server" style="width: 405px;"></select>
 					</div>
 				</div>
 				<div class="control-group">
@@ -99,6 +97,19 @@
 					</div>
 				</div>
 				<div class="control-group">
+					<label class="control-label" for="optionType">类型
+						<span class="required">*</span>
+					</label>
+					<div class="controls">
+						<select id="optionType" style="width: 405px;">
+							<option value="" selected="selected"></option>
+							<option value="1">均衡器</option>
+							<option value="2">调度器</option>
+							<option value="3">服务节点</option>
+						</select>
+					</div>
+				</div>
+				<div class="control-group">
 					<label class="control-label" for="port">端口
 						<span class="required">*</span>
 					</label>
@@ -107,7 +118,7 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="port">JMX端口</label>
+					<label class="control-label" for="jmxPort">JMX端口</label>
 					<div class="controls">
 						<input type="text" class="m-wrap span12" id="jmxPort">
 					</div>

@@ -31,7 +31,9 @@ import org.machairodus.mappers.mapper.manager.ConfigureServerMapper;
 import org.nanoframework.commons.crypt.CryptUtil;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
+import org.nanoframework.orm.mybatis.MultiTransactional;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 public class ConfigureServerComponentImpl implements ConfigureServerComponent {
@@ -64,7 +66,27 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 			return map;
 		}
 	}
+	
+	@Override
+	public Object findById(Long id) {
+		try {
+			if(id == null)
+				return OK;
+			
+			ServerConfig serverConfigs = configureServerMapper.findById(id);
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", Lists.newArrayList(serverConfigs));
+			map.put("total", 1);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureServer异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureServer异常");
+			return map;
+		}
+	}
 
+	@MultiTransactional(envId = "machairodus")
 	@Override
 	public Object add(ServerConfig serverConfig) {
 		if(serverConfig.getId() != null) {
@@ -100,6 +122,7 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 			}
 			
 			if(configureServerMapper.insert(serverConfig) > 0) {
+				serverConfig = configureServerMapper.findById(serverConfig.getId());
 				serverConfig.setPasswd(MachairodusConstants.PASSWD_VIEW);
 				Map<String, Object> map = OK._getBeanToMap();
 				map.put("item", serverConfig);
@@ -115,6 +138,7 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 		return FAIL;
 	}
 
+	@MultiTransactional(envId = "machairodus")
 	@Override
 	public Object update(ServerConfig serverConfig) {
 		if(serverConfig.getId() == null) {
@@ -151,6 +175,7 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 			
 			serverConfig.setModifyTime(new Timestamp(System.currentTimeMillis()));
 			if(configureServerMapper.update(serverConfig) > 0) {
+				serverConfig = configureServerMapper.findById(serverConfig.getId());
 				serverConfig.setPasswd(MachairodusConstants.PASSWD_VIEW);
 				Map<String, Object> map = OK._getBeanToMap();
 				map.put("item", serverConfig);
@@ -191,4 +216,21 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 		}
 	}
 	
+	@Override
+	public Object findSimple(String param, Integer offset, Integer limit) {
+		try {
+			List<ServerConfig> serverConfigs = configureServerMapper.findSimple(param, offset, limit);
+			long total = configureServerMapper.findSimpleTotal(param);
+			
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", serverConfigs);
+			map.put("total", total);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureServer异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureServer异常");
+			return map;
+		}
+	}
 }

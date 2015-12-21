@@ -1,5 +1,5 @@
 var Configure = Configure || {};
-Configure.Server = function(){
+Configure.Node = function(){
 	var $table = $('#configure-node-table'), 
 	$btnQuery = $('#btnQuery'), 
 	$btnAdd = $('#btnAdd'), 
@@ -25,11 +25,14 @@ Configure.Server = function(){
 			init = false;
 		}
 		
-		if($('#dlgFind #server').val() != '')
-			params["name[]"] = $('#dlgFind #name').getTags();
+		if($('#dlgFind #server').val() != null && $('#dlgFind #server').val() != '')
+			params["server[]"] = $('#dlgFind #server').val();
 		
 		if($('#dlgFind #name').val() != '')
-			params["address[]"] = $('#dlgFind #address').getTags();
+			params["node[]"] = $('#dlgFind #name').getTags();
+		
+		if($('#dlgFind #type').val() != null && $('#dlgFind #type').val() != '')
+			params["type"] = $('#dlgFind #type').val();
 		
 		return params;
 	}
@@ -45,10 +48,13 @@ Configure.Server = function(){
 	
 	var add = function() {
 		optionType = 'add';
+		reinitServerSelect();
+		$('#dlgOption #server').val(null).trigger("change"); 
 		$('#dlgOption #name').val('');
-		$('#dlgOption #address').val('');
-		$('#dlgOption #username').val('');
-		$('#dlgOption #passwd').val('');
+		$('#dlgOption #optionType').val(null).trigger("change");
+		$('#dlgOption #port').val('');
+		$('#dlgOption #jmxPort').val('');
+		$('#dlgOption #weight').val('');
 		$('#dlgOption').dialog('open');
 	}
 	
@@ -56,10 +62,14 @@ Configure.Server = function(){
 		var selections = $table.bootstrapTable('getSelections');
 		if(selections.length > 0) {
 			optionType = 'modify';
+			$('#dlgOption #server').val(selections[0].serverId).trigger("change"); 
+			reinitServerSelect(selections[0]);
+			
 			$('#dlgOption #name').val(selections[0].name);
-			$('#dlgOption #address').val(selections[0].address);
-			$('#dlgOption #username').val(selections[0].username);
-			$('#dlgOption #passwd').val(selections[0].passwd);
+			$('#dlgOption #optionType').val(selections[0].type).trigger("change");
+			$('#dlgOption #port').val(selections[0].port);
+			$('#dlgOption #jmxPort').val(selections[0].jmxPort);
+			$('#dlgOption #weight').val(selections[0].weight);
 			$('#dlgOption').dialog('open');
 			
 		} else {
@@ -81,20 +91,22 @@ Configure.Server = function(){
 	}
 	
 	var addRequest = function() {
+		var serverId = $('#dlgOption #server').val();
 		var name = $('#dlgOption #name').val();
-		var address = $('#dlgOption #address').val();
-		var username = $('#dlgOption #username').val();
-		var passwd = $('#dlgOption #passwd').val();
-		if(!validServerConfig(name, address, username, passwd)) {
+		var type = $('#dlgOption #optionType').val();
+		var port = $('#dlgOption #port').val();
+		var jmxPort = $('#dlgOption #jmxPort').val();
+		var weight = $('#dlgOption #weight').val();
+		if(!validNodeConfig(serverId, name, type, port)) {
 			return ;
 		} 
 		
-		var serverConfig = JSON.stringify({ name: name, address: address, username: username, passwd: passwd});
+		var nodeConfig = JSON.stringify({ serverId: serverId, name: name, type: type, port: port, jmxPort: jmxPort, weight: weight });
 		$.ajax({
 			url: context + '/configure/node/add',
 			type: "POST", 
 			contentType: "application/x-www-form-urlencoded; charset=utf-8", 
-			data: { serverConfig: serverConfig }, 
+			data: { nodeConfig: nodeConfig }, 
 			success: function(data) {
 				if(data.status) {
 					if(data.status == '2001') {
@@ -120,20 +132,31 @@ Configure.Server = function(){
 			return ;
 		}
 			
+		var serverId = $('#dlgOption #server').val();
+		var serverName = $('#dlgOption #server').text();
+		var selections = $table.bootstrapTable('getSelections');
+		if(selections.length > 0) {
+			if(serverId == null) {
+				serverId = selections[0].serverId;
+				serverName = selections[0].serverName;
+			}
+		}
+		
 		var name = $('#dlgOption #name').val();
-		var address = $('#dlgOption #address').val();
-		var username = $('#dlgOption #username').val();
-		var passwd = $('#dlgOption #passwd').val();
-		if(!validServerConfig(name, address, username, passwd)) {
+		var type = $('#dlgOption #optionType').val();
+		var port = $('#dlgOption #port').val();
+		var jmxPort = $('#dlgOption #jmxPort').val();
+		var weight = $('#dlgOption #weight').val();
+		if(!validNodeConfig(serverId, name, type, port)) {
 			return ;
 		} 
 			
-		var serverConfig = JSON.stringify({ id: ids[0], name: name, address: address, username: username, passwd: passwd});
+		var nodeConfig = JSON.stringify({ id: ids[0], serverId: serverId, serverName: serverName, name: name, type: type, port: port, jmxPort: jmxPort, weight: weight });
 		$.ajax({
 			url: context + '/configure/node/update',
 			type: "POST", 
 			contentType: "application/x-www-form-urlencoded; charset=utf-8", 
-			data: { serverConfig: serverConfig }, 
+			data: { nodeConfig: nodeConfig }, 
 			success: function(data) {
 				if(data.status) {
 					if(data.status == '2001') {
@@ -155,24 +178,24 @@ Configure.Server = function(){
 		});
 	}
 	
-	var validServerConfig = function(name, address, username, passwd) {
+	var validNodeConfig = function(server, name, type, port) {
+		if($.trim(server) == '') {
+			$.messager.alert('错误', '服务器不能为空');
+			return false;
+		}
+		
 		if($.trim(name) == '') {
 			$.messager.alert('错误', '名称不能为空');
 			return false;
 		}
 		
-		if($.trim(address) == '') {
-			$.messager.alert('错误', '地址不能为空');
+		if($.trim(type) == '') {
+			$.messager.alert('错误', '类型不能为空');
 			return false;
 		}
 		
-		if($.trim(username) == '') {
-			$.messager.alert('错误', '用户名不能为空');
-			return false;
-		}
-		
-		if($.trim(passwd) == '') {
-			$.messager.alert('错误', '密码不能为空');
+		if($.trim(port) == '') {
+			$.messager.alert('错误', '端口不能为空');
 			return false;
 		}
 		
@@ -297,11 +320,6 @@ Configure.Server = function(){
 	}
 	
 	var initTagsInput = function() {
-		$('#dlgFind #server').tagsInput({
-			defaultText: '添加条件', 
-			height: 34
-		});
-		
 		$('#dlgFind #name').tagsInput({
 			defaultText: '添加条件', 
 			height: 34
@@ -309,26 +327,168 @@ Configure.Server = function(){
 	}
 	
 	var initSelect2 = function() {
-		$("#dlgOption #server").select2({
-			placeholder: "Select a state",
-			allowClear: true
+		$("#dlgFind #server").select2({
+			placeholder: "选择服务器",
+			ajax: {
+				url: context + '/configure/server/find/simple',
+				dataType: 'json',
+			    delay: 300,
+			    data: function (params) {
+			      return {
+			        param: params.term,
+			        offset: (params.page || 0) * 10,
+			        limit: 10
+			      };
+			    },
+			    processResults: function (data, params) {
+			      params.page = params.page || 1;
+			 
+			      return {
+			        results: data.rows,
+			        pagination: {
+			          more: (params.page * 10) < data.total
+			        }
+			      };
+			    },
+			    cache: true
+			},
+			escapeMarkup: function (markup) { return markup; }, 
+			templateResult: formatRepo, 
+			templateSelection: formatRepoSelection 
 		});
 		
+		reinitServerSelect(null);
+		
 		$("#dlgFind #type").select2({
-			placeholder: "Select a state",
+			placeholder: "请选择类型"
+		});
+		
+		$("#dlgOption #optionType").select2({
+			placeholder: "请选择类型",
 			allowClear: true
 		});
 	}
+	
+	var reinitServerSelect = function(item) {
+		if(item) {
+			$('#dlgOption #server').select2({
+				placeholder: "选择服务器",
+				allowClear: true, 
+				ajax: {
+				    url: context + '/configure/server/find/simple',
+				    dataType: 'json',
+				    delay: 300,
+				    data: function (params) {
+				      return {
+				        param: params.term,
+				        offset: (params.page || 0) * 10,
+				        limit: 10
+				      };
+				    },
+				    processResults: function (data, params) {
+				      params.page = params.page || 1;
+				 
+				      return {
+				        results: data.rows,
+				        pagination: {
+				          more: (params.page * 10) < data.total
+				        }
+				      };
+				    },
+				    cache: true
+				  },
+				  initSelection: function(element, callback) {  
+					  var id = item.serverId;
+					  if (id !== "") {
+						  $.ajax(context + '/configure/server/find/id', {
+							  data : { id : id },
+							  dataType : "json"
+						  }).done(function(data) {
+							  callback(data.rows);
+						  });
+					  }  
+			      }, 
+				  escapeMarkup: function (markup) { return markup; }, 
+				  templateResult: formatRepo, 
+				  templateSelection: formatRepoSelection
+			});
+		} else {
+			$('#dlgOption #server').select2({
+				placeholder: "选择服务器",
+				allowClear: true, 
+				ajax: {
+				    url: context + '/configure/server/find/simple',
+				    dataType: 'json',
+				    delay: 300,
+				    data: function (params) {
+				      return {
+				        param: params.term,
+				        offset: (params.page || 0) * 10,
+				        limit: 10
+				      };
+				    },
+				    processResults: function (data, params) {
+				      params.page = params.page || 1;
+				 
+				      return {
+				        results: data.rows,
+				        pagination: {
+				          more: (params.page * 10) < data.total
+				        }
+				      };
+				    },
+				    cache: true
+				  }, 
+				  escapeMarkup: function (markup) { return markup; }, 
+				  templateResult: formatRepo, 
+				  templateSelection: formatRepoSelection
+			});
+		}
+	}
+	
+	var formatRepo = function(repo) {
+	      if (repo.loading) return repo.text;
+
+	      repo.text = repo.name;
+	      return "<span id='"+repo.id+"' name='"+repo.name+"' address='"+repo.address+"'>" + repo.name + " - " + repo.address + "</span>";
+	}
+
+    var formatRepoSelection = function(repo) {
+    	if(repo.name) 
+    		return repo.name;
+    	
+    	return repo.text;
+    }
+    
+    var initInputMask = function() {
+    	$('#dlgOption #port').inputmask({ mask: '9', repeat: 5, greedy: false });
+    	$('#dlgOption #jmxPort').inputmask({ mask: '9', repeat: 5, greedy: false });
+    	$('#dlgOption #weight').inputmask({ mask: '9', repeat: 3, greedy: false });
+    }
 	
 	return {
 		init: function() {
 			initTagsInput();
 			initSelect2();
+			initInputMask();
 			initButtonEvent();
 			initDialog();
 			initTable();
+		},
+	
+		typeFormatter: function(value, row) {
+			switch(value) {
+				case 1: 
+					return '均衡器';
+				case 2: 
+					return '调度器';
+				case 3: 
+					return '服务节点';
+				default: 
+					return value;
+			}
 		}
 	}
 }();
 
-Configure.Server.init();
+Configure.Node.init();

@@ -15,8 +15,8 @@
  */
 package org.machairodus.manager.component;
 
-import org.machairodus.manager.component.impl.ConfigureServerComponentImpl;
-import org.machairodus.mappers.domain.ServerConfig;
+import org.machairodus.manager.component.impl.ConfigureNodeComponentImpl;
+import org.machairodus.mappers.domain.NodeConfig;
 import org.nanoframework.core.component.stereotype.Component;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
 import org.nanoframework.core.component.stereotype.bind.RequestParam;
@@ -24,31 +24,25 @@ import org.nanoframework.core.component.stereotype.bind.RequestParam;
 import com.google.inject.ImplementedBy;
 
 @Component
-@ImplementedBy(ConfigureServerComponentImpl.class)
-@RequestMapping("/configure/server")
-public interface ConfigureServerComponent {
+@ImplementedBy(ConfigureNodeComponentImpl.class)
+@RequestMapping("/configure/node")
+public interface ConfigureNodeComponent {
 	@RequestMapping("/find")
-	Object find(@RequestParam(name = "name[]", required = false) String[] name,
-			@RequestParam(name = "address[]", required = false) String[] address, 
+	Object find(@RequestParam(name = "server[]", required = false) Long[] server,
+			@RequestParam(name = "node[]", required = false) String[] node,
+			@RequestParam(name = "type[]", required = false) Integer[] type, 
 			@RequestParam(name = "init", required = false) Boolean init, 
 			@RequestParam(name = "sort", required = false) String sort, 
 			@RequestParam(name = "order", required = false) String order, 
 			@RequestParam(name = "offset") Integer offset, 
 			@RequestParam(name = "limit") Integer limit);
 	
-	@RequestMapping("/find/id")
-	Object findById(@RequestParam(name = "id", required = false) Long id);
-	
 	@RequestMapping("/add")
-	Object add(@RequestParam(name = "serverConfig") ServerConfig serverConfig);
+	Object add(@RequestParam(name = "nodeConfig") NodeConfig nodeConfig);
 	
 	@RequestMapping("/update")
-	Object update(@RequestParam(name = "serverConfig") ServerConfig serverConfig);
+	Object update(@RequestParam(name = "nodeConfig") NodeConfig nodeConfig);
 	
 	@RequestMapping("/delete")
 	Object delete(@RequestParam(name = "id") Long id);
-	
-	@RequestMapping("/find/simple")
-	Object findSimple(@RequestParam(name = "param", required = false) String param, @RequestParam(name = "offset") Integer offset, 
-			@RequestParam(name = "limit") Integer limit);
 }

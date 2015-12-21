@@ -42,7 +42,8 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 			<script src="${pageContext.request.contextPath}/media/js/api/bootstrap-table.js"></script>
 			<%-- <script src="${pageContext.request.contextPath}/media/js/api/bootstrap-table-zh-CN.js"></script> --%>
 			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
-			<script src="${pageContext.request.contextPath}/media/js/api/select2.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.inputmask.bundle.min.js"></script>
 			<script src="${pageContext.request.contextPath}/media/js/configure.node.js"></script>
 			<%
 			break;
