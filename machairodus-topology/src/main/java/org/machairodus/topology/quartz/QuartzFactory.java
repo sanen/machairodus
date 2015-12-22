@@ -544,6 +544,7 @@ public class QuartzFactory {
 							if(!StringUtils.isEmpty(cron))
 								try { config.setCron(new CronExpression(cron)); } catch(ParseException e) { throw new QuartzException(e.getMessage(), e); }
 						
+							config.setLazy(quartz.lazy());
 							config.setDaemon(quartz.daemon());
 							
 							/** -------------------             set Machairodus private proerty   START       ------------- **/

@@ -56,6 +56,16 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	@Override
 	public void run() {
 		try {
+			try {
+				if(config.getLazy()) {
+					long delay = delay();
+					LOG.warn("启动延时: " + delay + "ms");
+					thisWait(delay);
+				}
+			} catch(Throwable e) {
+				LOG.error("Lazy error: " + e.getMessage());
+			}
+			
 			closed = false;
 			while(!close && !config.getService().isShutdown()) {
 				if(config.getBeforeAfterOnly()) {
@@ -156,19 +166,14 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 			throw new QuartzException("ThreadPoolExecutor不能为空");
 		
 		if(!close && !config.getService().isShutdown()) {
-			long _interval = config.getInterval();
-			if(config.getCron() != null) {
-				long now;
-				_interval = config.getCron().getNextValidTimeAfter(new Date(now = System.currentTimeMillis())).getTime() - now;
-			}
-			
+			long interval = delay();
 			if(config.getRunNumberOfTimes() == 0) {
-				thisWait(_interval);			
+				thisWait(interval);			
 				
 			} else {
 				nowTimes ++;
 				if(nowTimes < config.getRunNumberOfTimes()) {
-					thisWait(_interval);
+					thisWait(interval);
 					
 				} else {
 					close = true;
@@ -176,6 +181,16 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 			}
 		}
 		
+	}
+	
+	private long delay() {
+		long interval = config.getInterval();
+		if(config.getCron() != null) {
+			long now;
+			interval = config.getCron().getNextValidTimeAfter(new Date(now = System.currentTimeMillis())).getTime() - now;
+		}
+		
+		return interval;
 	}
 	
 	/**

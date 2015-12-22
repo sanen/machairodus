@@ -35,7 +35,7 @@ public class QuartzConfig extends BaseEntity {
 	private Integer total = 0;
 	private CronExpression cron;
 	private Boolean daemon = false;
-//	private QuartzType type = QuartzType.OTHER;
+	private Boolean lazy = false;
 	private String queueName = "";
 	private Class<? extends BaseQuartz> workerClass;
 	private Long timeout = 0L;
@@ -127,15 +127,15 @@ public class QuartzConfig extends BaseEntity {
 	public void setDaemon(Boolean daemon) {
 		this.daemon = daemon;
 	}
+	
+	public Boolean getLazy() {
+		return lazy;
+	}
 
-//	public QuartzType getType() {
-//		return type;
-//	}
-//
-//	public void setType(QuartzType type) {
-//		this.type = type;
-//	}
-//
+	public void setLazy(Boolean lazy) {
+		this.lazy = lazy;
+	}
+
 	public String getQueueName() {
 		return queueName;
 	}

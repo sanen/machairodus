@@ -95,6 +95,12 @@ public @interface Quartz {
 	boolean daemon() default false;
 	
 	/**
+	 * 启动时进行延迟
+	 * @return
+	 */
+	boolean lazy() default false;
+	
+	/**
 	 * 针对剑齿虎扩展包的扩展实现, 只在数据获取线程中有效
 	 * @return
 	 */

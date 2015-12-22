@@ -25,7 +25,7 @@ import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel")
+@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel", cron = "0 0/1 * * * ?", lazy = true)
 public class TestDataLoaderQuartz extends BaseQuartz {
 	private List<Test> data;
 	
