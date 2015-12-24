@@ -42,7 +42,7 @@ import org.machairodus.mappers.mapper.manager.UserMapper;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.core.globals.Globals;
-import org.nanoframework.ext.shiro.util.ByteSource;
+import org.nanoframework.extension.shiro.util.ByteSource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

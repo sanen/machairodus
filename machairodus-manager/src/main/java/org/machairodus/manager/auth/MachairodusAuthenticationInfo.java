@@ -17,8 +17,8 @@ package org.machairodus.manager.auth;
 
 import org.apache.shiro.subject.PrincipalCollection;
 import org.machairodus.mappers.domain.User;
-import org.nanoframework.ext.shiro.authc.SimpleAuthenticationInfo;
-import org.nanoframework.ext.shiro.util.ByteSource;
+import org.nanoframework.extension.shiro.authc.SimpleAuthenticationInfo;
+import org.nanoframework.extension.shiro.util.ByteSource;
 
 public class MachairodusAuthenticationInfo extends SimpleAuthenticationInfo {
 	private static final long serialVersionUID = -205944346354257424L;
