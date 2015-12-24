@@ -25,7 +25,7 @@ import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel", cron = "0 0/1 * * * ?", lazy = true)
+@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel")
 public class TestDataLoaderQuartz extends BaseQuartz {
 	private List<Test> data;
 	
@@ -37,7 +37,7 @@ public class TestDataLoaderQuartz extends BaseQuartz {
 	public void before() throws QuartzException {
 		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName()).size() < 100) {
 			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
-			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+//			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		} else {
 			thisWait(1000);
 		}

@@ -66,7 +66,7 @@
 	<select id="findSimple" resultType="org.machairodus.mappers.domain.ServerConfig" parameterType="java.util.Map">
 		select t1.id, t1.name, t1.address from t_scd_server_config t1 
 		where t1.deleted = 0
-		<if test="param != null">
+		<if test="param != null and param != ''">
 			and (t1.name like '%${param}%' or t1.address like '%${param}%')
 		</if>
 		order by t1.name asc
@@ -76,7 +76,7 @@
 	<select id="findSimpleTotal" resultType="java.lang.Long" parameterType="java.util.Map">
 		select count(1) from t_scd_server_config t1 
 		where t1.deleted = 0
-		<if test="param != null">
+		<if test="param != null and param != ''">
 			and (t1.name like '%${param}%' or t1.address like '%${param}%')
 		</if>
 	</select>

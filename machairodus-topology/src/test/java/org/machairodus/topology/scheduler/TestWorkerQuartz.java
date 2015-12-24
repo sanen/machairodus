@@ -43,10 +43,10 @@ public class TestWorkerQuartz extends BaseQuartz {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
 				thisWait(random.nextInt(300));
-				Statistic.incrementAndGet(Test.class.getSimpleName());
+				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName());
 			}
 			
-			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+//			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 

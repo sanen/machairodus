@@ -187,4 +187,21 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 		}
 	}
 
+	@Override
+	public Object findSimple(String param, Integer offset, Integer limit) {
+		try {
+			List<NodeConfig> serverConfigs = configureNodeMapper.findSimple(param, offset, limit);
+			long total = configureNodeMapper.findSimpleTotal(param);
+			
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", serverConfigs);
+			map.put("total", total);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureNode异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureNode异常");
+			return map;
+		}
+	}
 }

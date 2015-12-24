@@ -15,39 +15,39 @@
  */
 package org.machairodus.manager.auth;
 
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 import org.machairodus.mappers.domain.User;
+import org.nanoframework.ext.shiro.authc.SimpleAuthenticationInfo;
+import org.nanoframework.ext.shiro.util.ByteSource;
 
 public class MachairodusAuthenticationInfo extends SimpleAuthenticationInfo {
-	private static final long serialVersionUID = -393433691869611317L;
-
-	private User user;
+	private static final long serialVersionUID = -205944346354257424L;
 	
+	private User user;
+
 	public MachairodusAuthenticationInfo() {
-		
-    }
 
-    public MachairodusAuthenticationInfo(Object principal, Object credentials, String realmName, User user) {
-        super(principal, credentials, realmName);
-        this.user = user;
-    }
+	}
 
-    public MachairodusAuthenticationInfo(Object principal, Object hashedCredentials, ByteSource credentialsSalt, String realmName, User user) {
-        super(principal, hashedCredentials, credentialsSalt, realmName);
-        this.user = user;
-    }
+	public MachairodusAuthenticationInfo(Object principal, Object credentials, String realmName, User user) {
+		super(principal, credentials, realmName);
+		this.user = user;
+	}
 
-    public MachairodusAuthenticationInfo(PrincipalCollection principals, Object credentials, User user) {
-        super(principals, credentials);
-        this.user = user;
-    }
+	public MachairodusAuthenticationInfo(Object principal, Object hashedCredentials, ByteSource credentialsSalt, String realmName, User user) {
+		super(principal, hashedCredentials, credentialsSalt, realmName);
+		this.user = user;
+	}
 
-    public MachairodusAuthenticationInfo(PrincipalCollection principals, Object hashedCredentials, ByteSource credentialsSalt, User user) {
-    	super(principals, hashedCredentials, credentialsSalt);
-    	this.user = user;
-    }
+	public MachairodusAuthenticationInfo(PrincipalCollection principals, Object credentials, User user) {
+		super(principals, credentials);
+		this.user = user;
+	}
+
+	public MachairodusAuthenticationInfo(PrincipalCollection principals, Object hashedCredentials, ByteSource credentialsSalt, User user) {
+		super(principals, hashedCredentials, credentialsSalt);
+		this.user = user;
+	}
 
 	public User getUser() {
 		return user;
@@ -56,5 +56,5 @@ public class MachairodusAuthenticationInfo extends SimpleAuthenticationInfo {
 	public void setUser(User user) {
 		this.user = user;
 	}
-    
+
 }

@@ -26,6 +26,7 @@ public enum Definition {
 	SCHEDULE_BALANCER("schedule.balancer"),
 	SCHEDULE_SCHEDULER("schedule.scheduler"), 
 	MONITOR_LOAD("monitor.load"),
+	MONITOR_TPS("monitor.tps"), 
 	STATISTICS_SCHEDULER("statistics.scheduler");
 	
 	private String value;
@@ -59,6 +60,8 @@ public enum Definition {
 				return SCHEDULE_SCHEDULER;
 			case "monitor.load": 
 				return MONITOR_LOAD;
+			case "monitor.tps": 
+				return MONITOR_TPS;
 			case "statistics.scheduler": 
 				return STATISTICS_SCHEDULER;
 			default: 

@@ -26,6 +26,7 @@ public class NodeConfig extends BaseEntity {
 	private Long id;
 	private Long serverId;
 	private String serverName;
+	private String serverAddress;
 	private String name;
 	private Integer port;
 	private Integer jmxPort;
@@ -44,6 +45,7 @@ public class NodeConfig extends BaseEntity {
 	public static final String ID = "id";
 	public static final String SERVER_ID = "serverId";
 	public static final String SERVER_NAME = "serverName";
+	public static final String SERVER_ADDRESS = "serverAddress";
 	public static final String NAME = "name";
 	public static final String PORT = "port";
 	public static final String JMX_PORT = "jmxPort";
@@ -97,6 +99,14 @@ public class NodeConfig extends BaseEntity {
 
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
+	}
+
+	public String getServerAddress() {
+		return serverAddress;
+	}
+
+	public void setServerAddress(String serverAddress) {
+		this.serverAddress = serverAddress;
 	}
 
 	public String getName() {

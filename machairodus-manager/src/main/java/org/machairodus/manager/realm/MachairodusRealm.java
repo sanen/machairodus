@@ -30,7 +30,6 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.config.ConfigurationException;
 import org.apache.shiro.realm.jdbc.JdbcRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.util.CollectionUtils;
 import org.machairodus.manager.auth.MachairodusAuthenticationInfo;
 import org.machairodus.manager.auth.MachairodusAuthorizationInfo;
@@ -43,6 +42,7 @@ import org.machairodus.mappers.mapper.manager.UserMapper;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.core.globals.Globals;
+import org.nanoframework.ext.shiro.util.ByteSource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

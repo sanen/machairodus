@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzFactory;
+import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
@@ -119,6 +120,10 @@ public class Executor {
 					
 				case QUEUE: 
 					queue(out);
+					break;
+					
+				case TPS: 
+					tps(out);
 					break;
 					
 				case QUARTZ:
@@ -283,6 +288,12 @@ public class Executor {
 		}
 		
 		map.put("Queue", sizes);
+		out.write(JSON.toJSONString(map));
+	}
+	
+	private static final void tps(Writer out) throws IOException {
+		Map<String, Object> map = ResultMap.create(200, "TPS列表", "SUCCESS")._getBeanToMap();
+		map.put("items", Statistic.getInstance().getPointer());
 		out.write(JSON.toJSONString(map));
 	}
 	

@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.machairodus.manager.component.impl.PagesComponentImpl;
 import org.nanoframework.core.component.stereotype.Component;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
+import org.nanoframework.core.component.stereotype.bind.RequestParam;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 
@@ -59,6 +60,12 @@ public interface PagesComponent {
 	@RequestMapping("/monitor/load")
 	View monitorLoad(HttpServletRequest request, HttpServletResponse response, Model model);
 	
+	@RequestMapping("/monitor/tps")
+	View monitorTps(HttpServletRequest request, HttpServletResponse response, Model model);
+
 	@RequestMapping("/statistics/scheduler")
 	View statisticsScheduler(HttpServletRequest request, HttpServletResponse response, Model model);
+	
+	@RequestMapping("/script/websocket")
+	View websocket(@RequestParam(name = "id") String id, HttpServletRequest request, HttpServletResponse response, Model model);
 }

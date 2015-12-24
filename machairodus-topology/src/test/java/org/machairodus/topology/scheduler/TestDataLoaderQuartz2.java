@@ -37,7 +37,7 @@ public class TestDataLoaderQuartz2 extends BaseQuartz {
 	public void before() throws QuartzException {
 		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName() + "2").size() < 100) {
 			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
-			LOG.debug("抓取数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+//			LOG.debug("抓取数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		} else {
 			thisWait(1000);
 		}

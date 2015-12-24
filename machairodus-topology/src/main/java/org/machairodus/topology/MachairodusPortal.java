@@ -102,7 +102,8 @@ public class MachairodusPortal {
 				LOG.error("加载任务异常: " + e.getMessage());
 			}
 			
-			Statistic.setMaxPointer(Integer.parseInt(properties.getProperty(QuartzFactory.MAX_POINTER, "1200")));
+//			Statistic.setMaxPointer(Integer.parseInt(properties.getProperty(QuartzFactory.MAX_POINTER, "1200")));
+			Statistic.getInstance().setMaxPointer(1);
 			isInit.set(true);
 		}
 	}

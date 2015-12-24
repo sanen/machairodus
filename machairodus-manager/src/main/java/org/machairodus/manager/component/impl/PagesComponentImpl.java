@@ -20,9 +20,15 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.machairodus.manager.component.PagesComponent;
 import org.machairodus.manager.service.LayoutService;
+import org.machairodus.manager.service.PermissionService;
+import org.machairodus.manager.websocket.MonitorHandler;
 import org.machairodus.mappers.domain.Func;
+import org.machairodus.mappers.domain.User;
+import org.nanoframework.extension.websocket.WebSocketFactory;
+import org.nanoframework.extension.websocket.WebSocketServer;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 import org.nanoframework.web.server.mvc.support.ForwardView;
@@ -33,6 +39,9 @@ public class PagesComponentImpl implements PagesComponent {
 
 	@Inject
 	private LayoutService layoutSerivce;
+	
+	@Inject
+	private PermissionService permissionService;
 
 	@Override
 	public View index(HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -105,10 +114,33 @@ public class PagesComponentImpl implements PagesComponent {
 	}
 	
 	@Override
+	public View monitorTps(HttpServletRequest request, HttpServletResponse response, Model model) {
+		build(request, model);
+		model.addAttribute("definition", "monitor.tps");
+		return new ForwardView("/index.jsp");
+	}
+	
+	@Override
 	public View statisticsScheduler(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
 		model.addAttribute("definition", "statistics.scheduler");
 		return new ForwardView("/index.jsp");
+	}
+	
+	@Override
+	public View websocket(String id, HttpServletRequest request, HttpServletResponse response, Model model) {
+		WebSocketServer server = WebSocketFactory.get(MonitorHandler.class.getSimpleName());
+		String schema = server.isSsl() ? "wss://" : "ws://";
+		String host = request.getServerName();
+		int port = server.getPort();
+		String context = server.getLocation();
+		
+		User user = permissionService.findPrincipal();
+		model.addAttribute("uid", user.getId());
+		model.addAttribute("sid", SecurityUtils.getSubject().getSession().getId());
+		model.addAttribute("url", schema + host + ":" + port + context);
+		
+		return new ForwardView("/pages/js/" + id + ".websocket.jsp", true);
 	}
 	
 	private void build(HttpServletRequest request, Model model) {

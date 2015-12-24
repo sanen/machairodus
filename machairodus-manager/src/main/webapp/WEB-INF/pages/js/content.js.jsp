@@ -67,6 +67,16 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 			<script src="${pageContext.request.contextPath}/media/js/monitor.load.js"></script>
 			<%
 			break;
+		case MONITOR_TPS: 
+			%>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/flotr2.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/jquery.queue.js"></script>
+			<script src="${pageContext.request.contextPath}/script/websocket?id=monitor.tps"></script>
+			<script src="${pageContext.request.contextPath}/media/js/monitor.tps.js"></script>
+			<%
+			break;
 		case STATISTICS_SCHEDULER: 
 			%>
 			<script src="${pageContext.request.contextPath}/media/js/statistics.scheduler.js"></script>

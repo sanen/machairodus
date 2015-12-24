@@ -21,7 +21,9 @@ public enum Command {
 	APPEND("append"), 
 	REMOVE("remove"),
 	QUEUE("queue"),
-	QUARTZ("quartz"), CMD("cmd");
+	TPS("tps"),
+	QUARTZ("quartz"), 
+	CMD("cmd");
 	
 	private String value;
 	private Command(String value) {
@@ -51,6 +53,8 @@ public enum Command {
 			return REMOVE;
 		else if("queue".equals(value))
 			return QUEUE;
+		else if("tps".equals(value))
+			return TPS;
 		else if("quartz".equals(value))
 			return QUARTZ;
 		else if("cmd".equals(value))
@@ -70,6 +74,7 @@ public enum Command {
 			"command=append&group=?&size=?&auto_start=?",
 			"command=remove&group=?&size=?",
 			"command=queue",
+			"command=tps",
 			"command=quartz",
 			"command=cmd"
 		};

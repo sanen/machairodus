@@ -15,47 +15,30 @@
  */
 package org.machairodus.topology.scheduler;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.defaults.Statistic;
-import org.machairodus.topology.quartz.defaults.StatisticQuartz;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
-@Quartz(name = "StatisticEchoQuartz", interval = 1000, parallel = 1)
+@Quartz(name = "StatisticEchoQuartz", beforeAfterOnly = true, interval = 1000, parallel = 0)
 public class StatisticEchoQuartz extends BaseQuartz {
-	private BlockingQueue<List<Map<String , Object>>> pointerQueue;
 	
 	@Override
 	public void before() throws QuartzException {
-		pointerQueue = Statistic.getPointerQueue();
+		
 	}
 
 	@Override
 	public void execute() throws QuartzException {
-		if(pointerQueue != null) {
-			while(pointerQueue.size() > 0) {
-				try {
-					List<Map<String , Object>> pointer = pointerQueue.poll(1000, TimeUnit.MILLISECONDS);
-					String jsonPointer = JSON.toJSONString(pointer);
-					LOG.info("Pointer: " + jsonPointer);
-					
-				} catch(InterruptedException e) {
-					LOG.error(StatisticQuartz.class.getName() + " : " + e.getMessage());
-				}
-			}
-		}
+		LOG.info(JSON.toJSONString(Statistic.getInstance().getPointer(), SerializerFeature.WriteDateUseDateFormat));
 	}
 
 	@Override
 	public void after() throws QuartzException {
-		pointerQueue = null;
+		
 	}
 
 	@Override

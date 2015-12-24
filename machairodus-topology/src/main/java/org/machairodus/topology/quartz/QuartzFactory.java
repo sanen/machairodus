@@ -415,7 +415,7 @@ public class QuartzFactory {
 		
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
-			stoppedQuartz.remove(quartz.getConfig().getId(), quartz);
+			quartz.setRemove(true);
 		}
 		
 		rebalance(quartz.getConfig().getGroup());
@@ -674,7 +674,9 @@ public class QuartzFactory {
 			for(Entry<String, BaseQuartz> entry : closed.entrySet()) {
 				String id = entry.getKey();
 				BaseQuartz quartz = entry.getValue();
-				stoppedQuartz.put(id, quartz);
+				if(!quartz.isRemove())
+					stoppedQuartz.put(id, quartz);
+				
 				stoppingQuartz.remove(id, quartz);
 			}
 		}

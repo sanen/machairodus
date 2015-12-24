@@ -1,47 +1,60 @@
 package org.machairodus.topology.quartz.defaults;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.log4j.Logger;
+import org.machairodus.topology.jmx.JmxManagementFactory;
 
-public class Statistic {
-
-	private static Logger logger = Logger.getLogger(Statistic.class);
-	private static ConcurrentMap<String , AtomicLong> statisticMap = new ConcurrentHashMap<String , AtomicLong>();
-	private static AtomicInteger timePoint = new AtomicInteger(0);
-	private static int MAX_POINTER = -1;
-	private static LinkedBlockingQueue<List<Map<String , Object>>> pointerQueue = new LinkedBlockingQueue<List<Map<String , Object>>>();
+public class Statistic implements StatisticMXBean {
+	private ConcurrentMap<String , AtomicLong> statisticMap = new ConcurrentHashMap<String , AtomicLong>();
+	private LinkedBlockingQueue<List<Pointer>> pointerQueue = new LinkedBlockingQueue<List<Pointer>>();
 	public static final String TOTAL = "total";
-	private static boolean isSetPointer = false;
+	private boolean isSetPointer = false;
+	
 	private static ReentrantLock LOCK = new ReentrantLock();
 	
-	public static synchronized void setMaxPointer(int maxPointer) {
+	private static Statistic DEFAULT;
+	
+	private Statistic() { }
+	
+	public static final Statistic getInstance() {
+		if(DEFAULT == null) {
+			ReentrantLock lock = LOCK;
+			try {
+				lock.lock();
+				if(DEFAULT == null) {
+					DEFAULT = new Statistic();
+					JmxManagementFactory.register(DEFAULT, STATISTIC_MXBEAN_NAME);
+				}
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		return DEFAULT;
+	}
+	
+	public synchronized void setMaxPointer(int maxPointer) {
 		if(!isSetPointer) {
-			MAX_POINTER = maxPointer;
 			pointerQueue.clear();
-			pointerQueue = new LinkedBlockingQueue<List<Map<String , Object>>>(maxPointer);
+			pointerQueue = new LinkedBlockingQueue<List<Pointer>>(maxPointer);
 			isSetPointer = true;
 		} else 
 			throw new IllegalStateException("Can not reset maxPointer again. You can restart application to reset maxPointer.");
 	}
 	
-	public static long incrementAndGet(String scene) {
+	public long incrementAndGet(String scene) {
 		final ReentrantLock lock = LOCK;
 		try {
 			lock.lock();
 			AtomicLong _val = statisticMap.get(scene);
-			AtomicLong total = statisticMap.get(TOTAL);
 			if(_val != null)
 				_val.incrementAndGet();
 			else {
@@ -49,21 +62,14 @@ public class Statistic {
 				_val.incrementAndGet();
 			}
 			
-			if(total == null)
-				total = new AtomicLong(0L);
-			
-			total.incrementAndGet();
-			
 			statisticMap.put(scene, _val);
-			statisticMap.put(TOTAL, total);
-			
 			return _val.get();
 		} finally {
 			lock.unlock();
 		}
 	}
 	
-	public static long get(String scene) {
+	public long get(String scene) {
 		AtomicLong _val = statisticMap.get(scene);
 		if(_val == null) {
 			_val = new AtomicLong(0L);
@@ -73,40 +79,37 @@ public class Statistic {
 		return _val.get();
 	}
 	
-	public static void setPointer(int time) {
+	public void setPointer(int time) {
 		final ReentrantLock lock = LOCK;
 		try {
 			lock.lock();
-			long xpoint = timePoint.incrementAndGet() * time;
-			List<Map<String , Object>> pointer = new ArrayList<Map<String , Object>>();
+			List<Pointer> pointers = new ArrayList<Pointer>();
 			for(Entry<String, AtomicLong> item : statisticMap.entrySet()) {
-				Map<String , Object> xy = new HashMap<String , Object>();
-				xy.put("scene", item.getKey());
-				xy.put("second", xpoint);
-				xy.put("tps", item.getValue().get());
-				pointer.add(xy);
+				pointers.add(Pointer.create(item.getKey(), System.currentTimeMillis(), item.getValue().get()));
 			}
 			
-			if(!pointerQueue.offer(pointer)) {
-				try { pointerQueue.poll(10 , TimeUnit.MILLISECONDS); } catch (Exception e) { logger.error(e.getMessage() , e); }
-				pointerQueue.offer(pointer);
-				
+			if(!pointerQueue.offer(pointers)) {
+				pointerQueue.poll();
+				pointerQueue.offer(pointers);
 			}
 			
 			for(AtomicLong value : statisticMap.values()) {
 				value.set(0L);
 			}
 			
-			if(MAX_POINTER > -1 && timePoint.get() >= MAX_POINTER)
-				timePoint.set(0);
-			
+			statisticMap.clear();
 		} finally {
 			lock.unlock();
 		}
 	}
 	
-	public static LinkedBlockingQueue<List<Map<String , Object>>> getPointerQueue() {
-		return pointerQueue;
+	@Override
+	public List<Pointer> getPointer() {
+		Iterator<List<Pointer>> iter = pointerQueue.iterator();
+		if(iter.hasNext())
+			return iter.next();
+		
+		return null;
 	}
 	
 }

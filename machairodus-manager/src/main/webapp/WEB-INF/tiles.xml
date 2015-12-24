@@ -55,6 +55,10 @@
 		<put-attribute name="content" value="/WEB-INF/pages/monitor.load.jsp" />
 	</definition>
 	
+	<definition name="monitor.tps" extends="layout">
+		<put-attribute name="content" value="/WEB-INF/pages/monitor.tps.jsp" />
+	</definition>
+	
 	<definition name="statistics.scheduler" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/statistics.scheduler.jsp" />
 	</definition>

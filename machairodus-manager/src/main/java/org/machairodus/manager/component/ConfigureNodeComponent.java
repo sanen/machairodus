@@ -45,4 +45,8 @@ public interface ConfigureNodeComponent {
 	
 	@RequestMapping("/delete")
 	Object delete(@RequestParam(name = "id") Long id);
+	
+	@RequestMapping("/find/simple")
+	Object findSimple(@RequestParam(name = "param", required = false) String param, @RequestParam(name = "offset") Integer offset, 
+			@RequestParam(name = "limit") Integer limit);
 }

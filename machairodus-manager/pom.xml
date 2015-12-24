@@ -68,6 +68,19 @@
 			<artifactId>nano-server</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-ext-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-ext-concurrent</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.nanoframework</groupId>
+			<artifactId>nano-jmx-client</artifactId>
+		</dependency>
+			
+		<dependency>
 			<groupId>org.machairodus</groupId>
 			<artifactId>machairodus-commons</artifactId>
 		</dependency>
