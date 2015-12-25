@@ -18,7 +18,8 @@ package org.machairodus.topology.domain;
 import org.machairodus.topology.entity.BaseEntity;
 
 public class Test extends BaseEntity {
-
+	private static final long serialVersionUID = 7325047933690548752L;
+	
 	private Long id;
 	private String name;
 

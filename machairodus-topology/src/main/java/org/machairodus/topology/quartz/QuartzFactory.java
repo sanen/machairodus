@@ -65,7 +65,6 @@ public class QuartzFactory {
 	
 	public static final String BASE_PACKAGE = "context.quartz-scan.base-package";
 	public static final String AUTO_RUN = "context.quartz.run.auto";
-	public static final String MAX_POINTER = "context.statistic.max.pointer";
 	public static final String INCLUDES = "context.quartz.group.includes";
 	public static final String EXCLUSIONS = "context.quartz.group.exclusions";
 	

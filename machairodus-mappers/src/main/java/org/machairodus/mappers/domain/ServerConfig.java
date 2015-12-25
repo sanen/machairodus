@@ -34,7 +34,6 @@ public class ServerConfig extends BaseEntity {
 	private Timestamp modifyTime;
 	private Long modifyUserId;
 	private String modifyUserName;
-	private Integer deleted;
 	
 	public static final String ID = "id";
 	public static final String NAME = "name";
@@ -47,7 +46,6 @@ public class ServerConfig extends BaseEntity {
 	public static final String MODIFY_TIME = "modifyTime";
 	public static final String MODIFY_USER_ID = "modifyUserId";
 	public static final String MODIFY_USER_NAME = "modifyUserName";
-	public static final String DELETED = "deleted";
 	
 	public boolean validate() {
 		if(StringUtils.isBlank(name))
@@ -151,14 +149,6 @@ public class ServerConfig extends BaseEntity {
 
 	public void setModifyUserName(String modifyUserName) {
 		this.modifyUserName = modifyUserName;
-	}
-
-	public Integer getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(Integer deleted) {
-		this.deleted = deleted;
 	}
 
 }

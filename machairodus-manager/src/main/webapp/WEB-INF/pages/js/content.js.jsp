@@ -49,6 +49,12 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 			break;
 		case CONFIGURE_SERVICE: 
 			%>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.tagsinput.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/bootstrap-table.js"></script>
+			<%-- <script src="${pageContext.request.contextPath}/media/js/api/bootstrap-table-zh-CN.js"></script> --%>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
 			<script src="${pageContext.request.contextPath}/media/js/configure.service.js"></script>
 			<%
 			break;

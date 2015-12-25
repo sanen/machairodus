@@ -65,6 +65,10 @@
 	<logger name="org.apache.shiro.web.servlet">
 		<level value="info" />
 	</logger>
+	
+	<logger name="io.netty.handler.codec.http.websocketx">
+		<level value="info" />
+	</logger>
 
 	<root>
 		<priority value="DEBUG" />

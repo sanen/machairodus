@@ -22,91 +22,110 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
-import org.machairodus.manager.component.ConfigureNodeComponent;
+import org.machairodus.manager.component.ConfigureServiceComponent;
 import org.machairodus.manager.service.PermissionService;
-import org.machairodus.mappers.domain.NodeConfig;
+import org.machairodus.mappers.domain.SchedulerConfig;
 import org.machairodus.mappers.domain.User;
-import org.machairodus.mappers.mapper.manager.ConfigureNodeMapper;
+import org.machairodus.mappers.mapper.manager.ConfigureServiceMapper;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.commons.util.StringUtils;
 import org.nanoframework.orm.mybatis.MultiTransactional;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
-public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
-
-	private Logger LOG = LoggerFactory.getLogger(ConfigureNodeComponentImpl.class);
+public class ConfigureServiceComponentImpl implements ConfigureServiceComponent {
+private Logger LOG = LoggerFactory.getLogger(ConfigureServerComponentImpl.class);
 	
 	@Inject
-	private ConfigureNodeMapper configureNodeMapper;
+	private ConfigureServiceMapper configureServiceMapper;
 	
 	@Inject
 	private PermissionService permissionService;
 	
 	@Override
-	public Object find(Long[] server, String[] node, Integer[] type, Boolean init, String sort, String order, Integer offset, Integer limit) {
+	public Object find(String name[], String uri[], Boolean init, String sort, String order, Integer offset, Integer limit) {
 		try {
 			if(init != null && init)
 				return OK;
 			
-			List<NodeConfig> nodeConfigs = configureNodeMapper.find(server, node, type, sort, order, offset, limit);
-			long total = configureNodeMapper.findTotal(server, node, type);
+			List<SchedulerConfig> schedulerConfigs = configureServiceMapper.find(name, uri, sort, order, offset, limit);
+			long total = configureServiceMapper.findTotal(name, uri);
 			
 			Map<String, Object> map = OK._getBeanToMap();
-			map.put("rows", nodeConfigs);
+			map.put("rows", schedulerConfigs);
 			map.put("total", total);
 			return map;
 		} catch(Exception e) {
-			LOG.error("查询ConfigureNode异常: " + e.getMessage());
+			LOG.error("查询ConfigureService异常: " + e.getMessage());
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "查询ConfigureNode异常");
+			map.put("message", "查询ConfigureService异常");
+			return map;
+		}
+	}
+	
+	@Override
+	public Object findById(Long id) {
+		try {
+			if(id == null)
+				return OK;
+			
+			SchedulerConfig schedulerConfigs = configureServiceMapper.findById(id);
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", Lists.newArrayList(schedulerConfigs));
+			map.put("total", 1);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureService异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureService异常");
 			return map;
 		}
 	}
 
 	@MultiTransactional(envId = "machairodus")
 	@Override
-	public Object add(NodeConfig nodeConfig) {
-		if(nodeConfig.getId() != null) {
+	public Object add(SchedulerConfig schedulerConfig) {
+		if(schedulerConfig.getId() != null) {
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "无效的ConfigureNode新增对象");
+			map.put("message", "无效的ServerConfig新增对象");
 			return map;
 		}
 		
-		if(!nodeConfig.validate()) {
+		if(!schedulerConfig.validate()) {
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "新增对象数据内容无效，[服务器，名称，类型，端口]不能为空");
+			map.put("message", "新增对象数据内容无效，[名称，地址，用户名，密码]不能为空");
 			return map;
 		}
 		
 		Timestamp time = new Timestamp(System.currentTimeMillis());
-		nodeConfig.setCreateTime(time);
-		nodeConfig.setModifyTime(time);
+		schedulerConfig.setCreateTime(time);
+		schedulerConfig.setModifyTime(time);
 		
 		try {
 			User user = permissionService.findPrincipal();
 			if(user != null) {
-				nodeConfig.setCreateUserId(user.getId());
-				nodeConfig.setCreateUserName(user.getUsername());
-				nodeConfig.setModifyUserId(user.getId());
-				nodeConfig.setModifyUserName(user.getUsername());
+				schedulerConfig.setCreateUserId(user.getId());
+				schedulerConfig.setCreateUserName(user.getUsername());
+				schedulerConfig.setModifyUserId(user.getId());
+				schedulerConfig.setModifyUserName(user.getUsername());
 			} else {
 				Map<String, Object> map = FAIL._getBeanToMap();
 				map.put("message", "无效的登陆用户信息");
 				return map;
 			}
 			
-			if(configureNodeMapper.insert(nodeConfig) > 0) {
-				nodeConfig = configureNodeMapper.findById(nodeConfig.getId());
+			if(configureServiceMapper.insert(schedulerConfig) > 0) {
+				schedulerConfig = configureServiceMapper.findById(schedulerConfig.getId());
 				Map<String, Object> map = OK._getBeanToMap();
-				map.put("item", nodeConfig);
+				map.put("item", schedulerConfig);
 				return map;
 			}
 		} catch(Exception e) {
-			LOG.error("新增ConfigureNode对象异常: " + e.getMessage());
+			LOG.error("新增SchedulerConfig对象异常: " + e.getMessage());
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "新增ConfigureNode对象异常");
+			map.put("message", "新增SchedulerConfig对象异常");
 			return map;
 		}
 		
@@ -115,21 +134,21 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 
 	@MultiTransactional(envId = "machairodus")
 	@Override
-	public Object update(NodeConfig nodeConfig) {
-		if(nodeConfig.getId() == null) {
+	public Object update(SchedulerConfig schedulerConfig) {
+		if(schedulerConfig.getId() == null) {
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "无效的ConfigureNode修改对象");
+			map.put("message", "无效的SchedulerConfig修改对象");
 			return map;
 		}
 		
-		if(!nodeConfig.validate()) {
+		if(!schedulerConfig.validate()) {
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "修改对象数据内容无效，[服务器，名称，类型，端口]不能为空");
+			map.put("message", "修改对象数据内容无效，[名称，服务URI，类型]不能为空");
 			return map;
 		}
 		
 		try {
-			if(configureNodeMapper.findExistsById(nodeConfig.getId()) == 0) {
+			if(configureServiceMapper.findExistsById(schedulerConfig.getId()) == 0) {
 				Map<String, Object> map = FAIL._getBeanToMap();
 				map.put("message", "当前更新的对象已不存在");
 				return map;
@@ -137,25 +156,25 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 			
 			User user = permissionService.findPrincipal();
 			if(user != null) {
-				nodeConfig.setModifyUserId(user.getId());
-				nodeConfig.setModifyUserName(user.getUsername());
+				schedulerConfig.setModifyUserId(user.getId());
+				schedulerConfig.setModifyUserName(user.getUsername());
 			} else {
 				Map<String, Object> map = FAIL._getBeanToMap();
 				map.put("message", "无效的登陆用户信息");
 				return map;
 			}
 			
-			nodeConfig.setModifyTime(new Timestamp(System.currentTimeMillis()));
-			if(configureNodeMapper.update(nodeConfig) > 0) {
-				nodeConfig = configureNodeMapper.findById(nodeConfig.getId());
+			schedulerConfig.setModifyTime(new Timestamp(System.currentTimeMillis()));
+			if(configureServiceMapper.update(schedulerConfig) > 0) {
+				schedulerConfig = configureServiceMapper.findById(schedulerConfig.getId());
 				Map<String, Object> map = OK._getBeanToMap();
-				map.put("item", nodeConfig);
+				map.put("item", schedulerConfig);
 				return map;
 			}
 		} catch(Exception e) {
-			LOG.error("更新ConfigureNode对象异常: " + e.getMessage());
+			LOG.error("更新SchedulerConfig对象异常: " + e.getMessage());
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "更新ConfigureNode对象异常");
+			map.put("message", "更新SchedulerConfig对象异常");
 			return map;
 		}
 		
@@ -172,7 +191,7 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 				return map;
 			}
 			
-			if(configureNodeMapper.delete(id, user.getId()) > 0) {
+			if(configureServiceMapper.delete(id, user.getId()) > 0) {
 				return OK;
 			} else {
 				Map<String, Object> map = OK._getBeanToMap();
@@ -180,31 +199,13 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 				return map;
 			}
 		} catch(Exception e) {
-			LOG.error("删除NodeConfig对象异常: " + e.getMessage());
+			LOG.error("删除SchedulerConfig对象异常: " + e.getMessage());
 			Map<String, Object> map = FAIL._getBeanToMap();
 			if(StringUtils.isNotBlank(e.getMessage()) && e.getMessage().contains("foreign key constrain")) {
 				map.put("message", "请确保不存在依赖后再进行删除操作");
 			} else
-				map.put("message", "删除ConfigureNode对象异常");
+				map.put("message", "删除SchedulerConfig对象异常");
 			
-			return map;
-		}
-	}
-
-	@Override
-	public Object findSimple(String param, Integer offset, Integer limit) {
-		try {
-			List<NodeConfig> serverConfigs = configureNodeMapper.findSimple(param, offset, limit);
-			long total = configureNodeMapper.findSimpleTotal(param);
-			
-			Map<String, Object> map = OK._getBeanToMap();
-			map.put("rows", serverConfigs);
-			map.put("total", total);
-			return map;
-		} catch(Exception e) {
-			LOG.error("查询ConfigureNode异常: " + e.getMessage());
-			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "查询ConfigureNode异常");
 			return map;
 		}
 	}

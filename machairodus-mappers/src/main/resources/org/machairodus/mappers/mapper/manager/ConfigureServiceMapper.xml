@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.machairodus.mappers.mapper.manager.ConfigureServiceMapper">
+	<select id="find" resultType="org.machairodus.mappers.domain.SchedulerConfig" parameterType="java.util.Map">
+		select t1.id, t1.name, t1.uri, t1.options, t1.type, t1.description, t1.create_time as createTime, 
+		t1.create_user_id as createUserId, t1.modify_time as modifyTime, t1.modify_user_id as modifyUserId, 
+		t2.username as createUserName, t3.username as modifyUserName 
+		from t_scd_scheduler_config t1 
+		left join t_scd_user t2 on t1.create_user_id = t2.id
+		left join t_scd_user t3 on t1.modify_user_id = t3.id
+		where 1 = 1
+		<if test="name != null"> and 
+			<foreach collection="name" item="item" open="(" close=")" separator=" or ">
+				name like #{item}
+			</foreach>
+		</if>
+		<if test="uri != null"> and 
+			<foreach collection="uri" item="item" open="(" close=")" separator=" or ">
+				uri like #{item}
+			</foreach>
+		</if>
+		<if test="sort != null"> order by ${sort} ${order}</if>
+		<if test="limit != null">limit <if test="offset != null">#{offset}, </if> #{limit}</if>
+	</select>
+	
+	<select id="findTotal" resultType="java.lang.Long" parameterType="java.util.Map">
+		select count(1) from t_scd_scheduler_config t1 where 1 = 1
+		<if test="name != null"> and 
+			<foreach collection="name" item="item" open="(" close=")" separator=" or ">
+				name like #{item}
+			</foreach>
+		</if>
+		<if test="uri != null"> and 
+			<foreach collection="uri" item="item" open="(" close=")" separator=" or ">
+				uri like #{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="findById" resultType="org.machairodus.mappers.domain.SchedulerConfig" parameterType="java.lang.Long">
+		select t1.id, t1.name, t1.uri, t1.options, t1.type, t1.description, t1.create_time as createTime, 
+		t1.create_user_id as createUserId, t1.modify_time as modifyTime, t1.modify_user_id as modifyUserId, 
+		t2.username as createUserName, t3.username as modifyUserName 
+		from t_scd_scheduler_config t1 
+		left join t_scd_user t2 on t1.create_user_id = t2.id
+		left join t_scd_user t3 on t1.modify_user_id = t3.id
+		where t1.id = #{id}
+	</select>
+	
+	<select id="findExistsById" resultType="java.lang.Long" parameterType="java.lang.Long">
+		select count(1) from t_scd_scheduler_config where id = #{id}
+	</select>
+	
+	<insert id="insert" parameterType="org.machairodus.mappers.domain.SchedulerConfig" useGeneratedKeys="true" keyProperty="id">
+		insert into t_scd_scheduler_config(name, uri, options, type, description, create_time, create_user_id, modify_time, modify_user_id)
+		values(#{name}, #{uri}, #{options}, #{type}, #{description}, #{createTime}, #{createUserId}, #{modifyTime}, #{modifyUserId})
+	</insert>
+	
+	<update id="update" parameterType="org.machairodus.mappers.domain.SchedulerConfig">
+		update t_scd_scheduler_config set name = #{name}, uri = #{uri}, options = #{options}, type = #{type}, description = #{description}, 
+		modify_user_id = #{modifyUserId}, modify_time = #{modifyTime} where id = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.util.Map">
+		delete from t_scd_scheduler_config where id = #{id}
+	</delete>
+	
+</mapper>

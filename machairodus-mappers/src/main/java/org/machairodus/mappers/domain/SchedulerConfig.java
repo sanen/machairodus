@@ -20,20 +20,15 @@ import java.sql.Timestamp;
 import org.nanoframework.commons.entity.BaseEntity;
 import org.nanoframework.commons.util.StringUtils;
 
-public class NodeConfig extends BaseEntity {
-	private static final long serialVersionUID = 2789087606159146020L;
+public class SchedulerConfig extends BaseEntity {
+	private static final long serialVersionUID = -4061526992615772489L;
 
 	private Long id;
-	private Long serverId;
-	private String serverName;
-	private String serverAddress;
 	private String name;
-	private Integer port;
-	private Integer jmxPort;
+	private String uri;
+	private String options;
 	private Integer type;
-	private Integer weight;
-	private Integer startup;
-	private Integer pid;
+	private String description;
 	private Timestamp createTime;
 	private Long createUserId;
 	private String createUserName;
@@ -42,16 +37,11 @@ public class NodeConfig extends BaseEntity {
 	private String modifyUserName;
 	
 	public static final String ID = "id";
-	public static final String SERVER_ID = "serverId";
-	public static final String SERVER_NAME = "serverName";
-	public static final String SERVER_ADDRESS = "serverAddress";
 	public static final String NAME = "name";
-	public static final String PORT = "port";
-	public static final String JMX_PORT = "jmxPort";
+	public static final String URI = "uri";
+	public static final String OPTIONS = "options";
 	public static final String TYPE = "type";
-	public static final String WEIGHT = "weight";
-	public static final String STARTUP = "startup";
-	public static final String PID = "pid";
+	public static final String DESCRIPTION = "description";
 	public static final String CREATE_TIME = "createTime";
 	public static final String CREATE_USER_ID = "createUserId";
 	public static final String CREATE_USER_NAME = "createUserName";
@@ -63,10 +53,7 @@ public class NodeConfig extends BaseEntity {
 		if(StringUtils.isBlank(name))
 			return false;
 		
-		if(serverId == null)
-			return false;
-		
-		if(port == null)
+		if(StringUtils.isBlank(uri))
 			return false;
 		
 		if(type == null)
@@ -83,30 +70,6 @@ public class NodeConfig extends BaseEntity {
 		this.id = id;
 	}
 
-	public Long getServerId() {
-		return serverId;
-	}
-
-	public void setServerId(Long serverId) {
-		this.serverId = serverId;
-	}
-
-	public String getServerName() {
-		return serverName;
-	}
-
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	public String getServerAddress() {
-		return serverAddress;
-	}
-
-	public void setServerAddress(String serverAddress) {
-		this.serverAddress = serverAddress;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -115,52 +78,36 @@ public class NodeConfig extends BaseEntity {
 		this.name = name;
 	}
 
-	public Integer getPort() {
-		return port;
+	public String getUri() {
+		return uri;
 	}
 
-	public void setPort(Integer port) {
-		this.port = port;
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 
-	public Integer getJmxPort() {
-		return jmxPort;
+	public String getOptions() {
+		return options;
 	}
 
-	public void setJmxPort(Integer jmxPort) {
-		this.jmxPort = jmxPort;
+	public void setOptions(String options) {
+		this.options = options;
 	}
 
 	public Integer getType() {
 		return type;
 	}
-	
+
 	public void setType(Integer type) {
 		this.type = type;
 	}
-	
-	public Integer getWeight() {
-		return weight;
+
+	public String getDescription() {
+		return description;
 	}
 
-	public void setWeight(Integer weight) {
-		this.weight = weight;
-	}
-
-	public Integer getStartup() {
-		return startup;
-	}
-
-	public void setStartup(Integer startup) {
-		this.startup = startup;
-	}
-
-	public Integer getPid() {
-		return pid;
-	}
-
-	public void setPid(Integer pid) {
-		this.pid = pid;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public Timestamp getCreateTime() {

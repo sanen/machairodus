@@ -6,8 +6,9 @@ Monitor.TPS = function() {
 	portlet;
 	
 	var times = {};
-	var diffTime = 0;
+	var diffTimes = {};
 	var queues = {};
+	var queueIds = {};
 	var interval;
 	var maxTime = 600000;
 	var defaultQueueSize = 650;
@@ -64,6 +65,12 @@ Monitor.TPS = function() {
 		$('#btnServ' + id).bind('click', function() {
 			$('#ptlServ' + id).remove();
 			Chat.sendMessage(id, server, 'remove');
+			if(queueIds['view_' + id]) {
+				$.each(queueIds['view_' + id], function(idx, queueId) { delete queues[queueId]; });
+				delete queueIds['view_' + id];
+				delete times['view_' + id];
+				delete diffTimes['view_' + id];
+			}
 		});
 	}
 	
@@ -170,9 +177,15 @@ Monitor.TPS = function() {
 			})
 		}
 		
+		if(!opts)
+			opts = {};
+		
+		if(!opts.diffTime)
+			opts.diffTime = 0;
+		
 		max += max * 0.3;
-		options = {
-		    xaxis : { min: now - diffTime, max: now, mode : 'time', timeMode: 'local', labelsAngle : 0 },
+		var options = {
+		    xaxis : { min: now - opts.diffTime, max: now, mode : 'time', timeMode: 'local', labelsAngle : 0 },
 		    selection : { mode : 'x' },
 		    HtmlText : false,
             resolution:2
@@ -191,34 +204,41 @@ Monitor.TPS = function() {
 			data.TPS = [];
 		
 		var diff = data.TIME - times[data.ID];
-		if(!isNaN(diff) && diffTime < maxTime) {
-			diffTime += diff;
-			if(diffTime > maxTime)
-				diffTime = maxTime;
+		if(!diffTimes[data.ID])
+			diffTimes[data.ID] = 0;
+		
+		if(!isNaN(diff) && diffTimes[data.ID] < maxTime) {
+			diffTimes[data.ID] += diff;
+			if(diffTimes[data.ID] > maxTime)
+				diffTimes[data.ID] = maxTime;
 		}
 		
 		times[data.ID] = data.TIME;
 
-		if(!options) 
-			options = {};
 		
+		var options = {};
+		options.diffTime = diffTimes[data.ID];
 		options.time = data.TIME;
 		
 		$.each(data.TPS, function(idx, pointer) {
-			if(!queues[pointer.scene]) 
-				queues[pointer.scene] = new Queue(defaultQueueSize);
+			if(!queues[data.ID + "_" + pointer.scene]) {
+				queues[data.ID + "_" + pointer.scene] = new Queue(defaultQueueSize);
+				if(!queueIds[data.ID])
+					queueIds[data.ID] = [];
+				
+				queueIds[data.ID].push(data.ID + "_" + pointer.scene);
+			}
 			
-			queues[pointer.scene].offer([pointer.time, pointer.tps]);
+			queues[data.ID + "_" + pointer.scene].offer([pointer.time, pointer.tps]);
 		});
 		
 		if($('#' + data.ID)[0].clientWidth != 0 && $('#' + data.ID)[0].clientHeight != 0) {
 			var _data = [];
 			$.each(data.TPS, function(idx, pointer) {
-				_data.push({ data: queues[pointer.scene].get(), label: pointer.scene + ' ( '+queues[pointer.scene].last()[1]+' )' });
+				_data.push({ data: queues[data.ID + "_" + pointer.scene].get(), label: pointer.scene + ' ( '+queues[data.ID + "_" + pointer.scene].last()[1]+' )' });
 			});
 			
 			drawGraph($('#' + data.ID)[0], options, _data);
-			options.yaxis = {};
 		}
 	}
 	
@@ -263,7 +283,7 @@ Monitor.TPS = function() {
 			initSelect2();
 			initSortable();
 			
-			setTimeout(function() { initMonitor(); }, 1000);
+			setTimeout(function() { initMonitor(); }, 1500);
 			var resize;
 			$(window).resize(function() { 
 				if (resize) clearTimeout(resize);

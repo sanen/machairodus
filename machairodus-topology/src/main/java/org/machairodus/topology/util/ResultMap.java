@@ -9,7 +9,8 @@ import org.machairodus.topology.entity.BaseEntity;
  *
  */
 public class ResultMap extends BaseEntity {
-
+	private static final long serialVersionUID = -4058911595479256410L;
+	
 	/** 描述 */
 	private String info;
 	/** 状态码 */
@@ -17,6 +18,10 @@ public class ResultMap extends BaseEntity {
 	/** 消息内容 */
 	private String message;
 	
+	public static final String INFO = "info";
+	public static final String STATUS = "status";
+	public static final String MESSAGE = "message";
+
 	private ResultMap(int status, String message, String info) {
 		this.status = status;
 		this.message = message;

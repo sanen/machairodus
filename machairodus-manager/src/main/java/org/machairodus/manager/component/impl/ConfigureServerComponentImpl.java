@@ -31,6 +31,7 @@ import org.machairodus.mappers.mapper.manager.ConfigureServerMapper;
 import org.nanoframework.commons.crypt.CryptUtil;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
+import org.nanoframework.commons.util.StringUtils;
 import org.nanoframework.orm.mybatis.MultiTransactional;
 
 import com.google.common.collect.Lists;
@@ -106,7 +107,6 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 		Timestamp time = new Timestamp(System.currentTimeMillis());
 		serverConfig.setCreateTime(time);
 		serverConfig.setModifyTime(time);
-		serverConfig.setDeleted(0);
 		
 		try {
 			User user = permissionService.findPrincipal();
@@ -211,7 +211,11 @@ public class ConfigureServerComponentImpl implements ConfigureServerComponent {
 		} catch(Exception e) {
 			LOG.error("删除ServerConfig对象异常: " + e.getMessage());
 			Map<String, Object> map = FAIL._getBeanToMap();
-			map.put("message", "删除ServerConfig对象异常");
+			if(StringUtils.isNotBlank(e.getMessage()) && e.getMessage().contains("foreign key constrain")) {
+				map.put("message", "请确保不存在依赖后再进行删除操作");
+			} else
+				map.put("message", "删除ServerConfig对象异常");
+			
 			return map;
 		}
 	}
