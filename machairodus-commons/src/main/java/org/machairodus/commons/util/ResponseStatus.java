@@ -1,4 +1,4 @@
-package org.machairodus.manager.util;
+package org.machairodus.commons.util;
 
 import org.nanoframework.core.status.ComponentStatus;
 import org.nanoframework.core.status.ResultMap;

@@ -1,81 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+<?xml version="1.0" encoding="UTF-8"?>  
+<configuration status="OFF">  
+  <appenders>  
+    <Console name="OUT" target="SYSTEM_OUT">  
+      <PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss,SSS} %l >>> %m %n"/>  
+    </Console> 
+    <RollingFile name="INFO" fileName="logs/info.log" filePattern="logs/info/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+    	<PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss,SSS} %l >>> %m %n"/> 
+    	<SizeBasedTriggeringPolicy size="100 MB" />
+    	<LevelRangeFilter minLevel="info" maxLevel="info" onMatch="ACCEPT" />
+    </RollingFile>
+    <RollingFile name="DEBUG" fileName="logs/debug.log" filePattern="logs/debug/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+    	<PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss,SSS} %l >>> %m %n"/> 
+    	<SizeBasedTriggeringPolicy size="100 MB" />
+    	<LevelRangeFilter minLevel="debug" maxLevel="debug" onMatch="ACCEPT" />
+    </RollingFile>
+    <RollingFile name="ERROR" fileName="logs/error.log" filePattern="logs/error/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+    	<PatternLayout pattern="[%-5p] %d{yyyy-MM-dd HH:mm:ss,SSS} %l >>> %m %n"/> 
+    	<SizeBasedTriggeringPolicy size="100 MB" />
+    	<LevelRangeFilter minLevel="error" maxLevel="error" onMatch="ACCEPT" />
+    </RollingFile>
+  </appenders>  
 
-	<appender name="OUT" class="org.apache.log4j.ConsoleAppender">
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%-d{yyyy-MM-dd HH:mm:ss}][%-5p] : %m%n" />
-		</layout>
-	</appender>
-
-	<!--<appender name="INFO" class="org.apache.log4j.DailyRollingFileAppender"> -->
-
-	<appender name="INFO" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="logs/info.log" />
-		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
-		<param name="Append" value="true" />
-		<param name ="BufferedIO" value="true" />
-		<param name ="BufferSize" value="8192" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%-d{yyyy-MM-dd HH:mm:ss}][%-5p]: %m%n" />
-		</layout>
-		<filter class="org.apache.log4j.varia.LevelRangeFilter">
-			<param name="levelMin" value="info" />
-			<param name="levelMax" value="info" />
-			<param name="AcceptOnMatch" value="true" />
-		</filter>
-	</appender>
-
-	<appender name="DEBUG" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="logs/debug.log" />
-		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
-		<param name="Append" value="true" />
-		<param name ="BufferedIO" value="true" />
-		<param name ="BufferSize" value="8192" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%-d{yyyy-MM-dd HH:mm:ss}][%-5p]: %m%n" />
-		</layout>
-		<filter class="org.apache.log4j.varia.LevelRangeFilter">
-			<param name="levelMin" value="debug" />
-			<param name="levelMax" value="debug" />
-			<param name="AcceptOnMatch" value="true" />
-		</filter>
-	</appender>
-
-	<appender name="ERROR" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="logs/error.log" />
-		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
-		<param name="Append" value="true" />
-		<param name ="BufferedIO" value="true" />
-		<param name ="BufferSize" value="8192" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%-d{yyyy-MM-dd HH:mm:ss}][%-5p]: %l%n%m%n" />
-		</layout>
-		<filter class="org.apache.log4j.varia.LevelRangeFilter">
-			<param name="levelMin" value="error" />
-			<param name="levelMax" value="error" />
-			<param name="AcceptOnMatch" value="true" />
-		</filter>
-	</appender>
-	
-	<logger name="org.eclipse.jetty">
-		<level value="info" />
-	</logger>
-	
-	<logger name="org.apache.shiro.web.servlet">
-		<level value="info" />
-	</logger>
-	
-	<logger name="io.netty.handler.codec.http.websocketx">
-		<level value="info" />
-	</logger>
-
-	<root>
-		<priority value="DEBUG" />
-		<appender-ref ref="OUT" />
-		<appender-ref ref="INFO" />
-		<appender-ref ref="ERROR" />
-		<appender-ref ref="DEBUG" />
-	</root>
-
-</log4j:configuration>
+  <loggers>  
+  	<logger name="org.eclipse.jetty" level="info" additivity="false">
+  		<appender-ref ref="INFO"/>
+  		<appender-ref ref="ERROR"/>
+  	</logger>
+  	
+  	<logger name="io.netty.handler.codec.http.websocketx" level="info" additivity="false">
+  		<appender-ref ref="INFO"/>
+  		<appender-ref ref="ERROR"/>
+  	</logger>
+  	
+    <root level="debug">  
+      	<appender-ref ref="OUT"/>
+        <appender-ref ref="INFO"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="ERROR"/>
+    </root>  
+  </loggers>  
+</configuration>  

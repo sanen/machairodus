@@ -3,6 +3,8 @@
 <link href="${pageContext.request.contextPath}/media/css/api/easyui.css" rel="stylesheet" type="text/css"/>
 <link href="${pageContext.request.contextPath}/media/css/api/jquery.tagsinput.min.css" type="text/css" rel="stylesheet">
 <link href="${pageContext.request.contextPath}/media/css/api/select2.min.css" type="text/css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/media/css/api/multi-select.css" type="text/css" rel="stylesheet">
+
 <style>
 .form-horizontal .control-label {
 	width: 70px;
@@ -124,4 +126,5 @@
 		<button id="btnOptionCancle" data-dismiss="modal" class="btn black" type="button">取消</button>
 	</div>
 </div>
+<div id="dlgAssign"></div>
 <!-- END PAGE CONTENT-->

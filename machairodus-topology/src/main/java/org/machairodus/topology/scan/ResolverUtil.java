@@ -211,15 +211,24 @@ public class ResolverUtil<T> {
    */
   public ResolverUtil<T> find(Test test, String packageName) {
     String path = getPackagePath(packageName);
+    if(log.isDebugEnabled())
+      log.debug("获取包路径: " + path);
 
     try {
       List<String> children = VFS.getInstance().list(path);
+      if(log.isDebugEnabled()) {
+        log.debug("获取包下所有的资源文件: ");
+      }
       for (String child : children) {
+    	if(log.isDebugEnabled()) {
+    	  log.debug("\t" + child);
+    	}
+    	
         if (child.endsWith(".class"))
           addIfMatching(test, child);
       }
     } catch (IOException ioe) {
-      log.error("Could not read package: " + packageName, ioe);
+	  log.error("Could not read package: " + packageName, ioe);
     }
 
     return this;

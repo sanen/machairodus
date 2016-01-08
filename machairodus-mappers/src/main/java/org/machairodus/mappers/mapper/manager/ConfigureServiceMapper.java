@@ -36,4 +36,7 @@ public interface ConfigureServiceMapper {
 	
 	long delete(@Param("id") Long id, @Param("modifyUserId") Long modifyUserId);
 	
+	long insertSchedulerInfo(@Param("schedulerId") Long schedulerId, @Param("nodeId") Long nodeId, @Param("createUserId") Long createUserId);
+	
+	long deleteSchedulerInfo(@Param("schedulerId") Long schedulerId, @Param("nodeId") Long nodeId);
 }

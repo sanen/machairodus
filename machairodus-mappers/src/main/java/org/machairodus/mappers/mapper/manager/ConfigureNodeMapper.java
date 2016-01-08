@@ -40,4 +40,8 @@ public interface ConfigureNodeMapper {
 	List<NodeConfig> findSimple(@Param("param") String param, @Param("offset") Integer offset, @Param("limit") Integer limit);
 	
 	long findSimpleTotal(@Param("param") String param);
+	
+	List<NodeConfig> findUnAssign(@Param("schedulerId") Long schedulerId);
+	
+	List<NodeConfig> findAssign(@Param("schedulerId") Long schedulerId);
 }

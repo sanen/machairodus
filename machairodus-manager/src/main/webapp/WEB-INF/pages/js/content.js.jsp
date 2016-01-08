@@ -55,6 +55,8 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
 			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
 			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.multi-select.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.quicksearch.js"></script>
 			<script src="${pageContext.request.contextPath}/media/js/configure.service.js"></script>
 			<%
 			break;

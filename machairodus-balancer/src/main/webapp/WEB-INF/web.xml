@@ -3,10 +3,6 @@
 	version="3.0">
 	<display-name>Machairodus Balancer</display-name>
 	
-	<listener>
-		<listener-class>org.nanoframework.web.server.listener.ContextLoaderListener</listener-class>
-	</listener>
-	
 	<filter>
 		<filter-name>httpRequestFilter</filter-name>
 		<filter-class>org.nanoframework.web.server.filter.HttpRequestFilter</filter-class>
@@ -25,8 +21,12 @@
 			<param-value>/context.properties</param-value>
 		</init-param>
 		<init-param>
-			<param-name>log4j</param-name>
+			<param-name>log4j2</param-name>
 			<param-value>/machairodus-log4j.xml</param-value>
+		</init-param>
+		<init-param>
+			<param-name>redis</param-name>
+			<param-value>/machairodus-redis.properties</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

@@ -49,6 +49,7 @@ public class Executor {
 	public static final String GROUP = "group";
 	public static final String SIZE = "size";
 	public static final String AUTO_START = "auto_start";
+	private static QuartzFactory FACTORY = QuartzFactory.getInstance();
 	
 	public static final void execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Writer out = response.getWriter();
@@ -157,13 +158,13 @@ public class Executor {
 		if(StringUtils.isEmpty(id)) 
 			return ResultMap.create(400, "无效的任务ID", "WARN");
 			
-		if(!QuartzFactory.getInstance().closed(id) && !QuartzFactory.getInstance().started(id))
+		if(!FACTORY.closed(id) && !FACTORY.started(id))
 			return ResultMap.create(400, "不存在指定任务ID", "WARN");
 		
-		if(QuartzFactory.getInstance().started(id)) 
+		if(FACTORY.started(id)) 
 			return ResultMap.create(400, "指定任务ID已启动", "WARN");
 			
-		QuartzFactory.getInstance().start(id);
+		FACTORY.start(id);
 		return ResultMap.create(200, "启动指定任务: " + id, "SUCCESS");
 	}
 	
@@ -171,18 +172,18 @@ public class Executor {
 		if(StringUtils.isEmpty(group)) 
 			return ResultMap.create(400, "无效的任务组", "WARN");
 		
-		if(!QuartzFactory.getInstance().hasClosedGroup(group) && !QuartzFactory.getInstance().hasStartedGroup(group)) 
+		if(!FACTORY.hasClosedGroup(group) && !FACTORY.hasStartedGroup(group)) 
 			return ResultMap.create(400, "不存在任务组: " + group, "WARN");
 		
-		QuartzFactory.getInstance().startGroup(group);
+		FACTORY.startGroup(group);
 		return ResultMap.create(200, "启动指定任务组: " + group, "SUCCESS");
 	}
 	
 	private static final ResultMap startAll() throws IOException {
-		if(QuartzFactory.getInstance().getStopedQuratz().size() == 0 && QuartzFactory.getInstance().getStartedQuartz().size() == 0)
+		if(FACTORY.getStopedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
 			return ResultMap.create(400, "不存在任何任务", "WARN");
 		
-		QuartzFactory.getInstance().startAll();
+		FACTORY.startAll();
 		return ResultMap.create(200, "启动所有任务", "SUCCESS");
 	}
 	
@@ -190,13 +191,13 @@ public class Executor {
 		if(StringUtils.isEmpty(id)) 
 			return ResultMap.create(400, "无效的任务ID", "WARN");
 		
-		if(!QuartzFactory.getInstance().closed(id) && !QuartzFactory.getInstance().started(id))
+		if(!FACTORY.closed(id) && !FACTORY.started(id))
 			return ResultMap.create(400, "不存在指定任务ID", "WARN");
 		
-		if(QuartzFactory.getInstance().closed(id)) 
+		if(FACTORY.closed(id)) 
 			return ResultMap.create(400, "指定任务ID已停止", "WARN");
 		
-		QuartzFactory.getInstance().close(id);
+		FACTORY.close(id);
 		return ResultMap.create(200, "停止指定任务: " + id, "SUCCESS");
 	}
 	
@@ -204,18 +205,18 @@ public class Executor {
 		if(StringUtils.isEmpty(group)) 
 			return ResultMap.create(400, "无效的任务GROUP", "WARN");
 		
-		if(!QuartzFactory.getInstance().hasClosedGroup(group) && !QuartzFactory.getInstance().hasStartedGroup(group)) 
+		if(!FACTORY.hasClosedGroup(group) && !FACTORY.hasStartedGroup(group)) 
 			return ResultMap.create(400, "不存在任务组: " + group, "WARN");
 		
-		QuartzFactory.getInstance().closeGroup(group);
+		FACTORY.closeGroup(group);
 		return ResultMap.create(200, "停止指定任务组: " + group, "SUCCESS");
 	}
 	
 	private static final ResultMap stopAll() {
-		if(QuartzFactory.getInstance().getStopedQuratz().size() == 0 && QuartzFactory.getInstance().getStartedQuartz().size() == 0)
+		if(FACTORY.getStopedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
 			return ResultMap.create(400, "不存在任何任务", "WARN");
 		
-		QuartzFactory.getInstance().closeAll();
+		FACTORY.closeAll();
 		return ResultMap.create(200, "停止所有", "SUCCESS");
 	}
 	
@@ -226,7 +227,7 @@ public class Executor {
 		if(size <= 0)
 			return ResultMap.create(400, "无效的追加任务数", "WARN");
 			
-		BaseQuartz quartz = QuartzFactory.getInstance().findLast(group);
+		BaseQuartz quartz = FACTORY.findLast(group);
 		if(quartz == null) 
 			return ResultMap.create(400, "不存在此任务组", "WARN");
 		
@@ -240,9 +241,9 @@ public class Executor {
 			BaseQuartz _new = quartz.clone();
 			_new.setClose(true);
 			_new.setConfig(config);
-			QuartzFactory.getInstance().addQuartz(_new);
+			FACTORY.addQuartz(_new);
 			if(autoStart)
-				QuartzFactory.getInstance().start(config.getId());
+				FACTORY.start(config.getId());
 			
 		}
 		
@@ -256,23 +257,23 @@ public class Executor {
 		if(size <= 0)
 			return ResultMap.create(400, "无效的追加任务数", "WARN");
 			
-		int gorupSize = QuartzFactory.getInstance().getGroupSize(group);
+		int gorupSize = FACTORY.getGroupSize(group);
 		if(gorupSize < size)
 			size = gorupSize;
 		
 		for(int idx = 0; idx < size; idx ++) {
-			BaseQuartz quartz = QuartzFactory.getInstance().findLast(group);
+			BaseQuartz quartz = FACTORY.findLast(group);
 			if(quartz == null) 
 				return ResultMap.create(400, "不存在此任务组", "WARN");
 			
-			if(QuartzFactory.getInstance().getGroupSize(group) > 1)
-				QuartzFactory.getInstance().removeQuartz(quartz);
+			if(FACTORY.getGroupSize(group) > 1)
+				FACTORY.removeQuartz(quartz);
 			else if(!quartz.isClose())
-				QuartzFactory.getInstance().close(quartz.getConfig().getId());
+				FACTORY.close(quartz.getConfig().getId());
 				
 		}
 		
-		if(QuartzFactory.getInstance().getGroupSize(group) == 1) 
+		if(FACTORY.getGroupSize(group) == 1) 
 			return ResultMap.create(200, "任务组列表只存在一个任务", "SUCCESS");
 		
 		return ResultMap.create(200, "移除任务完成", "SUCCESS");
@@ -299,7 +300,7 @@ public class Executor {
 	
 	private static final void quartz(Writer out) throws IOException {
 		Map<String, Object> map = ResultMap.create(200, "任务列表", "SUCCESS")._getBeanToMap();
-		Collection<BaseQuartz> startedQuartz = QuartzFactory.getInstance().getStartedQuartz();
+		Collection<BaseQuartz> startedQuartz = FACTORY.getStartedQuartz();
 		List<String> startList = new ArrayList<String>();
 		Set<String> startGroupSet = new HashSet<String>();
 		for(BaseQuartz quartz : startedQuartz) {
@@ -307,7 +308,7 @@ public class Executor {
 			startGroupSet.add(quartz.getConfig().getGroup());
 		}
 		
-		Collection<BaseQuartz> stoppingQuartz = QuartzFactory.getInstance().getStoppingQuartz();
+		Collection<BaseQuartz> stoppingQuartz = FACTORY.getStoppingQuartz();
 		List<String> stoppingList = new ArrayList<String>();
 		Set<String> stoppingGroupSet = new HashSet<String>();
 		for(BaseQuartz quartz : stoppingQuartz) {
@@ -315,7 +316,7 @@ public class Executor {
 			stoppingGroupSet.add(quartz.getConfig().getGroup());
 		}
 		
-		Collection<BaseQuartz> stoppedQuartz = QuartzFactory.getInstance().getStopedQuratz();
+		Collection<BaseQuartz> stoppedQuartz = FACTORY.getStopedQuratz();
 		List<String> stoppedList = new ArrayList<String>();
 		Set<String> stoppedGroupSet = new HashSet<String>();
 		for(BaseQuartz quartz : stoppedQuartz) {

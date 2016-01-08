@@ -227,6 +227,16 @@ Configure.Service = function(){
 		}
 	}
 	
+	var assign = function() {
+		var selections = getIdSelections();
+		if(selections.length > 0) {
+			$('#dlgAssign').dialog('refresh', context + '/configure/service/assign/' + selections[0]);
+			$('#dlgAssign').dialog('open');
+		} else {
+			updateButtonStatus();
+		}
+	}
+	
 	var initTable = function() {
 		$table.bootstrapTable({
 			method: 'post',
@@ -255,11 +265,12 @@ Configure.Service = function(){
 		var isSelected = !$table.bootstrapTable('getSelections').length;
 		$btnDelete.prop('disabled', isSelected);
 		$btnModify.prop('disabled', isSelected);
+		$btnAssign.prop('disabled', isSelected);
 	}
 	
 	var getIdSelections = function() {
         return $.map($table.bootstrapTable('getSelections'), function (row) {
-            return row.id
+            return row.id;
         });
     }
 	
@@ -269,6 +280,7 @@ Configure.Service = function(){
 		$btnModify.bind('click', modify);
 		$btnRefresh.bind('click', refresh);
 		$btnDelete.bind('click', _delete);
+		$btnAssign.bind('click', assign);
 		
 		$btnFindEnter.bind('click', findEnter);
 		$btnFindCancle.bind('click', findCancle);
@@ -288,6 +300,15 @@ Configure.Service = function(){
 		$('#dlgOption').dialog({
 		    title: '数据操作',
 		    width: 500,
+		    closed: true,
+		    cache: false,
+		    modal: true
+		});
+		
+		$('#dlgAssign').dialog({
+		    title: '分配节点',
+		    width: 510,
+		    height: 269,
 		    closed: true,
 		    cache: false,
 		    modal: true
@@ -333,6 +354,15 @@ Configure.Service = function(){
 				default: 
 					return value;
 			}
+		}, 
+		
+		getIdSelection: function() {
+			var selections = getIdSelections();
+			if(selections.length > 0) {
+				return selections[0];
+			}
+			
+			return null;
 		}
 	}
 }();

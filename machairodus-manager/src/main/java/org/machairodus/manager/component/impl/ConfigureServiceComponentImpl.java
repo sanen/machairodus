@@ -15,22 +15,28 @@
  */
 package org.machairodus.manager.component.impl;
 
-import static org.machairodus.manager.util.ResponseStatus.FAIL;
-import static org.machairodus.manager.util.ResponseStatus.OK;
+import static org.machairodus.commons.util.ResponseStatus.FAIL;
+import static org.machairodus.commons.util.ResponseStatus.OK;
 
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.machairodus.manager.component.ConfigureServiceComponent;
 import org.machairodus.manager.service.PermissionService;
+import org.machairodus.mappers.domain.NodeConfig;
 import org.machairodus.mappers.domain.SchedulerConfig;
 import org.machairodus.mappers.domain.User;
+import org.machairodus.mappers.mapper.manager.ConfigureNodeMapper;
 import org.machairodus.mappers.mapper.manager.ConfigureServiceMapper;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.commons.util.StringUtils;
 import org.nanoframework.orm.mybatis.MultiTransactional;
+import org.nanoframework.web.server.mvc.Model;
+import org.nanoframework.web.server.mvc.View;
+import org.nanoframework.web.server.mvc.support.ForwardView;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -40,6 +46,9 @@ private Logger LOG = LoggerFactory.getLogger(ConfigureServerComponentImpl.class)
 	
 	@Inject
 	private ConfigureServiceMapper configureServiceMapper;
+	
+	@Inject
+	private ConfigureNodeMapper configureNodeMapper;
 	
 	@Inject
 	private PermissionService permissionService;
@@ -206,6 +215,44 @@ private Logger LOG = LoggerFactory.getLogger(ConfigureServerComponentImpl.class)
 			} else
 				map.put("message", "删除SchedulerConfig对象异常");
 			
+			return map;
+		}
+	}
+	
+	@Override
+	public View assign(Long schedulerId, Model model) {
+		List<NodeConfig> unselect = configureNodeMapper.findUnAssign(schedulerId);
+		Collections.sort(unselect, (before, after) -> before.getName().compareTo(after.getName()));
+		model.addAttribute("unselect", unselect);
+		
+		List<NodeConfig> select = configureNodeMapper.findAssign(schedulerId);
+		Collections.sort(select, (before, after) -> before.getName().compareTo(after.getName()));
+		model.addAttribute("select", select);
+		
+		return new ForwardView("/pages/dialog/configure.service.assign.jsp", true);
+	}
+	
+	@Override
+	public Object assigning(Long schedulerId, Long nodeId, String type) {
+		try {
+			User user = permissionService.findPrincipal();
+			if(user == null) {
+				Map<String, Object> map = FAIL._getBeanToMap();
+				map.put("message", "无效的登陆用户信息");
+				return map;
+			}
+			
+			if("select".equals(type)) {
+				configureServiceMapper.insertSchedulerInfo(schedulerId, nodeId, user.getId());
+			} else if("deselect".equals(type)) {
+				configureServiceMapper.deleteSchedulerInfo(schedulerId, nodeId);
+			}
+			
+			return OK;
+		} catch(Exception e) {
+			LOG.error("删除SchedulerInfo对象异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "删除SchedulerInfo对象异常");
 			return map;
 		}
 	}

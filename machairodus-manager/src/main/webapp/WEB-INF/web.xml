@@ -48,7 +48,7 @@
 			<param-value>/context.properties</param-value>
 		</init-param>
 		<init-param>
-			<param-name>log4j</param-name>
+			<param-name>log4j2</param-name>
 			<param-value>/machairodus-log4j.xml</param-value>
 		</init-param>
 		<init-param>

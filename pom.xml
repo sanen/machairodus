@@ -21,10 +21,10 @@
 		<maven-javadoc-plugin-version>2.9.1</maven-javadoc-plugin-version>
 		<maven-release-plugin-version>2.5.2</maven-release-plugin-version>
 
-		<nano-version>1.2.10-SNAPSHOT</nano-version>
+		<nano-version>1.2.11-SNAPSHOT</nano-version>
 		<junit-version>4.9</junit-version>
-		<slf4j-version>1.7.6</slf4j-version>
-		<log4j-version>1.2.17</log4j-version>
+		<slf4j-version>1.7.7</slf4j-version>
+		<log4j2-version>2.5</log4j2-version>
 		<google-guice-version>4.0</google-guice-version>
 		<google-guice-multibindings-version>4.0</google-guice-multibindings-version>
 		<commons-lang3-version>3.3</commons-lang3-version>
@@ -98,12 +98,7 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- Logger -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j-version}</version>
-			</dependency>
+			<!-- Log4j 2 -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
@@ -111,30 +106,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
+				<artifactId>jcl-over-slf4j</artifactId>
 				<version>${slf4j-version}</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>${log4j-version}</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>commons-logging</groupId>
-				<artifactId>commons-logging</artifactId>
-				<version>${logging-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
-				<version>${apache-log4j-version}</version>
+				<version>${log4j2-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-				<version>${apache-log4j-version}</version>
+				<version>${log4j2-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j2-version}</version>
 			</dependency>
 
 			<!-- Commons -->
@@ -255,6 +243,14 @@
 				<artifactId>netty-all</artifactId>
 				<version>${netty-all-version}</version>
 			</dependency>
+			
+			<!-- HttpClient Component -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient-version}</version>
+			</dependency>
+			
 
 			<!-- Jetty -->
 			<dependency>

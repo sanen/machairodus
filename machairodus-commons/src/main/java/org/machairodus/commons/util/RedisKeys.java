@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.util;
+package org.machairodus.commons.util;
 
-import org.nanoframework.commons.util.Assert;
+public enum RedisKeys {
+	JMX_MONITOR(RedisKey.create("JMX-MONITOR", RedisStorageType.KV));
 
-public enum RedisClientNames {
-	SHIRO("shiro"), MANAGER("manager");
-	
-	private String value;
-	private RedisClientNames(String value) {
+	private RedisKey value;
+
+	private RedisKeys(RedisKey value) {
 		this.value = value;
 	}
-	
-	public String value() {
+
+	public RedisKey value() {
 		return value;
 	}
-	
-	public static final RedisClientNames value(String value) {
-		Assert.hasLength(value, "value must not be empty.");
-		
-		switch(value) {
-			case "shiro": 
-				return SHIRO;
-				
-			case "manager": 
-				return MANAGER;
-				
-			default: 
-				throw new IllegalArgumentException("Unknown redis client name");
-		}
-	}
+
 }

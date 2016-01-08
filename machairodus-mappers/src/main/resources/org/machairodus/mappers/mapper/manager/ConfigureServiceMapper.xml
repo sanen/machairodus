@@ -65,4 +65,12 @@
 		delete from t_scd_scheduler_config where id = #{id}
 	</delete>
 	
+	<insert id="insertSchedulerInfo" parameterType="java.util.Map">
+		insert into t_scd_scheduler_info(scheduler_id, node_id, create_user_id) values(#{schedulerId}, #{nodeId}, #{createUserId});
+	</insert>
+	
+	<delete id="deleteSchedulerInfo" parameterType="java.util.Map">
+		delete from t_scd_scheduler_info where scheduler_id = #{schedulerId} and node_id = #{nodeId}
+	</delete>
+	
 </mapper>

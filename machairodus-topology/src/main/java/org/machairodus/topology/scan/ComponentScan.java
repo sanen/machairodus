@@ -67,6 +67,9 @@ public class ComponentScan {
      * @return a set of all classes contained in the given package.
      */
     private static Set<Class<?>> getClasses(String packageName) {
+    	if(LOG.isDebugEnabled())
+    		LOG.debug("开始扫描包: " + packageName);
+    	
         return getClasses(new ResolverUtil.IsA(Object.class), packageName);
     }
 

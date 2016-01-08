@@ -15,8 +15,8 @@
  */
 package org.machairodus.manager.component.impl;
 
-import static org.machairodus.manager.util.ResponseStatus.FAIL;
-import static org.machairodus.manager.util.ResponseStatus.OK;
+import static org.machairodus.commons.util.ResponseStatus.FAIL;
+import static org.machairodus.commons.util.ResponseStatus.OK;
 
 import java.sql.Timestamp;
 import java.util.List;

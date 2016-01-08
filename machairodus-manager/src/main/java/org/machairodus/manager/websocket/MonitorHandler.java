@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machairodus.manager.util.RedisClientNames;
-import org.machairodus.manager.util.ResponseStatus;
+import org.machairodus.commons.util.RedisClientNames;
+import org.machairodus.commons.util.ResponseStatus;
 import org.nanoframework.extension.websocket.AbstractWebSocketHandler;
 import org.nanoframework.extension.websocket.ChannelGroupSupport;
 import org.nanoframework.extension.websocket.WebSocket;

@@ -18,8 +18,11 @@ package org.machairodus.manager.component;
 import org.machairodus.manager.component.impl.ConfigureServiceComponentImpl;
 import org.machairodus.mappers.domain.SchedulerConfig;
 import org.nanoframework.core.component.stereotype.Component;
+import org.nanoframework.core.component.stereotype.bind.PathVariable;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
 import org.nanoframework.core.component.stereotype.bind.RequestParam;
+import org.nanoframework.web.server.mvc.Model;
+import org.nanoframework.web.server.mvc.View;
 
 import com.google.inject.ImplementedBy;
 
@@ -47,4 +50,11 @@ public interface ConfigureServiceComponent {
 	
 	@RequestMapping("/delete")
 	Object delete(@RequestParam(name = "id") Long id);
+	
+	@RequestMapping("/assign/{schedulerId}")
+	View assign(@PathVariable("schedulerId") Long schedulerId, Model model);
+	
+	@RequestMapping("/assign/{schedulerId}/{nodeId}/{type}")
+	Object assigning(@PathVariable("schedulerId") Long schedulerId, @PathVariable("nodeId") Long nodeId, @PathVariable("type") String type);
+	
 }

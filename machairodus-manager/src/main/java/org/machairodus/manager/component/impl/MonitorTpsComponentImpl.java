@@ -18,10 +18,10 @@ package org.machairodus.manager.component.impl;
 import java.util.Map;
 
 import org.apache.shiro.util.CollectionUtils;
+import org.machairodus.commons.util.RedisClientNames;
+import org.machairodus.commons.util.ResponseStatus;
 import org.machairodus.manager.component.MonitorTpsComponent;
 import org.machairodus.manager.service.PermissionService;
-import org.machairodus.manager.util.RedisClientNames;
-import org.machairodus.manager.util.ResponseStatus;
 import org.machairodus.mappers.domain.User;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;

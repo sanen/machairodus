@@ -473,8 +473,9 @@ public class QuartzFactory {
 		
 		String[] packages = _package.split(",");
 		for(String pkg : packages) {
-			if(!pkg.isEmpty()) {
-				ComponentScan.scan(pkg);
+			String _pkg;
+			if(pkg != null && !(_pkg = pkg.trim()).isEmpty()) {
+				ComponentScan.scan(_pkg);
 			}
 		}
 		
