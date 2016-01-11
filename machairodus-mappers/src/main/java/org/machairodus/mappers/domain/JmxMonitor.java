@@ -22,9 +22,15 @@ import org.nanoframework.commons.entity.BaseEntity;
 public class JmxMonitor extends BaseEntity {
 	private static final long serialVersionUID = 743543178402183287L;
 
+	private Long id;
+	private String nodeName;
+	private String host;
+	private Integer port;
+	
 	/** Runtime */
 	private Long uptime;
 	private String name;
+	private String hostName;
 	private String pid;
 	private Long startTime;
 	
@@ -50,6 +56,7 @@ public class JmxMonitor extends BaseEntity {
 	private Double systemLoadAverage;
 	private Long processCpuTime;
 	private Double cpuRatio;
+	private Double totalCpuRatio;
 	
 	/** Thread */
 	private Long totalStartedThreadCount;
@@ -58,32 +65,44 @@ public class JmxMonitor extends BaseEntity {
 	private Integer peakThreadCount;
 	private long[] allThreadIds;
 	
+	private Long updateTime;
+	private JmxMonitorStatus status;
+	
 	public enum MemoryUsage {
-		INIT("init"), USED("used"), COMMITTED("committed"), MAX("max");
+		INIT, USED, COMMITTED, MAX, FREE;
 		
-		private String value;
-		private MemoryUsage(String value) {
-			this.value = value;
-		}
-		
-		public String value() {
-			return value;
-		}
-		
-		public MemoryUsage value(String value) {
-			switch(value) {
-				case "init": 
-					return INIT;
-				case "used": 
-					return USED;
-				case "committed": 
-					return COMMITTED;
-				case "max": 
-					return MAX;
-				default: 
-					throw new IllegalArgumentException("Unknown MemoryUsage value");
-			}
-		}
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNodeName() {
+		return nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
 	}
 
 	public Long getUptime() {
@@ -100,6 +119,14 @@ public class JmxMonitor extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getHostName() {
+		return hostName;
+	}
+
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
 	}
 
 	public String getPid() {
@@ -254,6 +281,14 @@ public class JmxMonitor extends BaseEntity {
 		this.cpuRatio = cpuRatio;
 	}
 
+	public Double getTotalCpuRatio() {
+		return totalCpuRatio;
+	}
+
+	public void setTotalCpuRatio(Double totalCpuRatio) {
+		this.totalCpuRatio = totalCpuRatio;
+	}
+
 	public Long getTotalStartedThreadCount() {
 		return totalStartedThreadCount;
 	}
@@ -292,6 +327,22 @@ public class JmxMonitor extends BaseEntity {
 
 	public void setAllThreadIds(long[] allThreadIds) {
 		this.allThreadIds = allThreadIds;
+	}
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public JmxMonitorStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(JmxMonitorStatus status) {
+		this.status = status;
 	}
 	
 }

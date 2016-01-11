@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.commons.util;
+package org.machairodus.mappers.mapper.balancer;
 
-public enum RedisKeys {
-	JMX_MONITOR("JMX-MONITOR");
+import org.apache.ibatis.annotations.Param;
 
-	private String value;
-
-	private RedisKeys(String value) {
-		this.value = value;
-	}
-
-	public String value() {
-		return value;
-	}
-
+public interface ConfigureNodeMapper {
+	long updatePID(@Param("pid") Integer pid, @Param("nodeId") Long nodeId);
 }

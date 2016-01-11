@@ -26,11 +26,14 @@ import org.machairodus.balancer.service.CommandService;
 import org.machairodus.commons.util.ResponseStatus;
 import org.machairodus.mappers.domain.NodeConfig;
 import org.nanoframework.commons.util.CollectionUtils;
+import org.nanoframework.core.globals.Globals;
 import org.nanoframework.core.status.ResultMap;
 import org.nanoframework.extension.concurrent.quartz.BaseQuartz;
 import org.nanoframework.extension.concurrent.quartz.QuartzConfig;
 import org.nanoframework.extension.concurrent.quartz.QuartzFactory;
 import org.nanoframework.extension.concurrent.quartz.QuartzThreadFactory;
+
+import com.google.inject.Injector;
 
 public class CommandServiceImpl implements CommandService {
 	private static final AtomicLong PARALLEL = new AtomicLong(0);
@@ -55,7 +58,10 @@ public class CommandServiceImpl implements CommandService {
 			config.setTotal(PARALLEL.intValue());
 			config.setDaemon(true);
 			config.setLazy(true);
-			JmxMonitorQuartz quartz = new JmxMonitorQuartz(config, nodeConfig);
+			JmxMonitorQuartz quartz = Globals.get(Injector.class).getInstance(JmxMonitorQuartz.class);
+			quartz.setConfig(config);
+			quartz.setNode(nodeConfig);
+			quartz.connect(nodeConfig);
 			FACTORY.addQuartz(quartz);
 			FACTORY.start(config.getId());
 			

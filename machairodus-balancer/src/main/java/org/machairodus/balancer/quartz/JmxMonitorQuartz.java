@@ -21,10 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.machairodus.commons.util.RedisClientNames;
-import org.machairodus.commons.util.RedisKeys;
 import org.machairodus.mappers.domain.JmxMonitor;
 import org.machairodus.mappers.domain.JmxMonitor.MemoryUsage;
+import org.machairodus.mappers.domain.JmxMonitorStatus;
 import org.machairodus.mappers.domain.NodeConfig;
+import org.machairodus.mappers.domain.NodeType;
+import org.machairodus.mappers.mapper.balancer.ConfigureNodeMapper;
 import org.nanoframework.commons.util.Assert;
 import org.nanoframework.extension.concurrent.exception.QuartzException;
 import org.nanoframework.extension.concurrent.quartz.BaseQuartz;
@@ -45,6 +47,7 @@ import org.nanoframework.orm.jedis.GlobalRedisClient;
 import org.nanoframework.orm.jedis.RedisClient;
 
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 /**
  * 使用组件进行初始化，而非启动时初始化
@@ -55,25 +58,22 @@ import com.google.common.collect.Maps;
 public class JmxMonitorQuartz extends BaseQuartz {
 	private static final ConcurrentMap<Long, NodeConfig> nodeMap = new ConcurrentHashMap<>();
 	private RedisClient redisClient = GlobalRedisClient.get(RedisClientNames.MANAGER.value());
-	private static final String JMX_MONITOR = RedisKeys.JMX_MONITOR.value().getKey();
-	private final NodeConfig nodeConfig;
+	private NodeConfig node;
 	private JmxClient jmxClient;
 	private String address;
 	
+	@Inject
+	private ConfigureNodeMapper nodeMapper;
+	
+	public JmxMonitorQuartz() {
+		
+	}
+	
 	public JmxMonitorQuartz(QuartzConfig config, NodeConfig nodeConfig) {
 		Assert.notNull(config, "QuartzConfig must be not null.");
-		Assert.notNull(nodeConfig, "NodeConfig must be not null.");
-		Assert.hasLength(nodeConfig.getServerAddress(), "ServerAddress must be not empty.");
-		Assert.notNull(nodeConfig.getJmxPort(), "JmxPort must be not null.");
-		
-		if(nodeMap.get(nodeConfig.getId()) != null)
-			throw new QuartzException("Exists NodeConfig JmxMonitor");
-		
 		setConfig(config);
-		this.nodeConfig = nodeConfig;
-		
-		jmxClient = JmxClientManager.get((address = nodeConfig.getServerAddress() + ":" + nodeConfig.getJmxPort()));
-		nodeMap.put(nodeConfig.getId(), nodeConfig);
+		setNode(nodeConfig);
+		connect(nodeConfig);
 	}
 	
 	@Override
@@ -89,7 +89,9 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			RuntimeMXBean runtime = new RuntimeImpl(jmxClient);
 			monitor.setUptime(runtime.getUptime());
 			monitor.setName(runtime.getName());
-			monitor.setPid(monitor.getName().split("@")[0]);
+			String[] rt = monitor.getName().split("@");
+			monitor.setHostName(rt[1]);
+			monitor.setPid(rt[0]);
 			monitor.setStartTime(runtime.getStartTime());
 			
 			/** ClassLoading */
@@ -102,18 +104,21 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			MemoryMXBean memory = new MemoryImpl(jmxClient);
 			java.lang.management.MemoryUsage heapMemoryUsage = memory.getHeapMemoryUsage();
 			Map<MemoryUsage, Long> heap = Maps.newHashMap();
-			heap.put(MemoryUsage.INIT, heapMemoryUsage.getInit());
-			heap.put(MemoryUsage.USED, heapMemoryUsage.getUsed());
-			heap.put(MemoryUsage.COMMITTED, heapMemoryUsage.getCommitted());
-			heap.put(MemoryUsage.MAX, heapMemoryUsage.getMax());
+			long used, max;
+			heap.put(MemoryUsage.INIT, heapMemoryUsage.getInit() / 1000000);
+			heap.put(MemoryUsage.USED, used = heapMemoryUsage.getUsed() / 1000000);
+			heap.put(MemoryUsage.COMMITTED, heapMemoryUsage.getCommitted() / 1000000);
+			heap.put(MemoryUsage.MAX, max = heapMemoryUsage.getMax() / 1000000);
+			heap.put(MemoryUsage.FREE, max - used);
 			monitor.setHeapMemoryUsage(heap);
 			
 			java.lang.management.MemoryUsage nonHeapMemoryUsage = memory.getNonHeapMemoryUsage();
 			Map<MemoryUsage, Long> nonHeap = Maps.newHashMap();
-			nonHeap.put(MemoryUsage.INIT, nonHeapMemoryUsage.getInit());
-			nonHeap.put(MemoryUsage.USED, nonHeapMemoryUsage.getUsed());
-			nonHeap.put(MemoryUsage.COMMITTED, nonHeapMemoryUsage.getCommitted());
-			nonHeap.put(MemoryUsage.MAX, nonHeapMemoryUsage.getMax());
+			nonHeap.put(MemoryUsage.INIT, nonHeapMemoryUsage.getInit() / 1000000);
+			nonHeap.put(MemoryUsage.USED, used = nonHeapMemoryUsage.getUsed() / 1000000);
+			nonHeap.put(MemoryUsage.COMMITTED, nonHeapMemoryUsage.getCommitted() / 1000000);
+			nonHeap.put(MemoryUsage.MAX, max = nonHeapMemoryUsage.getMax() / 1000000);
+			nonHeap.put(MemoryUsage.FREE, max - used);
 			monitor.setNonHeapMemoryUsage(nonHeap);
 			
 			/** Threading */
@@ -122,31 +127,41 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			monitor.setThreadCount(thread.getThreadCount());
 			monitor.setDaemonThreadCount(thread.getDaemonThreadCount());
 			monitor.setPeakThreadCount(thread.getPeakThreadCount());
-//			monitor.setAllThreadIds(thread.getAllThreadIds());
 			
 			/** OS */
 			OperatingSystemMXBean os = new OperatingSystemImpl(jmxClient);
 			monitor.setOs(os.getName());
-//			monitor.setFreePhysicalMemorySize(os.getFreePhysicalMemorySize());
-//			monitor.setFreeSwapSpaceSize(os.getFreeSwapSpaceSize());
-//			monitor.setTotalPhysicalMemorySize(os.getTotalPhysicalMemorySize());
-//			monitor.setTotalSwapSpaceSize(os.getTotalSwapSpaceSize());
-//			monitor.setCommiteedVirtualMemorySize(os.getCommittedVirtualMemorySize());
 			monitor.setAvailableProcessors(os.getAvailableProcessors());
-//			monitor.setProcessCpuLoad(os.getProcessCpuLoad());
-//			monitor.setSystemCpuLoad(os.getSystemCpuLoad());
-			monitor.setSystemLoadAverage(os.getSystemLoadAverage());
-//			monitor.setProcessCpuTime(os.getProcessCpuTime());
 			monitor.setCpuRatio(os.cpuRatio());
-			redisClient.set(JMX_MONITOR + ":" + address, monitor);
-			redisClient.expire(JMX_MONITOR + ":" + address, 10);
+			
+			/** Set update time */
+			monitor.setUpdateTime(System.currentTimeMillis());
+			monitor.setStatus(JmxMonitorStatus.RUNNING);
+			monitor.setNodeName(address);
+			monitor.setId(node.getId());
+			String[] hosts = address.split(":");
+			monitor.setHost(hosts[0]);
+			monitor.setPort(Integer.parseInt(hosts[1]));
+			
+			redisClient.hset(NodeType.value(node.getType()).name(), node.getId().toString(), monitor);
+			
+			String pid;
+			if((pid = redisClient.hget("PID", node.getId().toString())) != null) {
+				if(!pid.equals(monitor.getPid())) {
+					nodeMapper.updatePID(Integer.parseInt(monitor.getPid()), node.getId());
+					redisClient.hset("PID", node.getId().toString(), monitor.getPid());
+				}
+			} else {
+				nodeMapper.updatePID(Integer.parseInt(monitor.getPid()), node.getId());
+				redisClient.hset("PID", node.getId().toString(), monitor.getPid());
+			}
 		} catch(Throwable e) {
 			if(e.getCause() != null && e.getCause() instanceof ConnectException) {
 				try { 
 					jmxClient.reconnect(); 
 				} catch(ConnectException ex) { 
 					LOG.error("Reconnect Error: " + ex.getMessage());
-					redisClient.del(JMX_MONITOR + ":" + address);
+					redisClient.hdel(NodeType.value(node.getType()).name(), address);
 					thisWait(1000);
 				}
 			}
@@ -161,17 +176,33 @@ public class JmxMonitorQuartz extends BaseQuartz {
 
 	@Override
 	public void destroy() throws QuartzException {
-		redisClient.del(JMX_MONITOR + ":" + address);
+		redisClient.hdel(NodeType.value(node.getType()).name(), address);
 		jmxClient.close();
 		JmxClientManager.remove(address, jmxClient);
-		nodeMap.remove(nodeConfig.getId(), nodeConfig);
+		nodeMap.remove(node.getId(), node);
 	}
 
 	public NodeConfig getNodeConfig() {
-		return nodeConfig;
+		return node;
 	}
 	
 	public Long getNodeConfigId() {
-		return nodeConfig.getId();
+		return node.getId();
+	}
+	
+	public void setNode(NodeConfig node) {
+		Assert.notNull(node, "NodeConfig must be not null.");
+		Assert.notNull(node.getId(), "NodeConfig ID must be not null.");
+		Assert.hasLength(node.getServerAddress(), "ServerAddress must be not empty.");
+		Assert.notNull(node.getJmxPort(), "JmxPort must be not null.");
+		this.node = node;
+		
+		if(nodeMap.get(node.getId()) != null)
+			throw new QuartzException("Exists NodeConfig JmxMonitor");
+	}
+	
+	public void connect(NodeConfig node) {
+		jmxClient = JmxClientManager.get((address = node.getServerAddress() + ":" + node.getJmxPort()));
+		nodeMap.put(node.getId(), node);
 	}
 }

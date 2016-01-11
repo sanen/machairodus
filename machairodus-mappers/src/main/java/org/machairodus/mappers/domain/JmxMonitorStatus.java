@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.commons.util;
+package org.machairodus.mappers.domain;
 
-public enum RedisKeys {
-	JMX_MONITOR("JMX-MONITOR");
-
-	private String value;
-
-	private RedisKeys(String value) {
-		this.value = value;
-	}
-
-	public String value() {
-		return value;
-	}
-
+public enum JmxMonitorStatus {
+	RUNNING, TIMEOUT, DOWN, FAIL, SUCCESS
 }

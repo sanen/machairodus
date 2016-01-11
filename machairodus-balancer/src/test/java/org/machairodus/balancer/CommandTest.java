@@ -34,6 +34,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.machairodus.mappers.domain.NodeConfig;
+import org.machairodus.mappers.domain.NodeType;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.commons.util.CollectionUtils;
@@ -50,10 +51,65 @@ public class CommandTest {
 			NodeConfig node = new NodeConfig();
 			node.setId(1L);
 			node.setName("JMX-Test");
-			node.setPort(8180);
 			node.setJmxPort(10180);
 			node.setServerName("VM");
 			node.setServerAddress("192.168.180.137");
+			node.setType(NodeType.BALANCER.value());
+			params.put("nodeConfig", node);
+			post("http://localhost:7200/balancer/cmd/create?", params);
+			
+			params = Maps.newHashMap();
+			node = new NodeConfig();
+			node.setId(2L);
+			node.setName("Virtual-Mapper");
+			node.setJmxPort(16181);
+			node.setServerName("SERV_3850");
+			node.setServerAddress("10.1.193.202");
+			node.setType(NodeType.SERVICE_NODE.value());
+			params.put("nodeConfig", node);
+			post("http://localhost:7200/balancer/cmd/create?", params);
+			
+			params = Maps.newHashMap();
+			node = new NodeConfig();
+			node.setId(3L);
+			node.setName("Virtual-Exp-Taking");
+			node.setJmxPort(16191);
+			node.setServerName("SERV_3850");
+			node.setServerAddress("10.1.193.202");
+			node.setType(NodeType.SERVICE_NODE.value());
+			params.put("nodeConfig", node);
+			post("http://localhost:7200/balancer/cmd/create?", params);
+			
+			params = Maps.newHashMap();
+			node = new NodeConfig();
+			node.setId(4L);
+			node.setName("Virtual-Exp-Container");
+			node.setJmxPort(16192);
+			node.setServerName("SERV_3850");
+			node.setServerAddress("10.1.193.202");
+			node.setType(NodeType.SERVICE_NODE.value());
+			params.put("nodeConfig", node);
+			post("http://localhost:7200/balancer/cmd/create?", params);
+			
+			params = Maps.newHashMap();
+			node = new NodeConfig();
+			node.setId(5L);
+			node.setName("Virtual-Exp-Handon");
+			node.setJmxPort(16193);
+			node.setServerName("SERV_3850");
+			node.setServerAddress("10.1.193.202");
+			node.setType(NodeType.SERVICE_NODE.value());
+			params.put("nodeConfig", node);
+			post("http://localhost:7200/balancer/cmd/create?", params);
+			
+			params = Maps.newHashMap();
+			node = new NodeConfig();
+			node.setId(6L);
+			node.setName("Virtual-Exp-Signature");
+			node.setJmxPort(16194);
+			node.setServerName("SERV_3850");
+			node.setServerAddress("10.1.193.202");
+			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
 			post("http://localhost:7200/balancer/cmd/create?", params);
 		} catch(Throwable e) {
@@ -89,9 +145,9 @@ public class CommandTest {
             
             response = httpClient.execute(httpPost);  
             LOG.debug(response.toString());  
+            
             HttpEntity entity = response.getEntity();  
             LOG.debug(EntityUtils.toString(entity, "UTF-8"));
-            
         } catch (IOException e) {  
             LOG.error(e.getMessage(), e);
             
@@ -100,7 +156,7 @@ public class CommandTest {
                 try {  
                     EntityUtils.consume(response.getEntity());  
                 } catch (IOException e) {  
-                    e.printStackTrace();  
+                	LOG.error(e.getMessage(), e);
                 }  
             }  
         }  
