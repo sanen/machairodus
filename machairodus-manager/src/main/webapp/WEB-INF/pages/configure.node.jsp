@@ -13,6 +13,8 @@
 			<button id="btnRefresh" class="btn black" type="button">刷新</button>
 			<button id="btnModify" class="btn black" type="button" disabled>修改</button>
 			<button id="btnDelete" class="btn black" type="button" disabled>删除</button>
+			<button id="btnStartMonitor" class="btn black" type="button" disabled>开始监控</button>
+			<button id="btnStopMonitor" class="btn black" type="button" disabled>停止监控</button>
 		</div>
 		<p>
 		<div class="row-fluid">
@@ -29,10 +31,12 @@
 					<th data-field="type" data-width="100" data-align="center" data-valign="middle" data-sortable="true" data-formatter="Configure.Node.typeFormatter">类型</th>
 					<th data-field="weight" data-width="100" data-align="center" data-valign="middle" data-sortable="true">权重</th>
 					<th data-field="pid" data-width="100" data-align="center" data-valign="middle" data-sortable="true">进程号</th>
-					<th data-field="createTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建时间</th>
+					<th data-field="status" data-width="100" data-align="center" data-valign="middle" data-sortable="true">状态</th>
+					<th data-field="monitored" data-width="100" data-align="center" data-valign="middle" data-sortable="true">是否监控</th>
+					<!-- <th data-field="createTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建时间</th>
 					<th data-field="createUserName" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建人</th>
 					<th data-field="modifyTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">修改时间</th>
-					<th data-field="modifyUserName" data-width="100" data-align="center" data-valign="middle" data-sortable="true">修改人</th>
+					<th data-field="modifyUserName" data-width="100" data-align="center" data-valign="middle" data-sortable="true">修改人</th> -->
 				</tr>
 				</thead>
 			</table>

@@ -132,7 +132,7 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			OperatingSystemMXBean os = new OperatingSystemImpl(jmxClient);
 			monitor.setOs(os.getName());
 			monitor.setAvailableProcessors(os.getAvailableProcessors());
-			monitor.setCpuRatio(os.cpuRatio());
+			monitor.setCpuRatio(os.cpuRatio(2000));
 			
 			/** Set update time */
 			monitor.setUpdateTime(System.currentTimeMillis());
@@ -176,8 +176,13 @@ public class JmxMonitorQuartz extends BaseQuartz {
 
 	@Override
 	public void destroy() throws QuartzException {
-		redisClient.hdel(NodeType.value(node.getType()).name(), address);
-		jmxClient.close();
+		try {
+			redisClient.hdel(NodeType.value(node.getType()).name(), address);
+			jmxClient.close();
+		} catch(Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		
 		JmxClientManager.remove(address, jmxClient);
 		nodeMap.remove(node.getId(), node);
 	}

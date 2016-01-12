@@ -16,7 +16,8 @@
 package org.machairodus.commons.util;
 
 public enum RedisKeys {
-	JMX_MONITOR("JMX-MONITOR");
+	JMX_MONITOR("JMX-MONITOR"),
+	JMX_MONITOR_NODE("JMX-MONITOR-NODE");
 
 	private String value;
 

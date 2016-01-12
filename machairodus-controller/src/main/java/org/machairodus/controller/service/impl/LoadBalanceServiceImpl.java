@@ -80,24 +80,27 @@ public class LoadBalanceServiceImpl implements LoadBalanceService {
 			Iterator<Entry<String, JmxMonitor>> iterator = map.entrySet().iterator();
 			iterator.forEachRemaining(entry -> {
 				JmxMonitor monitor = entry.getValue();
-				if(System.currentTimeMillis() - timeout > monitor.getUpdateTime()) {
-					Socket socket = null;
-					try {
-						socket = new Socket(monitor.getHost(), monitor.getPort());
-						if(socket.isConnected())
-							socket.close();
-						
-						monitor.setStatus(JmxMonitorStatus.TIMEOUT);
-					} catch (Exception e) {
-						monitor.setStatus(JmxMonitorStatus.DOWN);
-						
-					} finally {
-						socket = null;
-					}
+				
+				Socket socket = null;
+				try {
+					socket = new Socket(monitor.getHost(), monitor.getPort());
+					if(socket.isConnected())
+						socket.close();
 					
+					if(System.currentTimeMillis() - timeout > monitor.getUpdateTime()) {
+						monitor.setStatus(JmxMonitorStatus.MONITOR_DOWN);
+						redisClient.hset(nodeType, entry.getKey(), monitor);
+						iterator.remove();
+					}
+				} catch (Exception e) {
+					monitor.setStatus(JmxMonitorStatus.DOWN);
 					redisClient.hset(nodeType, entry.getKey(), monitor);
 					iterator.remove();
+					
+				} finally {
+					socket = null;
 				}
+				
 			});
 		}
 	}

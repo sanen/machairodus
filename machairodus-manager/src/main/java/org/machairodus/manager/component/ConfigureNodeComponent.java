@@ -18,6 +18,7 @@ package org.machairodus.manager.component;
 import org.machairodus.manager.component.impl.ConfigureNodeComponentImpl;
 import org.machairodus.mappers.domain.NodeConfig;
 import org.nanoframework.core.component.stereotype.Component;
+import org.nanoframework.core.component.stereotype.bind.PathVariable;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
 import org.nanoframework.core.component.stereotype.bind.RequestParam;
 
@@ -49,4 +50,11 @@ public interface ConfigureNodeComponent {
 	@RequestMapping("/find/simple")
 	Object findSimple(@RequestParam(name = "param", required = false) String param, @RequestParam(name = "offset") Integer offset, 
 			@RequestParam(name = "limit") Integer limit);
+	
+	@RequestMapping("/monitor/start/{id}")
+	Object startMonitor(@PathVariable("id") Long id);
+	
+	@RequestMapping("/monitor/stop/{id}")
+	Object stopMonitor(@PathVariable("id") Long id);
+	
 }

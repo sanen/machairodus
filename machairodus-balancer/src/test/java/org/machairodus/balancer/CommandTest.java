@@ -33,11 +33,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
+import org.machairodus.commons.token.Token;
 import org.machairodus.mappers.domain.NodeConfig;
 import org.machairodus.mappers.domain.NodeType;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.commons.util.CollectionUtils;
+import org.nanoframework.commons.util.MD5Utils;
 
 import com.google.common.collect.Maps;
 
@@ -56,6 +58,7 @@ public class CommandTest {
 			node.setServerAddress("192.168.180.137");
 			node.setType(NodeType.BALANCER.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 			
 			params = Maps.newHashMap();
@@ -67,6 +70,7 @@ public class CommandTest {
 			node.setServerAddress("10.1.193.202");
 			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 			
 			params = Maps.newHashMap();
@@ -78,6 +82,7 @@ public class CommandTest {
 			node.setServerAddress("10.1.193.202");
 			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 			
 			params = Maps.newHashMap();
@@ -89,6 +94,7 @@ public class CommandTest {
 			node.setServerAddress("10.1.193.202");
 			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 			
 			params = Maps.newHashMap();
@@ -100,6 +106,7 @@ public class CommandTest {
 			node.setServerAddress("10.1.193.202");
 			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 			
 			params = Maps.newHashMap();
@@ -111,6 +118,7 @@ public class CommandTest {
 			node.setServerAddress("10.1.193.202");
 			node.setType(NodeType.SERVICE_NODE.value());
 			params.put("nodeConfig", node);
+			params.put("token", Token.encode(MD5Utils.getMD5String(node.toString())));
 			post("http://localhost:7200/balancer/cmd/create?", params);
 		} catch(Throwable e) {
 			LOG.error(e.getMessage(), e);
@@ -120,6 +128,8 @@ public class CommandTest {
 	
 	public void destroyTest() {
 		try {
+			Map<String, Object> params = Maps.newHashMap();
+			params.put("token", Token.encode(MD5Utils.getMD5String("1")));
 			post("http://localhost:7200/balancer/cmd/destroy/1", null);
 		} catch(Throwable e) {
 			LOG.error(e.getMessage(), e);

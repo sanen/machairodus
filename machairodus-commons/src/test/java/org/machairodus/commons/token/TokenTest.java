@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.util;
+package org.machairodus.commons.token;
 
-public class MachairodusConstants {
+import org.junit.Test;
+import org.nanoframework.commons.support.logging.Logger;
+import org.nanoframework.commons.support.logging.LoggerFactory;
 
-	public static final String PASSWD_VIEW = "******";
+public class TokenTest {
+	private Logger LOG = LoggerFactory.getLogger(TokenTest.class);
 	
-	public static final String MONITORED = "MONITORED";
+	@Test
+	public void test0() {
+		String token = Token.encode("HelloWorld");
+		LOG.debug(token);
+		
+		boolean isOK = Token.decode(token);
+		LOG.debug("Token decode isOK? " + isOK);
+		
+	}
 }

@@ -6,6 +6,8 @@ Configure.Node = function(){
 	$btnModify = $('#btnModify'), 
 	$btnRefresh = $('#btnRefresh'), 
 	$btnDelete = $('#btnDelete'), 
+	$btnStartMonitor = $('#btnStartMonitor'),
+	$btnStopMonitor = $('#btnStopMonitor'),
 	
 	$btnFindEnter = $('#btnFindEnter'),
 	$btnFindCancle = $('#btnFindCancle'),
@@ -250,6 +252,74 @@ Configure.Node = function(){
 		}
 	}
 	
+	var startMonitor = function() {
+		var selections = $table.bootstrapTable('getSelections');
+		if(selections.length > 0) {
+			$.ajax({
+				url: context + '/configure/node/monitor/start/' + selections[0].id,
+				type: "POST", 
+				contentType: "application/x-www-form-urlencoded; charset=utf-8", 
+				success: function(data) {
+					if(data.status) {
+						if(data.status == '2001') {
+							selections[0].status = data.jmxStatus;
+							selections[0].monitored = data.monitored;
+							$table.bootstrapTable('updateByUniqueId', {
+								id: selections[0].id, 
+								row: selections[0]
+							});
+							
+							updateButtonStatus();
+						} else if(data.status == '2099') {
+							$.messager.alert('错误', data.message);
+						}
+					} else {
+						$.messager.alert('错误', '未知错误');
+					}
+				}, 
+				error: function(data) {
+					$.messager.alert('错误', data);
+				}
+			});
+		} else {
+			updateButtonStatus();
+		}
+	}
+	
+	var stopMonitor = function() {
+		var selections = $table.bootstrapTable('getSelections');
+		if(selections.length > 0) {
+			$.ajax({
+				url: context + '/configure/node/monitor/stop/' + selections[0].id,
+				type: "POST", 
+				contentType: "application/x-www-form-urlencoded; charset=utf-8", 
+				success: function(data) {
+					if(data.status) {
+						if(data.status == '2001') {
+							selections[0].status = data.jmxStatus;
+							selections[0].monitored = data.monitored;
+							$table.bootstrapTable('updateByUniqueId', {
+								id: selections[0].id, 
+								row: selections[0]
+							});
+							
+							updateButtonStatus();
+						} else if(data.status == '2099') {
+							$.messager.alert('错误', data.message);
+						}
+					} else {
+						$.messager.alert('错误', '未知错误');
+					}
+				}, 
+				error: function(data) {
+					$.messager.alert('错误', data);
+				}
+			});
+		} else {
+			updateButtonStatus();
+		}
+	}
+	
 	var initTable = function() {
 		$table.bootstrapTable({
 			method: 'post',
@@ -275,9 +345,24 @@ Configure.Node = function(){
 	}
 	
 	var updateButtonStatus = function() {
-		var isSelected = !$table.bootstrapTable('getSelections').length;
+		var selections;
+		var isSelected = !(selections = $table.bootstrapTable('getSelections')).length;
 		$btnDelete.prop('disabled', isSelected);
 		$btnModify.prop('disabled', isSelected);
+		
+		if(!isSelected) {
+			if(selections[0].monitored) {
+				$btnStartMonitor.prop('disabled', true);
+				$btnStopMonitor.prop('disabled', false);
+			} else {
+				$btnStartMonitor.prop('disabled', false);
+				$btnStopMonitor.prop('disabled', true);
+			}
+			
+		} else {
+			$btnStartMonitor.prop('disabled', isSelected);
+			$btnStopMonitor.prop('disabled', isSelected);
+		}
 	}
 	
 	var getIdSelections = function() {
@@ -292,6 +377,8 @@ Configure.Node = function(){
 		$btnModify.bind('click', modify);
 		$btnRefresh.bind('click', refresh);
 		$btnDelete.bind('click', _delete);
+		$btnStartMonitor.bind('click', startMonitor);
+		$btnStopMonitor.bind('click', stopMonitor);
 		
 		$btnFindEnter.bind('click', findEnter);
 		$btnFindCancle.bind('click', findCancle);

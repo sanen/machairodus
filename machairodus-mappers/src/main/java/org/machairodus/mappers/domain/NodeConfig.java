@@ -29,9 +29,9 @@ public class NodeConfig extends BaseEntity {
 	private String serverAddress;
 	private String name;
 	private Integer port;
-	private Integer jmxPort;
+	private Integer jmxPort = 0;
 	private Integer type;
-	private Integer weight;
+	private Integer weight = 0;
 	private Integer startup;
 	private Integer pid;
 	private Timestamp createTime;

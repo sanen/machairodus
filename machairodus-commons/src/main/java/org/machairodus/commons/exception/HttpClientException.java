@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.util;
+package org.machairodus.commons.exception;
 
-public class MachairodusConstants {
+public class HttpClientException extends RuntimeException {
+	private static final long serialVersionUID = -8782652555253035890L;
 
-	public static final String PASSWD_VIEW = "******";
-	
-	public static final String MONITORED = "MONITORED";
+	public HttpClientException() {
+		super();
+	}
+
+	public HttpClientException(String message) {
+		super(message);
+	}
+
+	public HttpClientException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public HttpClientException(Throwable cause) {
+		super(cause);
+	}
 }

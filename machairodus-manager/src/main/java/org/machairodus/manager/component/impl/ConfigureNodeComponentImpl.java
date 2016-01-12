@@ -22,16 +22,28 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+import org.machairodus.commons.util.RedisClientNames;
+import org.machairodus.commons.util.RedisKeys;
 import org.machairodus.manager.component.ConfigureNodeComponent;
+import org.machairodus.manager.service.ConfigureNodeService;
 import org.machairodus.manager.service.PermissionService;
+import org.machairodus.mappers.domain.JmxMonitor;
+import org.machairodus.mappers.domain.JmxMonitorStatus;
 import org.machairodus.mappers.domain.NodeConfig;
+import org.machairodus.mappers.domain.NodeType;
 import org.machairodus.mappers.domain.User;
 import org.machairodus.mappers.mapper.manager.ConfigureNodeMapper;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
+import org.nanoframework.commons.util.CollectionUtils;
+import org.nanoframework.commons.util.ObjectCompare;
 import org.nanoframework.commons.util.StringUtils;
+import org.nanoframework.orm.jedis.GlobalRedisClient;
+import org.nanoframework.orm.jedis.RedisClient;
 import org.nanoframework.orm.mybatis.MultiTransactional;
 
+import com.alibaba.fastjson.TypeReference;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
@@ -44,6 +56,12 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 	@Inject
 	private PermissionService permissionService;
 	
+	@Inject
+	private ConfigureNodeService nodeService;
+	
+	private RedisClient redisClient = GlobalRedisClient.get(RedisClientNames.MANAGER.value());
+	private TypeReference<JmxMonitor> typeReference = new TypeReference<JmxMonitor>() { };
+	
 	@Override
 	public Object find(Long[] server, String[] node, Integer[] type, Boolean init, String sort, String order, Integer offset, Integer limit) {
 		try {
@@ -52,9 +70,36 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 			
 			List<NodeConfig> nodeConfigs = configureNodeMapper.find(server, node, type, sort, order, offset, limit);
 			long total = configureNodeMapper.findTotal(server, node, type);
+			List<Map<String, Object>> nodes = Lists.newArrayList();
+			if(!CollectionUtils.isEmpty(nodeConfigs)) {
+				nodeConfigs.forEach(config -> {
+					String _type = NodeType.value(config.getType()).name();
+					String address = redisClient.hget(RedisKeys.JMX_MONITOR_NODE.value(), String.valueOf(config.getId()));
+					
+					Map<String, Object> _node = config._getBeanToMap();
+					if(StringUtils.isNotBlank(address)) {
+						_node.put("monitored", true);
+						
+						JmxMonitor monitor = redisClient.hget(_type, String.valueOf(config.getId()), typeReference);
+						if(monitor != null) {
+							_node.put("pid", monitor.getPid());
+							_node.put("status", monitor.getStatus());
+							if(ObjectCompare.isInList(monitor.getStatus(), JmxMonitorStatus.DOWN, JmxMonitorStatus.TIMEOUT, JmxMonitorStatus.MONITOR_DOWN))
+								_node.put("monitored", false);
+							
+						} else {
+							_node.put("status", JmxMonitorStatus.DOWN);
+						}
+					} else {
+						_node.put("monitored", false);
+					}
+					
+					nodes.add(_node);
+				});
+			}
 			
 			Map<String, Object> map = OK._getBeanToMap();
-			map.put("rows", nodeConfigs);
+			map.put("rows", nodes);
 			map.put("total", total);
 			return map;
 		} catch(Exception e) {
@@ -206,6 +251,47 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 			Map<String, Object> map = FAIL._getBeanToMap();
 			map.put("message", "查询ConfigureNode异常");
 			return map;
+		}
+	}
+	
+	@Override
+	public Object startMonitor(Long id) {
+		try {
+			NodeConfig node = configureNodeMapper.findById(id);
+			if(node == null)
+				return FAIL;
+					
+			if(nodeService.startMonitor(node)) {
+				Map<String, Object> ok = OK._getBeanToMap();
+				ok.put("jmxStatus", JmxMonitorStatus.PENDING);
+				ok.put("monitored", true);
+				return ok;
+			} else 
+				return FAIL;
+		} catch(Exception e) {
+			LOG.error("启动监控异常: " + e.getMessage());
+			return FAIL;
+		}
+		
+	}
+	
+	@Override
+	public Object stopMonitor(Long id) {
+		try {
+			NodeConfig node = configureNodeMapper.findById(id);
+			if(node == null)
+				return FAIL;
+			
+			if(nodeService.stopMonitor(node)) {
+				Map<String, Object> ok = OK._getBeanToMap();
+				ok.put("jmxStatus", JmxMonitorStatus.PENDING);
+				ok.put("monitored", false);
+				return ok;
+			} else 
+				return FAIL;
+		} catch(Exception e) {
+			LOG.error("启动监控异常: " + e.getMessage());
+			return FAIL;
 		}
 	}
 }

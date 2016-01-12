@@ -30,9 +30,9 @@ import com.google.inject.ImplementedBy;
 @RequestMapping("/cmd")
 public interface CommandComponent {
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	Object create(@RequestParam(name = "nodeConfig") NodeConfig node);
+	Object create(@RequestParam(name = "nodeConfig") NodeConfig node, @RequestParam(name = "token") String token);
 	
 	@RequestMapping("/destroy/{id}")
-	Object destroy(@PathVariable("id") Long id);
+	Object destroy(@PathVariable("id") Long id, @RequestParam(name = "token") String token);
 	
 }
