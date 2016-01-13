@@ -15,7 +15,13 @@
  */
 package org.machairodus.balancer.quartz;
 
-import java.rmi.ConnectException;
+import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,21 +34,10 @@ import org.machairodus.mappers.domain.NodeConfig;
 import org.machairodus.mappers.domain.NodeType;
 import org.machairodus.mappers.mapper.balancer.ConfigureNodeMapper;
 import org.nanoframework.commons.util.Assert;
+import org.nanoframework.commons.util.StringUtils;
 import org.nanoframework.extension.concurrent.exception.QuartzException;
 import org.nanoframework.extension.concurrent.quartz.BaseQuartz;
 import org.nanoframework.extension.concurrent.quartz.QuartzConfig;
-import org.nanoframework.jmx.client.JmxClient;
-import org.nanoframework.jmx.client.JmxClientManager;
-import org.nanoframework.jmx.client.management.ClassLoadingMXBean;
-import org.nanoframework.jmx.client.management.MemoryMXBean;
-import org.nanoframework.jmx.client.management.OperatingSystemMXBean;
-import org.nanoframework.jmx.client.management.RuntimeMXBean;
-import org.nanoframework.jmx.client.management.ThreadMXBean;
-import org.nanoframework.jmx.client.management.impl.ClassLoadingImpl;
-import org.nanoframework.jmx.client.management.impl.MemoryImpl;
-import org.nanoframework.jmx.client.management.impl.OperatingSystemImpl;
-import org.nanoframework.jmx.client.management.impl.RuntimeImpl;
-import org.nanoframework.jmx.client.management.impl.ThreadImpl;
 import org.nanoframework.orm.jedis.GlobalRedisClient;
 import org.nanoframework.orm.jedis.RedisClient;
 
@@ -55,25 +50,23 @@ import com.google.inject.Inject;
  * @author yanghe
  * @date 2016年1月8日 上午9:46:03
  */
-public class JmxMonitorQuartz extends BaseQuartz {
+public class LocalJmxMonitorQuartz extends BaseQuartz {
 	private static final ConcurrentMap<Long, NodeConfig> nodeMap = new ConcurrentHashMap<>();
 	private RedisClient redisClient = GlobalRedisClient.get(RedisClientNames.MANAGER.value());
 	private NodeConfig node;
-	private JmxClient jmxClient;
 	private String address;
 	
 	@Inject
 	private ConfigureNodeMapper nodeMapper;
 	
-	public JmxMonitorQuartz() {
+	public LocalJmxMonitorQuartz() {
 		
 	}
 	
-	public JmxMonitorQuartz(QuartzConfig config, NodeConfig nodeConfig) {
+	public LocalJmxMonitorQuartz(QuartzConfig config, NodeConfig nodeConfig) {
 		Assert.notNull(config, "QuartzConfig must be not null.");
 		setConfig(config);
 		setNode(nodeConfig);
-		connect(nodeConfig);
 	}
 	
 	@Override
@@ -81,12 +74,16 @@ public class JmxMonitorQuartz extends BaseQuartz {
 		
 	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	public void execute() throws QuartzException {
+		if(StringUtils.isBlank(address))
+			address = node.getServerAddress() + ":" + node.getJmxPort();
+		
 		JmxMonitor monitor = new JmxMonitor();
 		try {
 			/** Runtime */
-			RuntimeMXBean runtime = new RuntimeImpl(jmxClient);
+			RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 			monitor.setUptime(runtime.getUptime());
 			monitor.setName(runtime.getName());
 			String[] rt = monitor.getName().split("@");
@@ -95,13 +92,13 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			monitor.setStartTime(runtime.getStartTime());
 			
 			/** ClassLoading */
-			ClassLoadingMXBean classLoading = new ClassLoadingImpl(jmxClient);
+			ClassLoadingMXBean classLoading = ManagementFactory.getClassLoadingMXBean();
 			monitor.setLoadedClassCount(classLoading.getLoadedClassCount());
 			monitor.setUnloadedClassCount(classLoading.getUnloadedClassCount());
 			monitor.setTotalLoadedClassCount(classLoading.getTotalLoadedClassCount());
 			
 			/** Memory */
-			MemoryMXBean memory = new MemoryImpl(jmxClient);
+			MemoryMXBean memory = ManagementFactory.getMemoryMXBean();
 			java.lang.management.MemoryUsage heapMemoryUsage = memory.getHeapMemoryUsage();
 			Map<MemoryUsage, Long> heap = Maps.newHashMap();
 			long used, max;
@@ -122,17 +119,17 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			monitor.setNonHeapMemoryUsage(nonHeap);
 			
 			/** Threading */
-			ThreadMXBean thread = new ThreadImpl(jmxClient);
+			ThreadMXBean thread = ManagementFactory.getThreadMXBean();
 			monitor.setTotalStartedThreadCount(thread.getTotalStartedThreadCount());
 			monitor.setThreadCount(thread.getThreadCount());
 			monitor.setDaemonThreadCount(thread.getDaemonThreadCount());
 			monitor.setPeakThreadCount(thread.getPeakThreadCount());
 			
 			/** OS */
-			OperatingSystemMXBean os = new OperatingSystemImpl(jmxClient);
+			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 			monitor.setOs(os.getName());
 			monitor.setAvailableProcessors(os.getAvailableProcessors());
-			monitor.setCpuRatio(os.cpuRatio(1000));
+			monitor.setCpuRatio(cpuRatio(1000, true, os));
 			
 			/** Set update time */
 			monitor.setUpdateTime(System.currentTimeMillis());
@@ -155,15 +152,9 @@ public class JmxMonitorQuartz extends BaseQuartz {
 				redisClient.hset("PID", node.getId().toString(), monitor.getPid());
 			}
 		} catch(Throwable e) {
-			if(e.getCause() != null && e.getCause() instanceof ConnectException) {
-				try { 
-					jmxClient.reconnect(); 
-				} catch(ConnectException ex) { 
-					LOG.error("Reconnect Error: " + ex.getMessage());
-					redisClient.hdel(NodeType.value(node.getType()).name(), address);
-					thisWait(1000);
-				}
-			}
+			LOG.error(e.getMessage(), e);
+			redisClient.hdel(NodeType.value(node.getType()).name(), address);
+			thisWait(1000);
 		}
 		
 	}
@@ -177,12 +168,10 @@ public class JmxMonitorQuartz extends BaseQuartz {
 	public void destroy() throws QuartzException {
 		try {
 			redisClient.hdel(NodeType.value(node.getType()).name(), address);
-			jmxClient.close();
 		} catch(Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		
-		JmxClientManager.remove(address, jmxClient);
 		nodeMap.remove(node.getId(), node);
 	}
 
@@ -203,14 +192,28 @@ public class JmxMonitorQuartz extends BaseQuartz {
 		
 		if(nodeMap.get(node.getId()) != null)
 			throw new QuartzException("Exists NodeConfig JmxMonitor");
+		
+		nodeMap.put(node.getId(), node);
 	}
 	
 	public static boolean exists(Long nodeId) {
 		return nodeMap.keySet().contains(nodeId);
 	}
 	
-	public void connect(NodeConfig node) {
-		jmxClient = JmxClientManager.get((address = node.getServerAddress() + ":" + node.getJmxPort()));
-		nodeMap.put(node.getId(), node);
+	@SuppressWarnings("restriction")
+	public double cpuRatio(long time, boolean ifAvaProc, com.sun.management.OperatingSystemMXBean os) {
+		Long start = System.currentTimeMillis();  
+        long startT = os.getProcessCpuTime();  
+        try { Thread.sleep(time); } catch (InterruptedException e) { }
+        Long end = System.currentTimeMillis();  
+        long endT = os.getProcessCpuTime();  
+        double ratio = (endT - startT) / 1000000.0 / (end - start);
+        if(ifAvaProc)
+        	ratio /= os.getAvailableProcessors();
+        
+        BigDecimal decimal = new BigDecimal(ratio * 100);
+        return decimal.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        
 	}
+	
 }

@@ -29,7 +29,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-@Quartz(name = "LoadBalancerQuartz", cron = "*/2 * * * * ?", parallel = 1)
+@Quartz(name = "LoadBalancerQuartz", cron = "* * * * * ?", parallel = 1)
 public class LoadBalanceQuartz extends BaseQuartz {
 
 	@Inject

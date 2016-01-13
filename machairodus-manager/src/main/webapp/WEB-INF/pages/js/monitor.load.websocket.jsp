@@ -22,7 +22,7 @@ Chat.connect = (function(host) {
 
 	Chat.socket.onmessage = function(message) {
 		var json = JSON.parse(message.data);
-		Monitor.TPS.receiver(json);
+		Monitor.Load.receiver(json);
 	};
 });
 
@@ -30,15 +30,16 @@ Chat.initialize = function() {
 	Chat.connect('<%=request.getAttribute("url") %>');
 };
 
-Chat.sendMessage = function(id, server, type, sendMessage_count) {
+Chat.sendMessage = function(id, server, nodeType, type, sendMessage_count) {
 	if(server && type) {
 		if(server.indexOf(':') > 0) {
 			var map = {
 				uid: '<%=request.getAttribute("uid") %>',
 				sid: '<%=request.getAttribute("sid") %>', 
-				monitorType: 'monitor.tps', 
+				monitorType: 'monitor.load', 
 				id: id,
-				server: server, 
+				server: '-', 
+				nodeType: nodeType, 
 				type: type
 			};
 			
@@ -50,7 +51,7 @@ Chat.sendMessage = function(id, server, type, sendMessage_count) {
 			if(sendMessage_count > 100)
 				return ;
 			
-			setTimeout(function() { Chat.sendMessage(id, server, type, ++ sendMessage_count); }, 10);
+			setTimeout(function() { Chat.sendMessage(id, server, nodeType, type, ++ sendMessage_count); }, 10);
 		}
 	} else {
 		console.log('Unknown select server');

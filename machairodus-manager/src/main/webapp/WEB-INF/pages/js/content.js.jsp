@@ -72,6 +72,11 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 			break;
 		case MONITOR_LOAD: 
 			%>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/flotr2.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/jquery.queue.js"></script>
+			<script src="${pageContext.request.contextPath}/script/websocket?id=monitor.load"></script>
 			<script src="${pageContext.request.contextPath}/media/js/monitor.load.js"></script>
 			<%
 			break;

@@ -16,7 +16,7 @@
 package org.machairodus.manager.service;
 
 public enum MonitorType {
-	TPS("monitor.tps");
+	TPS("monitor.tps"), LOAD("monitor.load");
 	
 	private String value;
 	private MonitorType(String value) {

@@ -91,6 +91,7 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 							_node.put("status", JmxMonitorStatus.DOWN);
 						}
 					} else {
+						_node.put("status", JmxMonitorStatus.CLOSED);
 						_node.put("monitored", false);
 					}
 					

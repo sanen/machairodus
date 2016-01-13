@@ -79,6 +79,22 @@ public class ConfigureNodeServiceImpl implements ConfigureNodeService {
 					}
 				}
 				
+				// Redis中的Balancer全部无法连接时
+				for(NodeConfig _node : nodes) {
+					Socket socket;
+					try {
+						socket = new Socket(_node.getServerAddress(), _node.getPort());
+						if(socket.isConnected()) 
+							socket.close();
+						
+						return startMonitor0(node, _node.getServerAddress() + ":" + _node.getPort());
+					} catch(Exception e) {
+						continue ;
+					} finally {
+						socket = null;
+					}
+				}
+				
 			} else {
 				for(NodeConfig _node : nodes) {
 					Socket socket;
@@ -132,6 +148,7 @@ public class ConfigureNodeServiceImpl implements ConfigureNodeService {
 		try {
 			Map<String, Object> map = HttpClientUtil.post("http://" + address + "/balancer/cmd/destroy/" + id, params, new TypeReference<Map<String, Object>>() { });
 			if(map.get(ResultMap.STATUS).equals(ResponseStatus.OK.getStatus())) {
+				redisClient.hdel(RedisKeys.JMX_MONITOR_NODE.value(), id);
 				return true;
 			}
 		} catch(Exception e) {

@@ -135,7 +135,13 @@ Configure.Node = function(){
 		}
 			
 		var serverId = $('#dlgOption #server').val();
-		var serverName = $('#dlgOption #server').text();
+		var serverName;
+		$.each($('#dlgOption #server').select2('data'), function(idx, item) {
+			if(item.id == serverId) {
+				serverName = item.text;
+			}
+		});
+		
 		var selections = $table.bootstrapTable('getSelections');
 		if(selections.length > 0) {
 			if(serverId == null) {

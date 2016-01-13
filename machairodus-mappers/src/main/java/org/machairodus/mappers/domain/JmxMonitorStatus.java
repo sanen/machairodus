@@ -16,5 +16,5 @@
 package org.machairodus.mappers.domain;
 
 public enum JmxMonitorStatus {
-	PENDING, RUNNING, TIMEOUT, MONITOR_DOWN, DOWN, FAIL, SUCCESS
+	PENDING, RUNNING, TIMEOUT, MONITOR_DOWN, DOWN, CLOSED, FAIL, SUCCESS
 }

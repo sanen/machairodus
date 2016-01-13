@@ -30,3 +30,53 @@ input.search-input {
     margin-bottom: 5px;
     width: 100%;
 }
+
+.margin_right_5 {
+	margin-right: 5px;
+}
+
+panel float_left margin_right_5 {
+	margin-right: 5px;
+}
+
+.float-left {
+	float: left;
+}
+
+.margin_top_5 {
+	margin-top: 5px;
+}
+
+.margin_bottom_5 {
+	margin-bottom: 5px;
+}
+
+.padding_left_5 {
+	padding-left: 5px;
+}
+
+.padding_bottom_5 {
+	padding-bottom: 5px;
+}
+
+.float_left {
+	float: left;
+}
+
+.height_100 {
+	height: 100%;
+}
+
+.width_100 {
+	width: 100%;
+}
+
+.border_set {
+	border-width: 1px;
+	border-color: #cef
+}
+
+.absolute_right {
+	right:7px;
+	position:absolute;
+}
