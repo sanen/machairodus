@@ -37,9 +37,9 @@ public interface ConfigureNodeMapper {
 
 	long delete(@Param("id") Long id, @Param("modifyUserId") Long modifyUserId);
 
-	List<NodeConfig> findSimple(@Param("param") String param, @Param("offset") Integer offset, @Param("limit") Integer limit);
+	List<NodeConfig> findSimple(@Param("param") String param, @Param("type") Integer[] type, @Param("offset") Integer offset, @Param("limit") Integer limit);
 	
-	long findSimpleTotal(@Param("param") String param);
+	long findSimpleTotal(@Param("param") String param, @Param("type") Integer[] type);
 	
 	List<NodeConfig> findUnAssign(@Param("schedulerId") Long schedulerId);
 	

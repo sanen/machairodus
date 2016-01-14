@@ -222,6 +222,7 @@ Monitor.Load = function() {
 				    delay: 300,
 				    data: function (params) {
 				      return {
+				    	'type[]': [1, 2, 3], 
 				        param: params.term,
 				        offset: (params.page || 0) * 10,
 				        limit: 10
@@ -241,12 +242,12 @@ Monitor.Load = function() {
 				  },
 				  initSelection: function(element, callback) {  
 					  if (id !== "") {
-						  $.ajax(context + '/configure/server/find/id', {
+						  $.ajax(context + '/configure/node/find/id', {
 							  data : { id : id },
 							  dataType : "json"
 						  }).done(function(data) {
 							  callback(data.rows);
-							  reloadMonitor(data.rows[0].id);
+							  reloadMonitor(data.rows[0].id, data.rows[0]);
 						  });
 					  }  
 			      }, 
@@ -263,6 +264,7 @@ Monitor.Load = function() {
 				    delay: 300,
 				    data: function (params) {
 				      return {
+				    	'type[]': [1, 2, 3], 
 				        param: params.term,
 				        offset: (params.page || 0) * 10,
 				        limit: 10
@@ -291,37 +293,61 @@ Monitor.Load = function() {
 		});
 	}
 	
-	var reloadMonitor = function(id) {
-		$.cookie("shell-server-mapper", id, { expires : 30, path : "/" });
-		queues['viewCpu'].clear();
-		queues['viewMemory_COMMITED'].clear();
-		queues['viewMemory_USED'].clear();
-		queues['viewClasses_LOADED'].clear();
-		queues['viewClasses_UNLOADED'].clear();
-		queues['viewThreads_THREAD_COUNT'].clear();
-		queues['viewThreads_DAEMON_THREAD_COUNT'].clear();
-		diffTime = 0;
-		var text;
-		var nodeType;
-		$.each($('#node').select2('data'), function(idx, item) {
-			if(item.id == $('#node').val()) {
-				text = item.text;
-				nodeType = item.type;
+	var reloadMonitor = function(id, row) {
+		setTimeout(function() {
+			$.cookie("shell-server-mapper", id, { expires : 30, path : "/" });
+			queues['viewCpu'].clear();
+			queues['viewMemory_COMMITED'].clear();
+			queues['viewMemory_USED'].clear();
+			queues['viewClasses_LOADED'].clear();
+			queues['viewClasses_UNLOADED'].clear();
+			queues['viewThreads_THREAD_COUNT'].clear();
+			queues['viewThreads_DAEMON_THREAD_COUNT'].clear();
+			diffTime = 0;
+			
+			var text;
+			var nodeType;
+			if(row) {
+				text = row.serverName + "." + row.name + "(" + row.serverAddress + ":" + row.jmxPort + "), TYPE: " + this.nodeType(row.type);
+				nodeType = row.type;
+			} else {
+				$.each($('#node').select2('data'), function(idx, item) {
+					if(item.id == $('#node').val()) {
+						text = item.text;
+						nodeType = item.type;
+					}
+				});
 			}
-		});
 		
-		Chat.sendMessage(id, text, nodeType, 'add');
+			Chat.sendMessage(id, text, nodeType, 'add');
+		}, 1000);
 	}
 	
 	var formatRepo = function(repo) {
 		if (repo.loading) return repo.text;
-
-		repo.text = repo.serverAddress + ":" + repo.jmxPort;
-	    return repo.serverAddress + ":" + repo.jmxPort;
+		
+		repo.text = repo.serverName + "." + repo.name + "(" + repo.serverAddress + ":" + repo.jmxPort + "), TYPE: " + this.nodeType(repo.type);
+	    return repo.text;
 	}
 
 	var formatRepoSelection = function(repo) {
-	  	return repo.text;
+		if(repo.text)
+			return repo.text;
+		
+	  	return formatRepo(repo);
+	}
+	
+	this.nodeType = function(type) {
+		switch(type) {
+			case 1: 
+				return '均衡器';
+			case 2: 
+				return '调度器';
+			case 3: 
+				return '服务节点';
+			default: 
+				return 'Unknown';
+		}
 	}
 	
 	return {
@@ -346,9 +372,11 @@ Monitor.Load = function() {
 				initSelect2();
 			}, 100);
 			
-			$(window).resize(function() {
-				setTimeout(function() { resizePanel(); }, 90);
-			});
+			var resize;
+			window.onresize = function() { 
+				if (resize) clearTimeout(resize);
+				resize = setTimeout(function() { resizePanel(); }, 90);
+			};
 		},
 		
 		receiver : function(data) {

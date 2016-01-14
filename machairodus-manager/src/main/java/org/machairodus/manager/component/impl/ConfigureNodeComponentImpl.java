@@ -31,6 +31,7 @@ import org.machairodus.mappers.domain.JmxMonitor;
 import org.machairodus.mappers.domain.JmxMonitorStatus;
 import org.machairodus.mappers.domain.NodeConfig;
 import org.machairodus.mappers.domain.NodeType;
+import org.machairodus.mappers.domain.ServerConfig;
 import org.machairodus.mappers.domain.User;
 import org.machairodus.mappers.mapper.manager.ConfigureNodeMapper;
 import org.nanoframework.commons.support.logging.Logger;
@@ -102,6 +103,25 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 			Map<String, Object> map = OK._getBeanToMap();
 			map.put("rows", nodes);
 			map.put("total", total);
+			return map;
+		} catch(Exception e) {
+			LOG.error("查询ConfigureNode异常: " + e.getMessage());
+			Map<String, Object> map = FAIL._getBeanToMap();
+			map.put("message", "查询ConfigureNode异常");
+			return map;
+		}
+	}
+	
+	@Override
+	public Object findById(Long id) {
+		try {
+			if(id == null)
+				return OK;
+			
+			NodeConfig nodeConfigs = configureNodeMapper.findById(id);
+			Map<String, Object> map = OK._getBeanToMap();
+			map.put("rows", Lists.newArrayList(nodeConfigs));
+			map.put("total", 1);
 			return map;
 		} catch(Exception e) {
 			LOG.error("查询ConfigureNode异常: " + e.getMessage());
@@ -238,10 +258,10 @@ public class ConfigureNodeComponentImpl implements ConfigureNodeComponent {
 	}
 
 	@Override
-	public Object findSimple(String param, Integer offset, Integer limit) {
+	public Object findSimple(String param, Integer[] type, Integer offset, Integer limit) {
 		try {
-			List<NodeConfig> serverConfigs = configureNodeMapper.findSimple(param, offset, limit);
-			long total = configureNodeMapper.findSimpleTotal(param);
+			List<NodeConfig> serverConfigs = configureNodeMapper.findSimple(param, type, offset, limit);
+			long total = configureNodeMapper.findSimpleTotal(param, type);
 			
 			Map<String, Object> map = OK._getBeanToMap();
 			map.put("rows", serverConfigs);

@@ -83,8 +83,13 @@
 	
 	<select id="findSimple" resultType="org.machairodus.mappers.domain.NodeConfig" parameterType="java.util.Map">
 		select t1.id, t1.name, t1.port, t1.jmx_port as jmxPort, t2.name as serverName, t2.address as serverAddress, t1.type from t_scd_node_config t1 
-		left join t_scd_server_config t2 on t1.server_id = t2.id
-		where t1.type = 3
+		left join t_scd_server_config t2 on t1.server_id = t2.id where 
+		<if test="type == null">t1.type = 3</if>
+		<if test="type != null">t1.type in
+			<foreach collection="type" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
 		<if test="param != null and param != ''">
 			and (t1.name like '%${param}%' or t2.name like '%${param}%' or t2.address like '%${param}%')
 		</if>
@@ -94,8 +99,9 @@
 	
 	<select id="findSimpleTotal" resultType="java.lang.Long" parameterType="java.util.Map">
 		select count(1) from t_scd_node_config t1 
-		left join t_scd_server_config t2 on t1.server_id = t2.id
-		where t1.type = 3
+		left join t_scd_server_config t2 on t1.server_id = t2.id where 
+		<if test="type == null">t1.type = 3</if>
+		<if test="type != null">t1.type = #{type}</if>
 		<if test="param != null and param != ''">
 			and (t1.name like '%${param}%' or t2.name like '%${param}%' or t2.address like '%${param}%')
 		</if>

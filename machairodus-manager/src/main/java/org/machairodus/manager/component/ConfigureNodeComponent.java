@@ -38,6 +38,9 @@ public interface ConfigureNodeComponent {
 			@RequestParam(name = "offset") Integer offset, 
 			@RequestParam(name = "limit") Integer limit);
 	
+	@RequestMapping("/find/id")
+	Object findById(@RequestParam(name = "id", required = false) Long id);
+	
 	@RequestMapping("/add")
 	Object add(@RequestParam(name = "nodeConfig") NodeConfig nodeConfig);
 	
@@ -48,7 +51,7 @@ public interface ConfigureNodeComponent {
 	Object delete(@RequestParam(name = "id") Long id);
 	
 	@RequestMapping("/find/simple")
-	Object findSimple(@RequestParam(name = "param", required = false) String param, @RequestParam(name = "offset") Integer offset, 
+	Object findSimple(@RequestParam(name = "param", required = false) String param, @RequestParam(name = "type[]", required = false) Integer[] type, @RequestParam(name = "offset") Integer offset, 
 			@RequestParam(name = "limit") Integer limit);
 	
 	@RequestMapping("/monitor/start/{id}")

@@ -24,24 +24,24 @@
 	<div class="row-fluid" style="padding-left: 5px;">
 		<div class="control-group">
 			<span class="controls margin_right_5 float-left">
-				<select id="node" style="width: 312px;">
+				<select id="node" style="width: 500px;">
 					<option value="" selected="selected"></option>
 				</select>
 			</span>
 			<a id="bar" href="#" style="outline: medium none; overflow: hidden; text-align: center; text-decoration: none; vertical-align: middle;">
-				<span class="margin_right_5 float-left">
+				<span class="float-left" style="margin-left: 5px; margin-top:5px;">
 					<label for="chkCpu" class="margin_right_5 float-left">CPU</label>
 					<input id="chkCpu" type="checkbox" checked="checked">
 				</span>
-				<span class="margin_right_5 float-left">
+				<span class="float-left" style="margin-left: 5px; margin-top:5px;">
 					<label for="chkMemory" class="margin_right_5 float-left">Memory</label>
 					<input id="chkMemory" type="checkbox" checked="checked">
 				</span>
-				<span class="margin_right_5 float-left">
+				<span class="float-left" style="margin-left: 5px; margin-top:5px;">
 					<label for="chkClasses" class="margin_right_5 float-left">Classes</label>
 					<input id="chkClasses" type="checkbox" checked="checked">
 				</span>
-				<span class="margin_right_5 float-left">
+				<span class="float-left" style="margin-left: 5px; margin-top:5px;">
 					<label for="chkThreads" class="margin_right_5 float-left">Threads</label>
 					<input id="chkThreads" type="checkbox" checked="checked">
 				</span>
