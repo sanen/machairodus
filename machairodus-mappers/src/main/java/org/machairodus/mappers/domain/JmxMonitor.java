@@ -15,6 +15,7 @@
  */
 package org.machairodus.mappers.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.nanoframework.commons.entity.BaseEntity;
@@ -28,45 +29,55 @@ public class JmxMonitor extends BaseEntity {
 	private Integer port;
 	
 	/** Runtime */
-	private Long uptime;
+	private Long uptime = 0L;
 	private String name;
 	private String hostName;
 	private String pid;
 	private Long startTime;
 	
 	/** ClassLoading */
-	private Integer loadedClassCount;
-	private Long unloadedClassCount;
-	private Long totalLoadedClassCount;
+	private Integer loadedClassCount = 0;
+	private Long unloadedClassCount = 0L;
+	private Long totalLoadedClassCount = 0L;
 	
 	/** Memory */
-	private Map<MemoryUsage, Long> heapMemoryUsage;
-	private Map<MemoryUsage, Long> nonHeapMemoryUsage;
+	private Map<MemoryUsage, Long> heapMemoryUsage = DEFAULT_MEMORY_STATUS;
+	private Map<MemoryUsage, Long> nonHeapMemoryUsage = DEFAULT_MEMORY_STATUS;
 	
 	/** OS */
 	private String os;
-	private Long freePhysicalMemorySize;
-	private Long freeSwapSpaceSize;
-	private Long totalPhysicalMemorySize;
-	private Long totalSwapSpaceSize;
-	private Long commiteedVirtualMemorySize;
-	private Integer availableProcessors;
-	private Double processCpuLoad;
-	private Double systemCpuLoad;
-	private Double systemLoadAverage;
-	private Long processCpuTime;
-	private Double cpuRatio;
-	private Double totalCpuRatio;
+	private Long freePhysicalMemorySize = 0L;
+	private Long freeSwapSpaceSize = 0L;
+	private Long totalPhysicalMemorySize = 0L;
+	private Long totalSwapSpaceSize = 0L;
+	private Long commiteedVirtualMemorySize = 0L;
+	private Integer availableProcessors = 0;
+	private Double processCpuLoad = 0D;
+	private Double systemCpuLoad = 0D;
+	private Double systemLoadAverage = 0D;
+	private Long processCpuTime = 0L;
+	private Double cpuRatio = 0D;
+	private Double totalCpuRatio = 0D;
 	
 	/** Thread */
-	private Long totalStartedThreadCount;
-	private Integer threadCount;
-	private Integer daemonThreadCount;
-	private Integer peakThreadCount;
+	private Long totalStartedThreadCount = 0L;
+	private Integer threadCount = 0;
+	private Integer daemonThreadCount = 0;
+	private Integer peakThreadCount = 0;
 	private long[] allThreadIds;
 	
 	private Long updateTime;
 	private JmxMonitorStatus status;
+	
+	private static final Map<MemoryUsage, Long> DEFAULT_MEMORY_STATUS = new HashMap<MemoryUsage, Long>() {
+		private static final long serialVersionUID = -3324580956350564994L; {
+		put(MemoryUsage.MAX, 0L);
+		put(MemoryUsage.USED, 0L);
+		put(MemoryUsage.INIT, 0L);
+		put(MemoryUsage.COMMITTED, 0L);
+		put(MemoryUsage.FREE, 0L);
+		}
+	};
 	
 	public enum MemoryUsage {
 		INIT, USED, COMMITTED, MAX, FREE;

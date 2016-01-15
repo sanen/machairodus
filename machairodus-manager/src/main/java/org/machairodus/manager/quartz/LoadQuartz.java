@@ -26,7 +26,6 @@ import org.machairodus.manager.service.MonitorType;
 import org.machairodus.manager.websocket.MonitorHandler;
 import org.machairodus.mappers.domain.JmxMonitor;
 import org.machairodus.mappers.domain.JmxMonitor.MemoryUsage;
-import org.machairodus.mappers.domain.JmxMonitorStatus;
 import org.machairodus.mappers.domain.NodeType;
 import org.nanoframework.commons.util.CollectionUtils;
 import org.nanoframework.commons.util.StringUtils;

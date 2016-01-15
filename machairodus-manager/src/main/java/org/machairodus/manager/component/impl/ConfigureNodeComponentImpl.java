@@ -31,7 +31,6 @@ import org.machairodus.mappers.domain.JmxMonitor;
 import org.machairodus.mappers.domain.JmxMonitorStatus;
 import org.machairodus.mappers.domain.NodeConfig;
 import org.machairodus.mappers.domain.NodeType;
-import org.machairodus.mappers.domain.ServerConfig;
 import org.machairodus.mappers.domain.User;
 import org.machairodus.mappers.mapper.manager.ConfigureNodeMapper;
 import org.nanoframework.commons.support.logging.Logger;

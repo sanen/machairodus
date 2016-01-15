@@ -213,7 +213,7 @@ Monitor.Load = function() {
 	
 	this.initSelect2 = function() {
 		var id;
-		if (id = $.cookie("shell-server-mapper")) {
+		if (id = $.cookie("machairodus.monitor.load")) {
 			$('#node').select2({
 				placeholder: "选择节点",
 				ajax: {
@@ -295,7 +295,7 @@ Monitor.Load = function() {
 	
 	var reloadMonitor = function(id, row) {
 		setTimeout(function() {
-			$.cookie("shell-server-mapper", id, { expires : 30, path : "/" });
+			$.cookie("machairodus.monitor.load", id, { expires : 30, path : "/" });
 			queues['viewCpu'].clear();
 			queues['viewMemory_COMMITED'].clear();
 			queues['viewMemory_USED'].clear();

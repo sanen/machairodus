@@ -62,6 +62,8 @@ public class JmxMonitorQuartz extends BaseQuartz {
 	private JmxClient jmxClient;
 	private String address;
 	
+	private long cpuTime = Long.parseLong(System.getProperty("machairodus.balancer.jmx.monitor.cpu.time", "1000"));
+	
 	@Inject
 	private ConfigureNodeMapper nodeMapper;
 	
@@ -132,7 +134,7 @@ public class JmxMonitorQuartz extends BaseQuartz {
 			OperatingSystemMXBean os = new OperatingSystemImpl(jmxClient);
 			monitor.setOs(os.getName());
 			monitor.setAvailableProcessors(os.getAvailableProcessors());
-			monitor.setCpuRatio(os.cpuRatio(1000));
+			monitor.setCpuRatio(os.cpuRatio(cpuTime));
 			
 			/** Set update time */
 			monitor.setUpdateTime(System.currentTimeMillis());
@@ -176,6 +178,7 @@ public class JmxMonitorQuartz extends BaseQuartz {
 	@Override
 	public void destroy() throws QuartzException {
 		try {
+			nodeMapper.updatePID(null, node.getId());
 			redisClient.hdel(NodeType.value(node.getType()).name(), address);
 			jmxClient.close();
 		} catch(Exception e) {
