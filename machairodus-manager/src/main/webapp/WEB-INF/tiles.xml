@@ -51,6 +51,10 @@
 		<put-attribute name="content" value="/WEB-INF/pages/schedule.scheduler.jsp" />
 	</definition>
 	
+	<definition name="schedule.topology" extends="layout">
+		<put-attribute name="content" value="/WEB-INF/pages/schedule.topology.jsp" />
+	</definition>
+	
 	<definition name="monitor.load" extends="layout">
 		<put-attribute name="content" value="/WEB-INF/pages/monitor.load.jsp" />
 	</definition>

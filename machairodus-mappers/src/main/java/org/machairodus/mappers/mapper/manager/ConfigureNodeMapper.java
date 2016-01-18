@@ -45,5 +45,5 @@ public interface ConfigureNodeMapper {
 	
 	List<NodeConfig> findAssign(@Param("schedulerId") Long schedulerId);
 	
-	List<NodeConfig> findAllBalancer();
+	List<NodeConfig> findByType(@Param("type") Integer type);
 }

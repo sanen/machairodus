@@ -739,7 +739,8 @@
 
                 if (column.checkbox) {
                     if (!that.options.singleSelect && that.options.checkboxHeader) {
-                        text = '<input name="btSelectAll" type="checkbox" />';
+                    	/** to Uniform Style by yanghe */
+                        text = '<div class="checker"><span><input name="btSelectAll" type="checkbox" /></span></div>';
                     }
                     that.header.stateField = column.field;
                 }
@@ -1514,6 +1515,8 @@
 
                     text = [that.options.cardView ?
                         '<div class="card-view">' : '<td class="bs-checkbox">',
+                        /** to Uniform Style by yanghe */
+                        '<div class="checker"><span>' +
                         '<input' +
                         sprintf(' data-index="%s"', i) +
                         sprintf(' name="%s"', that.options.selectItemName) +
@@ -1523,7 +1526,9 @@
                         (value && value.checked) ? 'checked' : undefined) +
                         sprintf(' disabled="%s"', !column.checkboxEnabled ||
                         (value && value.disabled) ? 'disabled' : undefined) +
-                        ' />',
+                        ' />' +
+                        '</span></div>'
+                        ,
                         that.header.formatters[j] && typeof value === 'string' ? value : '',
                         that.options.cardView ? '</div>' : '</td>'
                     ].join('');
@@ -1792,7 +1797,13 @@
             this.$selectItem.filter(':enabled').filter(':checked').length;
 
         this.$selectAll.add(this.$selectAll_).prop('checked', checkAll);
-
+        
+        /** add by yanghe */
+        $('input[name=btSelectAll]').parent().each(function() {
+        	$(this)[checkAll ? 'addClass' : 'removeClass']('checked');
+        });
+        /** END */
+        
         this.$selectItem.each(function () {
             $(this).closest('tr')[$(this).prop('checked') ? 'addClass' : 'removeClass']('selected');
         });

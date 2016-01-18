@@ -93,6 +93,10 @@
 			<groupId>org.machairodus</groupId>
 			<artifactId>machairodus-mappers</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.machairodus</groupId>
+			<artifactId>machairodus-topology</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>machairodus-manager</finalName>

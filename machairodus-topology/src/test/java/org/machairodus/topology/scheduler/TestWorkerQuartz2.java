@@ -42,7 +42,7 @@ public class TestWorkerQuartz2 extends BaseQuartz {
 	public void execute() throws QuartzException {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
-				thisWait(random.nextInt(300));
+				thisWait(random.nextInt(10));
 				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName() + "2");
 			}
 			

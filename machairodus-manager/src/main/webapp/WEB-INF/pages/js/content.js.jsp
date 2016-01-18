@@ -1,11 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="org.machairodus.manager.util.Definition" %>
 <% 
-String _definition;
-if((_definition = (String) request.getAttribute("definition")) == null) { %>
+Definition definition;
+if((definition = (Definition) request.getAttribute("definition")) == null) { %>
 	<script src="${pageContext.request.contextPath}/media/js/index.js"></script>
 <% } else { 
-	Definition definition = Definition.value(_definition);
 	switch(definition) {
 		case INDEX: 
 			%>
@@ -68,6 +67,16 @@ if((_definition = (String) request.getAttribute("definition")) == null) { %>
 		case SCHEDULE_SCHEDULER: 
 			%>
 			<script src="${pageContext.request.contextPath}/media/js/schedule.scheduler.js"></script>
+			<%
+			break;
+		case SCHEDULE_TOPOLOGY: 
+			%>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.tagsinput.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/bootstrap-table.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/select2.full.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/api/jquery.easyui.min.js"></script>
+			<script src="${pageContext.request.contextPath}/media/js/schedule.topology.js"></script>
 			<%
 			break;
 		case MONITOR_LOAD: 

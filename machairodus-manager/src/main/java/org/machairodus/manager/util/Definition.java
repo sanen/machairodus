@@ -25,6 +25,7 @@ public enum Definition {
 	CONFIGURE_SERVICE("configure.service"),
 	SCHEDULE_BALANCER("schedule.balancer"),
 	SCHEDULE_SCHEDULER("schedule.scheduler"), 
+	SCHEDULE_TOPOLOGY("schedule.topology"),
 	MONITOR_LOAD("monitor.load"),
 	MONITOR_TPS("monitor.tps"), 
 	STATISTICS_SCHEDULER("statistics.scheduler");
@@ -58,6 +59,8 @@ public enum Definition {
 				return SCHEDULE_BALANCER;
 			case "schedule.scheduler": 
 				return SCHEDULE_SCHEDULER;
+			case "schedule.topology":
+				return SCHEDULE_TOPOLOGY;
 			case "monitor.load": 
 				return MONITOR_LOAD;
 			case "monitor.tps": 

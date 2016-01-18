@@ -133,12 +133,12 @@ Configure.Service = function(){
 			return ;
 		} 
 			
-		var serverConfig = JSON.stringify({ id: ids[0], name: name, uri: uri, options: options, type: type, description: description });
+		var schedulerConfig = JSON.stringify({ id: ids[0], name: name, uri: uri, options: options, type: type, description: description });
 		$.ajax({
 			url: context + '/configure/service/update',
 			type: "POST", 
 			contentType: "application/x-www-form-urlencoded; charset=utf-8", 
-			data: { serverConfig: serverConfig }, 
+			data: { schedulerConfig: schedulerConfig }, 
 			success: function(data) {
 				if(data.status) {
 					if(data.status == '2001') {
@@ -307,7 +307,7 @@ Configure.Service = function(){
 		
 		$('#dlgAssign').dialog({
 		    title: '分配节点',
-		    width: 510,
+		    width: 910,
 		    height: 269,
 		    closed: true,
 		    cache: false,

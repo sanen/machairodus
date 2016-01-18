@@ -24,6 +24,7 @@ import org.apache.shiro.SecurityUtils;
 import org.machairodus.manager.component.PagesComponent;
 import org.machairodus.manager.service.LayoutService;
 import org.machairodus.manager.service.PermissionService;
+import org.machairodus.manager.util.Definition;
 import org.machairodus.manager.websocket.MonitorHandler;
 import org.machairodus.mappers.domain.Func;
 import org.machairodus.mappers.domain.User;
@@ -42,89 +43,99 @@ public class PagesComponentImpl implements PagesComponent {
 	
 	@Inject
 	private PermissionService permissionService;
+	
+	private final View INDEX = new ForwardView("/index.jsp");
+	public static final String DEFINITION = "definition";
 
 	@Override
 	public View index(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "index");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.INDEX);
+		return INDEX;
 	}
 	
 	@Override
 	public View permissionUser(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "permission.user");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.PERMISSION_USER);
+		return INDEX;
 	}
 	
 	@Override
 	public View permissionRole(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "permission.role");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.PERMISSION_ROLE);
+		return INDEX;
 	}
 	
 	@Override
 	public View permissionFunc(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "permission.func");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.PERMISSION_FUNC);
+		return INDEX;
 	}
 	
 	@Override
 	public View configureServer(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "configure.server");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.CONFIGURE_SERVER);
+		return INDEX;
 	}
 	
 	@Override
 	public View configureNode(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "configure.node");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.CONFIGURE_NODE);
+		return INDEX;
 	}
 	
 	@Override
 	public View configureService(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "configure.service");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.CONFIGURE_SERVICE);
+		return INDEX;
 	}
 	
 	@Override
 	public View scheduleBalancer(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "schedule.balancer");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.SCHEDULE_BALANCER);
+		return INDEX;
 	}
 	
 	@Override
 	public View scheduleScheduler(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "schedule.scheduler");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.SCHEDULE_SCHEDULER);
+		return INDEX;
+	}
+	
+	@Override
+	public View scheduleTopology(HttpServletRequest request, HttpServletResponse response, Model model) {
+		build(request, model);
+		model.addAttribute(DEFINITION, Definition.SCHEDULE_TOPOLOGY);
+		return INDEX;
 	}
 	
 	@Override
 	public View monitorLoad(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "monitor.load");
+		model.addAttribute(DEFINITION, Definition.MONITOR_LOAD);
 		return new ForwardView("/index.jsp");
 	}
 	
 	@Override
 	public View monitorTps(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "monitor.tps");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.MONITOR_TPS);
+		return INDEX;
 	}
 	
 	@Override
 	public View statisticsScheduler(HttpServletRequest request, HttpServletResponse response, Model model) {
 		build(request, model);
-		model.addAttribute("definition", "statistics.scheduler");
-		return new ForwardView("/index.jsp");
+		model.addAttribute(DEFINITION, Definition.STATISTICS_SCHEDULER);
+		return INDEX;
 	}
 	
 	@Override

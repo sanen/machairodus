@@ -80,3 +80,7 @@ panel float_left margin_right_5 {
 	right:7px;
 	position:absolute;
 }
+
+table div.checker {
+	margin-right: 0px;
+}

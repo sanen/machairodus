@@ -37,6 +37,7 @@ import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
+import org.nanoframework.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,14 @@ public class Executor {
 	public static final String GROUP = "group";
 	public static final String SIZE = "size";
 	public static final String AUTO_START = "auto_start";
+	public static final String KEY = "key";
+	public static final String STARTED = "started";
+	public static final String STARTED_GROUP = "started-group";
+	public static final String STOPPING = "stopping";
+	public static final String STOPPING_GROUP = "stopping-group";
+	public static final String STOPPED = "stopped";
+	public static final String STOPPED_GROUP = "stopped-group";
+	
 	private static QuartzFactory FACTORY = QuartzFactory.getInstance();
 	
 	public static final void execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -116,7 +125,16 @@ public class Executor {
 						} catch(NumberFormatException e) { size = "0"; }
 					}
 					
-					resultMap = remove(request.getParameter(GROUP), Integer.parseInt(size));
+					String group = request.getParameter(GROUP);
+					String id = request.getParameter(ID);
+					
+					if(!StringUtils.isEmpty(id)) 
+						resultMap = remove(id);
+					else if(!StringUtils.isEmpty(group))
+						resultMap = remove(group, Integer.parseInt(size));
+					else 
+						resultMap = ResultMap.create(400, "无效的请求参数列表", "ERROR");
+						
 					break;
 					
 				case QUEUE: 
@@ -279,6 +297,32 @@ public class Executor {
 		return ResultMap.create(200, "移除任务完成", "SUCCESS");
 	}
 	
+	private static final ResultMap remove(String id) {
+		BaseQuartz quartz = FACTORY.find(id);
+		if(quartz == null) {
+			Collection<BaseQuartz> stopedQuartz = FACTORY.getStopedQuratz();
+			if(!CollectionUtils.isEmpty(stopedQuartz)) {
+				for(BaseQuartz item : stopedQuartz) {
+					if(item.getConfig().getId().equals(id)) {
+						quartz = item;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(quartz != null) {
+			String group = id.substring(0, id.lastIndexOf("-"));
+			if(FACTORY.getGroupSize(group) > 1)
+				FACTORY.removeQuartz(quartz);
+			else if(!quartz.isClose())
+				FACTORY.close(quartz.getConfig().getId());
+				
+		}
+		
+		return ResultMap.create(200, "移除任务完成", "SUCCESS");
+	}
+	
 	private static final void queue(Writer out) throws IOException {
 		Map<String, Object> map = ResultMap.create(200, "任务队列信息", "SUCCESS")._getBeanToMap();
 		Set<String> keys = BlockingQueueFactory.getInstance().getQueueKeys();
@@ -335,12 +379,12 @@ public class Executor {
 		Collections.sort(stoppingList, comp);
 		Collections.sort(stoppedList, comp);
 		
-		map.put("started", startList);
-		map.put("started-group", startGroupSet);
-		map.put("stopping", stoppingList);
-		map.put("stopping-group", stoppingGroupSet);
-		map.put("stopped", stoppedList);
-		map.put("stopped-group", stoppedGroupSet);
+		map.put(STARTED, startList);
+		map.put(STARTED_GROUP, startGroupSet);
+		map.put(STOPPING, stoppingList);
+		map.put(STOPPING_GROUP, stoppingGroupSet);
+		map.put(STOPPED, stoppedList);
+		map.put(STOPPED_GROUP, stoppedGroupSet);
 		out.write(JSON.toJSONString(map));
 	}
 	

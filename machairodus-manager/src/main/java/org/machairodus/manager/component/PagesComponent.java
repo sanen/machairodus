@@ -57,6 +57,9 @@ public interface PagesComponent {
 	@RequestMapping("/schedule/scheduler")
 	View scheduleScheduler(HttpServletRequest request, HttpServletResponse response, Model model);
 	
+	@RequestMapping("/schedule/topology")
+	View scheduleTopology(HttpServletRequest request, HttpServletResponse response, Model model);
+	
 	@RequestMapping("/monitor/load")
 	View monitorLoad(HttpServletRequest request, HttpServletResponse response, Model model);
 	

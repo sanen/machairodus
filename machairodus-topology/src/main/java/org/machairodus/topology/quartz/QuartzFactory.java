@@ -18,6 +18,7 @@ package org.machairodus.topology.quartz;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -435,13 +436,38 @@ public class QuartzFactory {
 		return 0;
 	}
 	
+	public Set<BaseQuartz> getGroupQuartz(String groupName) {
+		return group.get(groupName);
+	}
+	
+	public final BaseQuartz find(String id) {
+		Assert.hasLength(id, "id must be not empty.");
+		String groupName = id.substring(0, id.lastIndexOf("-"));
+		Set<BaseQuartz> groupQuartz = group.get(groupName);
+		if(!CollectionUtils.isEmpty(groupQuartz)) {
+			for(BaseQuartz quartz : groupQuartz) {
+				if(quartz.getConfig().getId().equals(id))
+					return quartz;
+			}
+		}
+		
+		return null;
+	}
+	
 	public final BaseQuartz findLast(String groupName) {
 		Assert.hasLength(groupName);
 		Set<BaseQuartz> groupQuartz = group.get(groupName);
 		if(!CollectionUtils.isEmpty(groupQuartz)) {
+			int max = -1;
 			for(BaseQuartz quartz : groupQuartz) {
-				if(quartz.getConfig().getNum() + 1 == quartz.getConfig().getTotal())
+				if(quartz.getConfig().getNum() > max)
+					max = quartz.getConfig().getNum();
+			}
+			
+			for(BaseQuartz quartz : groupQuartz) {
+				if(quartz.getConfig().getNum() == max) {
 					return quartz;
+				}
 			}
 		}
 		
@@ -678,6 +704,13 @@ public class QuartzFactory {
 					stoppedQuartz.put(id, quartz);
 				
 				stoppingQuartz.remove(id, quartz);
+			}
+			
+			/** 删除在停止列表中被标记为remove的任务 */
+			for(Iterator<Entry<String, BaseQuartz>> iter = stoppedQuartz.entrySet().iterator(); iter.hasNext(); ) {
+				if(iter.next().getValue().isRemove()) {
+					iter.remove();
+				}
 			}
 		}
 

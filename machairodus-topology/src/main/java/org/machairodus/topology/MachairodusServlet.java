@@ -30,6 +30,7 @@ import org.machairodus.topology.util.ContentType;
 import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
+import org.machairodus.topology.util.Token;
 import org.machairodus.topology.util.ZipUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class MachairodusServlet extends HttpServlet {
 			ResultMap resultMap = ResultMap.create(400, "无效的校验KEY", "ERROR");
 			out.write(resultMap.toString());
 			return ;
-		} else if(!key.equals(this.key)) {
+		} else if(!key.equals(this.key) && !Token.decode(key)) {
 			Writer out = response.getWriter();
 			ResultMap resultMap = ResultMap.create(400, "校验KEY错误", "ERROR");
 			out.write(resultMap.toString());

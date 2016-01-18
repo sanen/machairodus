@@ -162,11 +162,6 @@ div.checker span.checked {
 	background-position: -76px -260px;
 }
 
-/** 追加bootstrap-table中对复选框的样式效果 by yanghe */
-tr.selected div.checker span {
-	background-position: -76px -260px;
-}
-
 div.checker input {
 	opacity: 0;
 	filter: alpha(opacity = 0);
@@ -184,6 +179,10 @@ div.checker.active span {
 }
 
 div.checker.active span.checked {
+	background-position: -95px -260px;
+}
+
+tr.selected div.checker span {
 	background-position: -95px -260px;
 }
 

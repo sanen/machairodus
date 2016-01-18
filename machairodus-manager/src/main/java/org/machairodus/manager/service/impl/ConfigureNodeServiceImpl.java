@@ -56,7 +56,7 @@ public class ConfigureNodeServiceImpl implements ConfigureNodeService {
 			return startMonitor0(node, node.getServerAddress() + ":" + node.getPort());
 			
 		} else {
-			List<NodeConfig> nodes = nodeMapper.findAllBalancer();
+			List<NodeConfig> nodes = nodeMapper.findByType(NodeType.BALANCER.value());
 			List<Long> balancers = redisClient.hget(RedisKeys.JMX_MONITOR.value(), NodeType.BALANCER.name(), new TypeReference<List<Long>>() { });
 			if(!CollectionUtils.isEmpty(balancers)) {
 				for(long id : balancers) {

@@ -1,12 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="org.machairodus.mappers.domain.NodeConfig,java.util.List" %>
+<style>
+.ms-container{
+  background: transparent url('${pageContext.request.contextPath}/media/image/switch.png') no-repeat 50% 50%;
+  width: 900px;
+}
+</style>
 <div style="margin: 5px;">
 	<select multiple="multiple" id="nodeConfig" name="nodeConfig[]">
 	<%
 	List<NodeConfig> unselect = (List<NodeConfig>) request.getAttribute("unselect");
 	if(unselect != null && !unselect.isEmpty()) {
 		for(NodeConfig cfg : unselect) {
-			String text = cfg.getServerAddress() + ":" + cfg.getPort() + ":" + cfg.getJmxPort();
+			String text = cfg.getServerName() + "." + cfg.getName() + " (" + cfg.getServerAddress() + ":" + cfg.getPort() + ":" + cfg.getJmxPort() + ")";
 			%><option value='<%=cfg.getId() %>'><%=text %></option><%
 		}
 	}
@@ -14,7 +20,7 @@
 	List<NodeConfig> select = (List<NodeConfig>) request.getAttribute("select");
 	if(select != null && !select.isEmpty()) {
 		for(NodeConfig cfg : select) {
-			String text = cfg.getServerAddress() + ":" + cfg.getPort() + ":" + cfg.getJmxPort();
+			String text = cfg.getServerName() + "." + cfg.getName() + " (" + cfg.getServerAddress() + ":" + cfg.getPort() + ":" + cfg.getJmxPort() + ")";
 			%><option value='<%=cfg.getId() %>' selected><%=text %></option><%
 		}
 	}

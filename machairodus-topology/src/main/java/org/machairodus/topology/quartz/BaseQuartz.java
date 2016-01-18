@@ -68,6 +68,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 			}
 			
 			closed = false;
+			remove = false;
 			while(!close && !config.getService().isShutdown()) {
 				if(config.getBeforeAfterOnly()) {
 					try {

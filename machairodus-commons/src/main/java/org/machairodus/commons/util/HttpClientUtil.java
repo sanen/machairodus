@@ -18,6 +18,7 @@ package org.machairodus.commons.util;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,19 @@ import com.alibaba.fastjson.TypeReference;
 public class HttpClientUtil {
 	private static Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
 	
+	public static <T> T post(String uri, TypeReference<T> type) {
+		String result = post(uri, Collections.emptyMap());
+		return JSON.parseObject(result, type);
+	}
+	
 	public static <T> T post(String uri, Map<String, Object> params, TypeReference<T> type) {
+		LOG.debug("Remote Invoke: " + uri);
 		String result = post(uri, params);
 		return JSON.parseObject(result, type);
+	}
+	
+	public static String post(String uri) {
+		return post(uri, Collections.emptyMap());
 	}
 	
 	public static String post(String uri, Map<String, Object> params) {
