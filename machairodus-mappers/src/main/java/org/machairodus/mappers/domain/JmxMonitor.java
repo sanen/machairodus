@@ -68,6 +68,7 @@ public class JmxMonitor extends BaseEntity {
 	
 	private Long updateTime;
 	private JmxMonitorStatus status;
+	private Integer flag = 0;
 	
 	private static final Map<MemoryUsage, Long> DEFAULT_MEMORY_STATUS = new HashMap<MemoryUsage, Long>() {
 		private static final long serialVersionUID = -3324580956350564994L; {
@@ -354,6 +355,14 @@ public class JmxMonitor extends BaseEntity {
 
 	public void setStatus(JmxMonitorStatus status) {
 		this.status = status;
+	}
+
+	public Integer getFlag() {
+		return flag;
+	}
+
+	public void setFlag(Integer flag) {
+		this.flag = flag;
 	}
 	
 }

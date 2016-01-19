@@ -77,8 +77,6 @@ public class HttpClientUtil {
             }
             
             response = httpClient.execute(httpPost);  
-            LOG.debug(response.toString());  
-            
             HttpEntity entity = response.getEntity();  
             return EntityUtils.toString(entity, "UTF-8");
         } catch (IOException e) {  
@@ -92,6 +90,14 @@ public class HttpClientUtil {
                 	throw new HttpClientException("EntityUtils.consume Error: " + e.getMessage());
                 }  
             }  
+            
+            if(httpClient != null) {
+            	try {
+					httpClient.close();
+				} catch (IOException e) {
+					LOG.error("HttpClient Close Error: " + e.getMessage());
+				}
+            }
         }  
         
 	}

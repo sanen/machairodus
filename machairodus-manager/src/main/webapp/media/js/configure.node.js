@@ -580,6 +580,41 @@ Configure.Node = function(){
 				default: 
 					return value;
 			}
+		}, 
+		
+		statusFormatter: function(value, row) {
+			switch(value) {
+				case 'PENDING': 
+					return '已提交';
+				case 'RUNNING': 
+					return '监控中';
+				case 'TIMEOUT': 
+					return '监控超时';
+				case 'MONITOR_DOWN': 
+					return '均衡器宕机';
+				case 'DOWN': 
+					return '宕机';
+				case 'CLOSED': 
+					return '监控停止';
+				case 'FAIL':
+					return '异常';
+				case 'SUCCESS': 
+					return '正常';
+				default: 
+					return value;
+			}
+		},
+		
+		monitoredFormatter: function(value, row) {
+			switch(value) {
+				case true: 
+					return '是';
+				case false: 
+					return '否';
+				default: 
+					return value;
+				
+			}
 		}
 	}
 }();

@@ -6,10 +6,12 @@
 	<servlet>
 		<servlet-name>Machairodus-Servlet</servlet-name>
 		<servlet-class>org.machairodus.topology.MachairodusServlet</servlet-class>
+		<!-- 任务调度扩展配置文件 -->
 		<init-param>
 			<param-name>quartz-config</param-name>
 			<param-value>classpath:quartz-config.properties</param-value>
 		</init-param>
+		<!-- 指令请求校验码，不设置时使用默认值: 6a9d11e666414b11719ee140ab499b5d -->
 		<init-param>
 			<param-name>key</param-name>
 			<param-value>123456</param-value>
@@ -19,6 +21,7 @@
 
 	<servlet-mapping>
 		<servlet-name>Machairodus-Servlet</servlet-name>
+		<!-- url必须为 /machairodus/*  后期对于远端控制进行请求处理 -->
 		<url-pattern>/machairodus/*</url-pattern>
 	</servlet-mapping>
 

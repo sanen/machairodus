@@ -31,8 +31,8 @@
 					<th data-field="type" data-width="100" data-align="center" data-valign="middle" data-sortable="true" data-formatter="Configure.Node.typeFormatter">类型</th>
 					<th data-field="weight" data-width="100" data-align="center" data-valign="middle" data-sortable="true">权重</th>
 					<th data-field="pid" data-width="100" data-align="center" data-valign="middle" data-sortable="true">进程号</th>
-					<th data-field="status" data-width="100" data-align="center" data-valign="middle" data-sortable="true">状态</th>
-					<th data-field="monitored" data-width="100" data-align="center" data-valign="middle" data-sortable="true">是否监控</th>
+					<th data-field="status" data-width="100" data-align="center" data-valign="middle" data-sortable="true" data-formatter="Configure.Node.statusFormatter">状态</th>
+					<th data-field="monitored" data-width="100" data-align="center" data-valign="middle" data-sortable="true" data-formatter="Configure.Node.monitoredFormatter">是否监控</th>
 					<!-- <th data-field="createTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建时间</th>
 					<th data-field="createUserName" data-width="100" data-align="center" data-valign="middle" data-sortable="true">创建人</th>
 					<th data-field="modifyTime" data-width="100" data-align="center" data-valign="middle" data-sortable="true">修改时间</th>

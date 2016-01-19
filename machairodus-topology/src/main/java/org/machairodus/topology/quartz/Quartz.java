@@ -117,7 +117,7 @@ public @interface Quartz {
 	String queueNameProperty() default "";
 	
 	/**
-	 * 针对剑齿虎扩展包的扩展实现，停止工作线程(worker)超时时长，默认: 0，当timeout为0时，表示无限等待，单位: ms
+	 * 针对剑齿虎扩展包的扩展实现，停止工作线程(worker)超时时长，默认: 180000，当timeout为0时，表示无限等待，单位: ms
 	 * @return
 	 */
 	long closeTimeout() default 180000;

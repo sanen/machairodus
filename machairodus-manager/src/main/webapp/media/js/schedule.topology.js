@@ -304,18 +304,18 @@ Schedule.Topology = function(){
 		
 		statusFormatter: function(value, row) {
 			switch(row.status) {
-			case 'STARTED': 
-				return '已启动';
-				
-			case 'STOPPING': 
-				return '停止中';
-				
-			case 'STOPPED': 
-				return '已停止';
-				
-			default: 
-				return value;
-		}
+				case 'STARTED': 
+					return '已启动';
+					
+				case 'STOPPING': 
+					return '停止中';
+					
+				case 'STOPPED': 
+					return '已停止';
+					
+				default: 
+					return value;
+			}
 		}
 	}
 }();

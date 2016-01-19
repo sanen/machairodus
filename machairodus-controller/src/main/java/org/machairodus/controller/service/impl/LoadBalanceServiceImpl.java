@@ -88,28 +88,32 @@ public class LoadBalanceServiceImpl implements LoadBalanceService {
 						socket.close();
 					
 					if(System.currentTimeMillis() - timeout > monitor.getUpdateTime()) {
+						if(monitor.getStatus() != JmxMonitorStatus.MONITOR_DOWN) {
+							JmxMonitor _monitor = new JmxMonitor();
+							_monitor.setId(monitor.getId());
+							_monitor.setNodeName(monitor.getNodeName());
+							_monitor.setHost(monitor.getHost());
+							_monitor.setPort(monitor.getPort());
+							_monitor.setStatus(JmxMonitorStatus.MONITOR_DOWN);
+							_monitor.setUpdateTime(System.currentTimeMillis());
+							redisClient.hset(nodeType, entry.getKey(), _monitor);
+						}
+						
+						iterator.remove();
+					}
+				} catch (Exception e) {
+					if(monitor.getStatus() != JmxMonitorStatus.DOWN) {
 						JmxMonitor _monitor = new JmxMonitor();
 						_monitor.setId(monitor.getId());
 						_monitor.setNodeName(monitor.getNodeName());
 						_monitor.setHost(monitor.getHost());
 						_monitor.setPort(monitor.getPort());
-						_monitor.setStatus(JmxMonitorStatus.MONITOR_DOWN);
+						_monitor.setStatus(JmxMonitorStatus.DOWN);
 						_monitor.setUpdateTime(System.currentTimeMillis());
 						redisClient.hset(nodeType, entry.getKey(), _monitor);
-						iterator.remove();
 					}
-				} catch (Exception e) {
-					JmxMonitor _monitor = new JmxMonitor();
-					_monitor.setId(monitor.getId());
-					_monitor.setNodeName(monitor.getNodeName());
-					_monitor.setHost(monitor.getHost());
-					_monitor.setPort(monitor.getPort());
-					_monitor.setStatus(JmxMonitorStatus.DOWN);
-					_monitor.setUpdateTime(System.currentTimeMillis());
 					
-					redisClient.hset(nodeType, entry.getKey(), _monitor);
 					iterator.remove();
-					
 				} finally {
 					socket = null;
 				}
