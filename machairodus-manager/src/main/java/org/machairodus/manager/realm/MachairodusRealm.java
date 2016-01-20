@@ -174,6 +174,6 @@ public class MachairodusRealm extends JdbcRealm {
 	
 	@Override
 	public String getSaltForUser(String username) {
-		return "Nano Framework Extension Shiro Salt for user: [admin]";
+		return "Nano Framework Extension Shiro Salt for user: ["+username+"]";
 	}
 }
