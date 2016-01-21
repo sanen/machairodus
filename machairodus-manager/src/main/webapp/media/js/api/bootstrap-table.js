@@ -1757,6 +1757,17 @@
                 that.trigger('load-success', res);
             },
             error: function (res) {
+            	try {
+            		/** #MACHAIRODUS-ISSUE 1 */
+            		/** 针对后端Session过期后前端的一些处理细节 by yanghe on 2016-01-21 */
+	            	if(res.responseText.indexOf("<!-- LOGIN PAGE -->") > -1) {
+	            		window.location.href = "index.jsp"; 
+	            		return ;
+	            	}
+            	} catch(error) {
+            		console.log(error);
+            	}
+            	
                 that.trigger('load-error', res.status, res);
             },
             complete: function () {

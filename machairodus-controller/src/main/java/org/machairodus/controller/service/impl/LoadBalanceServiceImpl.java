@@ -144,10 +144,8 @@ public class LoadBalanceServiceImpl implements LoadBalanceService {
 			List<JmxMonitor> monitors = Lists.newLinkedList(map.values());
 			Collections.sort(monitors, comparator);
 			List<Long> nodeList = Lists.newLinkedList();
-			LOG.debug("\n");
 			monitors.forEach(monitor -> {
 				monitor.setTotalCpuRatio(cpuRatios.get(monitor.getHost()));
-				LOG.debug(nodeType + ": " + monitor);
 				nodeList.add(monitor.getId());
 			});
 			

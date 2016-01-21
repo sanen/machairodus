@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><!DOCTYPE html><!-- LOGIN PAGE -->
 <!--[if IE 8]> <html lang="zh-CN" class="ie8"> <![endif]-->
 <!--[if IE 9]> <html lang="zh-CN" class="ie9"> <![endif]-->
 <!--[if !IE]><!--> <html lang="zh-CN"> <!--<![endif]-->
