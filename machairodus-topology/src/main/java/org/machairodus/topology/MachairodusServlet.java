@@ -83,6 +83,8 @@ public class MachairodusServlet extends HttpServlet {
 		
 		Executor.execute(request, response);
 		
+//		Writer out = response.getWriter();
+//		out.write(JSON.toJSONString(ResultMap.create(404, "Unknown resources", "WARN")));
 	}
 	
 	@Override

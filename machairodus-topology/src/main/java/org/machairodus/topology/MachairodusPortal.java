@@ -33,6 +33,7 @@ public class MachairodusPortal {
 	private String quartzConfigPath;
 	private static AtomicBoolean isInit = new AtomicBoolean(false);
 	private final Object LOCK = new Object();
+	
 	public MachairodusPortal() {
 		
 	}

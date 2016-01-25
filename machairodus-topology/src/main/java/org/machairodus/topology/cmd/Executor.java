@@ -198,7 +198,7 @@ public class Executor {
 	}
 	
 	private static final ResultMap startAll() throws IOException {
-		if(FACTORY.getStopedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
+		if(FACTORY.getStoppedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
 			return ResultMap.create(400, "不存在任何任务", "WARN");
 		
 		FACTORY.startAll();
@@ -231,7 +231,7 @@ public class Executor {
 	}
 	
 	private static final ResultMap stopAll() {
-		if(FACTORY.getStopedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
+		if(FACTORY.getStoppedQuratz().size() == 0 && FACTORY.getStartedQuartz().size() == 0)
 			return ResultMap.create(400, "不存在任何任务", "WARN");
 		
 		FACTORY.closeAll();
@@ -300,7 +300,7 @@ public class Executor {
 	private static final ResultMap remove(String id) {
 		BaseQuartz quartz = FACTORY.find(id);
 		if(quartz == null) {
-			Collection<BaseQuartz> stopedQuartz = FACTORY.getStopedQuratz();
+			Collection<BaseQuartz> stopedQuartz = FACTORY.getStoppedQuratz();
 			if(!CollectionUtils.isEmpty(stopedQuartz)) {
 				for(BaseQuartz item : stopedQuartz) {
 					if(item.getConfig().getId().equals(id)) {
@@ -360,7 +360,7 @@ public class Executor {
 			stoppingGroupSet.add(quartz.getConfig().getGroup());
 		}
 		
-		Collection<BaseQuartz> stoppedQuartz = FACTORY.getStopedQuratz();
+		Collection<BaseQuartz> stoppedQuartz = FACTORY.getStoppedQuratz();
 		List<String> stoppedList = new ArrayList<String>();
 		Set<String> stoppedGroupSet = new HashSet<String>();
 		for(BaseQuartz quartz : stoppedQuartz) {

@@ -33,6 +33,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.machairodus.topology.quartz.defaults.EtcdOrderWatcherQuartz;
+import org.machairodus.topology.quartz.defaults.EtcdQuartz;
+import org.machairodus.topology.quartz.defaults.StatisticQuartz;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scan.ComponentScan;
 import org.machairodus.topology.util.Assert;
@@ -57,17 +60,19 @@ public class QuartzFactory {
 	private final ConcurrentMap<String , BaseQuartz> stoppingQuartz = new ConcurrentHashMap<String , BaseQuartz>();
 	private final ConcurrentMap<String , BaseQuartz> stoppedQuartz = new ConcurrentHashMap<String , BaseQuartz>();
 	private final ConcurrentMap<String, Set<BaseQuartz>> group = new ConcurrentHashMap<String, Set<BaseQuartz>>();
-	private static final QuartzThreadFactory threadFactory = new QuartzThreadFactory();
+	public static final QuartzThreadFactory threadFactory = new QuartzThreadFactory();
 	private static final ThreadPoolExecutor service = (ThreadPoolExecutor) Executors.newCachedThreadPool(threadFactory);
 	private static final ThreadPoolExecutor closeQuartzService = (ThreadPoolExecutor) new ThreadPoolExecutor(0, RuntimeUtil.AVAILABLE_PROCESSORS, 5L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
 	private static final ThreadPoolExecutor closeQuartzCallableService = (ThreadPoolExecutor) new ThreadPoolExecutor(0, RuntimeUtil.AVAILABLE_PROCESSORS, 5L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
-	
 	private static boolean isLoaded = false;
 	
 	public static final String BASE_PACKAGE = "context.quartz-scan.base-package";
 	public static final String AUTO_RUN = "context.quartz.run.auto";
 	public static final String INCLUDES = "context.quartz.group.includes";
 	public static final String EXCLUSIONS = "context.quartz.group.exclusions";
+	public static final String DEFAULT_QUARTZ_NAME_PREFIX = "Quartz-Thread-Pool: ";
+	
+	private static EtcdQuartz etcdQuartz;
 	
 	private QuartzFactory() {
 		
@@ -78,6 +83,10 @@ public class QuartzFactory {
 			synchronized (LOCK) {
 				if(FACTORY == null) {
 					FACTORY = new QuartzFactory();
+					
+					StatisticQuartz statistic = new StatisticQuartz();
+					statistic.getConfig().getService().execute(statistic);
+					
 					StatusMonitorQuartz statusMonitor = FACTORY.new StatusMonitorQuartz();
 					statusMonitor.getConfig().getService().execute(statusMonitor);
 					Runtime.getRuntime().addShutdownHook(new Thread(FACTORY.new ShutdownHook()));
@@ -153,7 +162,7 @@ public class QuartzFactory {
 		return stoppedQuartz.size();
 	}
 	
-	public Collection<BaseQuartz> getStopedQuratz() {
+	public Collection<BaseQuartz> getStoppedQuratz() {
 		return stoppedQuartz.values();
 	}
 	
@@ -178,6 +187,9 @@ public class QuartzFactory {
 				quartz.setClose(true);
 				stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 				startedQuartz.remove(quartz.getConfig().getId(), quartz);
+				
+				/** Sync to Etcd by stop method */
+				etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 			} else {
 				int size = 0;
 				Set<BaseQuartz> dataLoaders = new LinkedHashSet<BaseQuartz>();
@@ -195,11 +207,17 @@ public class QuartzFactory {
 					quartz.setClose(true);
 					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 					startedQuartz.remove(quartz.getConfig().getId(), quartz);
+					
+					/** Sync to Etcd by stop method */
+					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 				} else if(size == 1) {
 					for(BaseQuartz _quartz : dataLoaders) {
 						_quartz.setClose(true);
 						stoppingQuartz.put(_quartz.getConfig().getId(), _quartz);
 						startedQuartz.remove(_quartz.getConfig().getId(), _quartz);
+						
+						/** Sync to Etcd by stop method */
+						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 					}
 					
 					closeByQueue(quartz, quartz.getConfig().getQueueName());
@@ -231,6 +249,9 @@ public class QuartzFactory {
 			quartz.setClose(true);
 			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 			startedQuartz.remove(quartz.getConfig().getId(), quartz);
+			
+			/** Sync to Etcd by stop method */
+			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 		}
 		
 		for(BaseQuartz quartz : startedQuartz.values()) {
@@ -241,6 +262,9 @@ public class QuartzFactory {
 					quartz.setClose(true);
 					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 					startedQuartz.remove(quartz.getConfig().getId(), quartz);
+					
+					/** Sync to Etcd by stop method */
+					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 				}
 			}
 		}
@@ -271,6 +295,9 @@ public class QuartzFactory {
 			quartz.setClose(true);
 			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 			startedQuartz.remove(quartz.getConfig().getId(), quartz);
+			
+			/** Sync to Etcd by stop method */
+			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 			return ;
 		}
 		
@@ -295,11 +322,17 @@ public class QuartzFactory {
 						quartz.setClose(true);
 						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 						startedQuartz.remove(quartz.getConfig().getId(), quartz);
+						
+						/** Sync to Etcd by stop method */
+						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 					} else {
 						future.get(timeout, TimeUnit.MILLISECONDS);
 						quartz.setClose(true);
 						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 						startedQuartz.remove(quartz.getConfig().getId(), quartz);
+						
+						/** Sync to Etcd by stop method */
+						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 					}
 				} catch(Exception e) {
 					LOG.error("等待队列数据消费超时: " + e.getMessage());
@@ -322,6 +355,9 @@ public class QuartzFactory {
 				getInstance().bind(quartz);
 				threadFactory.setBaseQuartz(quartz);
 				service.execute(quartz);
+				
+				/** Sync to Etcd by start method */
+				etcdQuartz.start(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 			}
 			
 			stoppedQuartz.clear();
@@ -343,6 +379,9 @@ public class QuartzFactory {
 						threadFactory.setBaseQuartz(quartz);
 						service.execute(quartz);
 						keys.add(id);
+						
+						/** Sync to Etcd by start method */
+						etcdQuartz.start(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 					}
 				}
 			}
@@ -363,6 +402,9 @@ public class QuartzFactory {
 			threadFactory.setBaseQuartz(quartz);
 			service.execute(quartz);
 			stoppedQuartz.remove(id);
+			
+			/** Sync to Etcd by start method */
+			etcdQuartz.start(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 		}
 	}
 	
@@ -559,7 +601,7 @@ public class QuartzFactory {
 							BaseQuartz baseQuartz = (BaseQuartz) clz.newInstance();
 							QuartzConfig config = new QuartzConfig();
 							config.setId(quartz.name() + "-" + p);
-							config.setName("Quartz-Thread-Pool: " + quartz.name() + "-" + p);
+							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + quartz.name() + "-" + p);
 							config.setGroup(quartz.name());
 							config.setService(service);
 							config.setBeforeAfterOnly(quartz.beforeAfterOnly());
@@ -573,7 +615,7 @@ public class QuartzFactory {
 							config.setLazy(quartz.lazy());
 							config.setDaemon(quartz.daemon());
 							
-							/** -------------------             set Machairodus private proerty   START       ------------- **/
+							/** set Machairodus private proerty   START */
 							if(!StringUtils.isEmpty(quartz.workerClassProperty().trim())) {
 								try {
 									String className = properties.getProperty(quartz.workerClassProperty().trim());
@@ -614,7 +656,7 @@ public class QuartzFactory {
 							} else 
 								config.setTimeout(quartz.closeTimeout());
 							
-							/** -------------------             set Machairodus private proerty   END          ------------- **/
+							/** set Machairodus private proerty   END */
 							
 							baseQuartz.setConfig(config);
 							
@@ -637,6 +679,20 @@ public class QuartzFactory {
 				
 			}
 			
+			/** Create and start Etcd Scheduler */
+			try {
+				etcdQuartz = new EtcdQuartz(componentClasses, properties);
+				etcdQuartz.getConfig().getService().execute(etcdQuartz);
+				etcdQuartz.syncBaseDirTTL();
+				etcdQuartz.syncClass();
+				
+				/** Start Order Scheduler */
+				EtcdOrderWatcherQuartz etcdOrderQuartz = new EtcdOrderWatcherQuartz(etcdQuartz.getEtcd());
+				etcdOrderQuartz.getConfig().getService().execute(etcdOrderQuartz);
+				
+			} catch(QuartzException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 		
 		isLoaded = true;
@@ -668,13 +724,13 @@ public class QuartzFactory {
 		
 	}
 	
-	private class StatusMonitorQuartz extends BaseQuartz {
+	public class StatusMonitorQuartz extends BaseQuartz {
 		private final ConcurrentMap<String, BaseQuartz> closed;
 		
 		public StatusMonitorQuartz() {
 			QuartzConfig config = new QuartzConfig();
 			config.setId("StatusMonitorQuartz-0");
-			config.setName("StatusMonitorQuartz");
+			config.setName(DEFAULT_QUARTZ_NAME_PREFIX + "StatusMonitorQuartz-0");
 			config.setGroup("StatusMonitorQuartz");
 			threadFactory.setBaseQuartz(this);
 			config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
@@ -704,6 +760,9 @@ public class QuartzFactory {
 					stoppedQuartz.put(id, quartz);
 				
 				stoppingQuartz.remove(id, quartz);
+				
+				/** Sync to Etcd by stopped method */
+				etcdQuartz.stopped(quartz.getConfig().getGroup(), id, quartz.isRemove());
 			}
 			
 			/** 删除在停止列表中被标记为remove的任务 */
@@ -750,4 +809,5 @@ public class QuartzFactory {
 		}
 		
 	}
+	
 }
