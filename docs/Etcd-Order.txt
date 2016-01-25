@@ -1,0 +1,18 @@
+
+## GET
+curl -L http://192.168.180.202:2379/v2/keys/machairodus/?sort=true -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM='
+
+## DELETE
+curl -L 'http://192.168.180.202:2379/v2/keys/machairodus/?dir=true&recursive=true' -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM=' -XDELETE
+
+## GET by SystemID
+curl -L http://192.168.180.202:2379/v2/keys/machairodus/7806b500055f13f4dc030ec4b0e406c8 -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM='
+
+## GET STOPPED
+curl -L http://192.168.180.202:2379/v2/keys/machairodus/4da9438920be4126b4cd76484c4e448c/Stopped/TestWorkerQuartz2 -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM='
+
+## DELETE by SystemID
+curl -L 'http://192.168.180.202:2379/v2/keys/machairodus/5313ec3e89080fac4a1e879d91fa5f01?dir=true&recursive=true' -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM=' -XDELETE
+
+## POST Order.list
+curl -L http://192.168.180.202:2379/v2/keys/machairodus/7806b500055f13f4dc030ec4b0e406c8/Order.list -H 'Authorization: Basic bWFjaGFpcm9kdXM6bWFjaGFpcm9kdXM=' -XPOST -d value='{"action":"STOP","group":"TestWorkerQuartz2","id":"TestWorkerQuartz2-4"}'
