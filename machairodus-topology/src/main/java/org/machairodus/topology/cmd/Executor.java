@@ -35,14 +35,15 @@ import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.quartz.defaults.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
-import org.nanoframework.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 
+@Deprecated
 public class Executor {
 	private static final Logger LOG = LoggerFactory.getLogger(Executor.class);
 	public static final String COMMAND = "command";

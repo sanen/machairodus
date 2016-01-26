@@ -15,6 +15,7 @@
  */
 package org.machairodus.topology.cmd;
 
+@Deprecated
 public enum Command {
 	START("start"), START_GROUP("start_group"), START_ALL("start_all"),
 	STOP("stop"), STOP_GROUP("stop_group"), STOP_ALL("stop_all"), 

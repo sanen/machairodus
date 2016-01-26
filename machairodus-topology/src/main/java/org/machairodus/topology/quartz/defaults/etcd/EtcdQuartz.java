@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults;
+package org.machairodus.topology.quartz.defaults.etcd;
 
 import static org.machairodus.topology.quartz.QuartzFactory.DEFAULT_QUARTZ_NAME_PREFIX;
 import static org.machairodus.topology.quartz.QuartzFactory.threadFactory;
 
+import java.net.Inet4Address;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -35,15 +36,17 @@ import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.CronExpression;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzException;
+import org.machairodus.topology.quartz.QuartzStatus;
+import org.machairodus.topology.quartz.QuartzStatus.Status;
 import org.machairodus.topology.util.Assert;
+import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.StringUtils;
-import org.nanoframework.commons.util.CollectionUtils;
 import org.nanoframework.extension.etcd.client.retry.RetryWithExponentialBackOff;
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
 
-public class EtcdQuartz extends BaseQuartz {
+public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 
 	private final Set<Class<?>> clsSet;
 	
@@ -51,19 +54,21 @@ public class EtcdQuartz extends BaseQuartz {
 	private final Properties properties;
 	
 	public static final String SYSTEM_ID = MD5Utils.getMD5String(UUID.randomUUID().toString() + System.currentTimeMillis() + Math.random());
+	public static final String ETCD_ENABLE = "context.quartz.etcd.enable";
 	public static final String ETCD_URI = "context.quartz.etcd.uri";
 	public static final String ETCD_USER = "context.quartz.etcd.username";
 	public static final String ETCD_PASSWD = "context.quartz.etcd.passwd";
-	public static final String ETCD_RESOURCE = "/machairodus";
+	public static final String ETCD_APP_NAME = "context.quartz.app.name";
+	public static final String ETCD_RESOURCE = "context.quartz.etcd.resource";
 	
-	public static final String DIR = ETCD_RESOURCE + "/" + SYSTEM_ID;
+	public static final String DIR = System.getProperty(ETCD_RESOURCE, "") + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Quartz.class";
-	public static final String STARTED_KEY = DIR + "/Started";
-	public static final String STOPPING_KEY = DIR + "/Stopping";
-	public static final String STOPPED_KEY = DIR + "/Stopped";
+	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
+	public static final String INFO_KEY = DIR + "/App.info";
+	private static String APP_NAME;
 	
 	private Map<Class<?>, Long> clsIndex = new HashMap<Class<?>, Long>();
-	private Map<String, Map<String, Long>> indexMap = new HashMap<String, Map<String, Long>>();
+	private Map<String, Long> indexMap = new HashMap<String, Long>();
 	
 	private boolean init = false;
 	private final int timeout = 75;
@@ -119,6 +124,17 @@ public class EtcdQuartz extends BaseQuartz {
 		}
 	}
 	
+	public void syncInfo() {
+		EtcdAppInfo info = new EtcdAppInfo();
+		info.setAppName(APP_NAME);
+		try {
+			info.setIp(Inet4Address.getLocalHost().getHostAddress());
+			etcd.put(INFO_KEY, info.toString()).send().get();
+		} catch (Exception e) {
+			LOG.error("Send App info error: " + e.getMessage());
+		}
+	}
+	
 	public void syncClass() {
 		if(!CollectionUtils.isEmpty(clsSet)) {
 			Iterator<Class<?>> iter = clsSet.iterator();
@@ -161,8 +177,9 @@ public class EtcdQuartz extends BaseQuartz {
 		/** create ETCD client instance */
 		String username = properties.getProperty(ETCD_USER, "");
 		String password = properties.getProperty(ETCD_PASSWD, "");
+		APP_NAME = properties.getProperty(ETCD_APP_NAME, "");
 		String[] uris = properties.getProperty(ETCD_URI, "").split(",");
-		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {
+		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {
 			List<URI> uriList = new ArrayList<URI>();
 			for(String uri : uris) {
 				if(StringUtils.isEmpty(uri))
@@ -182,20 +199,16 @@ public class EtcdQuartz extends BaseQuartz {
 		}
 	}
 	
-	private EtcdKeysResponse put(String key, String field, String value) {
+	private EtcdKeysResponse put(String key, QuartzStatus status) {
 		try {
 			Long index;
-			Map<String, Long> map;
-			if((map = indexMap.get(key)) == null)
-				indexMap.put(key, map = new HashMap<String, Long>());
-			
 			EtcdKeysResponse response;
-			if((index = map.get(value)) != null) {
-				response = etcd.put(field + "/" + index, value).prevExist(true).send().get();
+			if((index = indexMap.get(status.getId())) != null) {
+				response = etcd.put(key + "/" + index, status.toString()).prevExist(true).send().get();
 			} else {
-				response = etcd.post(field, value).send().get();
+				response = etcd.post(key, status.toString()).send().get();
 				if(response.node != null && (index = response.node.createdIndex) != null) {
-					map.put(value, index);
+					indexMap.put(status.getId(), index);
 				}
 			}
 			
@@ -207,17 +220,13 @@ public class EtcdQuartz extends BaseQuartz {
 		return null;
 	}
 	
-	private EtcdKeysResponse delete(String key, String field) {
+	private EtcdKeysResponse delete(String key, QuartzStatus status) {
 		try {
 			Long index;
-			Map<String, Long> map;
-			if((map = indexMap.get(key)) == null)
-				indexMap.put(key, map = new HashMap<String, Long>());
-			
 			EtcdKeysResponse response = null;
-			if((index = map.get(field)) != null) {
-				response = etcd.delete(field + "/" + index).send().get();
-				map.remove(field);
+			if((index = indexMap.get(status.getId())) != null) {
+				response = etcd.delete(key + "/" + index).send().get();
+				indexMap.remove(status.getId());
 			} 
 			
 			return response;
@@ -229,23 +238,27 @@ public class EtcdQuartz extends BaseQuartz {
 	}
 	
 	public void start(String group, String id) {
-		put(STARTED_KEY, STARTED_KEY + "/" + group, id);
-		delete(STOPPED_KEY, STOPPED_KEY + "/" + group);
+		put(INSTANCE_KEY, new QuartzStatus(group, id, Status.STARTED));
 	}
 	
 	public void stopping(String group, String id) {
-		put(STOPPING_KEY, STOPPING_KEY + "/" + group, id);
-		delete(STARTED_KEY, STARTED_KEY + "/" + group);
+		put(INSTANCE_KEY, new QuartzStatus(group, id, Status.STOPPING));
 	}
 	
 	public void stopped(String group, String id, boolean isRemove) {
+		QuartzStatus status = new QuartzStatus(group, id, Status.STOPPED);
 		if(!isRemove)
-			put(STOPPED_KEY, STOPPED_KEY + "/" + group, id);
+			put(INSTANCE_KEY, status);
+		else 
+			delete(INSTANCE_KEY, status);
 		
-		delete(STOPPING_KEY, STOPPING_KEY + "/" + group);
 	}
 	
 	public EtcdClient getEtcd() {
 		return etcd;
+	}
+	
+	public static String getAppName() {
+		return APP_NAME;
 	}
 }

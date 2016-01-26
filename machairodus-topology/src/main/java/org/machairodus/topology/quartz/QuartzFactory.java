@@ -33,9 +33,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.machairodus.topology.quartz.defaults.EtcdOrderWatcherQuartz;
-import org.machairodus.topology.quartz.defaults.EtcdQuartz;
 import org.machairodus.topology.quartz.defaults.StatisticQuartz;
+import org.machairodus.topology.quartz.defaults.etcd.EtcdOrderWatcherQuartz;
+import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
+import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartzOperate;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scan.ComponentScan;
 import org.machairodus.topology.util.Assert;
@@ -72,7 +73,7 @@ public class QuartzFactory {
 	public static final String EXCLUSIONS = "context.quartz.group.exclusions";
 	public static final String DEFAULT_QUARTZ_NAME_PREFIX = "Quartz-Thread-Pool: ";
 	
-	private static EtcdQuartz etcdQuartz;
+	private static EtcdQuartzOperate etcdQuartz;
 	
 	private QuartzFactory() {
 		
@@ -171,25 +172,25 @@ public class QuartzFactory {
 	 * @param id 任务号
 	 */
 	public void close(final String id) {
+		BaseQuartz quartz = null;
 		try {
-			final BaseQuartz quartz = startedQuartz.get(id);
-			close(quartz);
+			close(quartz = startedQuartz.get(id));
 		} finally {
-			if(LOG.isDebugEnabled())
+			if(quartz != null && LOG.isDebugEnabled())
 				LOG.debug("关闭任务: 任务号[ " + id + " ]");
-			
 		}
 	}
 	
 	public void close(final BaseQuartz quartz) {
 		if(quartz != null && !quartz.isClose()) {
 			if(quartz.getConfig().getWorkerClass() != BaseQuartz.class) {
+				/** Sync to Etcd by stop method */
+				etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+				
 				quartz.setClose(true);
 				stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 				startedQuartz.remove(quartz.getConfig().getId(), quartz);
 				
-				/** Sync to Etcd by stop method */
-				etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 			} else {
 				int size = 0;
 				Set<BaseQuartz> dataLoaders = new LinkedHashSet<BaseQuartz>();
@@ -204,20 +205,20 @@ public class QuartzFactory {
 				}
 				
 				if(size > 1) {
+					/** Sync to Etcd by stop method */
+					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+					
 					quartz.setClose(true);
 					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 					startedQuartz.remove(quartz.getConfig().getId(), quartz);
-					
-					/** Sync to Etcd by stop method */
-					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 				} else if(size == 1) {
 					for(BaseQuartz _quartz : dataLoaders) {
+						/** Sync to Etcd by stop method */
+						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+						
 						_quartz.setClose(true);
 						stoppingQuartz.put(_quartz.getConfig().getId(), _quartz);
 						startedQuartz.remove(_quartz.getConfig().getId(), _quartz);
-						
-						/** Sync to Etcd by stop method */
-						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 					}
 					
 					closeByQueue(quartz, quartz.getConfig().getQueueName());
@@ -246,12 +247,12 @@ public class QuartzFactory {
 		}
 		
 		for(BaseQuartz quartz : dataLoaders) {
+			/** Sync to Etcd by stop method */
+			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+			
 			quartz.setClose(true);
 			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 			startedQuartz.remove(quartz.getConfig().getId(), quartz);
-			
-			/** Sync to Etcd by stop method */
-			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 		}
 		
 		for(BaseQuartz quartz : startedQuartz.values()) {
@@ -259,12 +260,12 @@ public class QuartzFactory {
 				if(!"".equals(quartz.getConfig().getQueueName()))
 					closeByQueue(quartz, quartz.getConfig().getQueueName());
 				else {
+					/** Sync to Etcd by stop method */
+					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+					
 					quartz.setClose(true);
 					stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 					startedQuartz.remove(quartz.getConfig().getId(), quartz);
-					
-					/** Sync to Etcd by stop method */
-					etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 				}
 			}
 		}
@@ -292,12 +293,13 @@ public class QuartzFactory {
 			return ;
 		
 		if(StringUtils.isEmpty(queueName)) {
+			/** Sync to Etcd by stop method */
+			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+			
 			quartz.setClose(true);
 			stoppingQuartz.put(quartz.getConfig().getId(), quartz);
 			startedQuartz.remove(quartz.getConfig().getId(), quartz);
 			
-			/** Sync to Etcd by stop method */
-			etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
 			return ;
 		}
 		
@@ -319,20 +321,22 @@ public class QuartzFactory {
 						LOG.warn("现在开始无限等待队列数据消费，请注意线程阻塞: " + quartz.getConfig().getId());
 						future.get();
 						LOG.info("队列数据消费结束: " + quartz.getConfig().getId());
-						quartz.setClose(true);
-						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
-						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 						
 						/** Sync to Etcd by stop method */
 						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+						
+						quartz.setClose(true);
+						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 					} else {
 						future.get(timeout, TimeUnit.MILLISECONDS);
-						quartz.setClose(true);
-						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
-						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 						
 						/** Sync to Etcd by stop method */
 						etcdQuartz.stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+						
+						quartz.setClose(true);
+						stoppingQuartz.put(quartz.getConfig().getId(), quartz);
+						startedQuartz.remove(quartz.getConfig().getId(), quartz);
 					}
 				} catch(Exception e) {
 					LOG.error("等待队列数据消费超时: " + e.getMessage());
@@ -408,6 +412,29 @@ public class QuartzFactory {
 		}
 	}
 	
+	public final void append(String groupName, int size, boolean autoStart) {
+		BaseQuartz quartz = findLast(groupName);
+		if(quartz == null) 
+			return ;
+		
+		for(int idx = 0; idx < size; idx ++) {
+			QuartzConfig config = (QuartzConfig) quartz.getConfig().clone();
+			int total = config.getTotal();
+			config.setTotal(total + 1);
+			config.setNum(total);
+			config.setId(groupName + "-" + config.getNum());
+			config.setName(DEFAULT_QUARTZ_NAME_PREFIX + config.getId());
+			BaseQuartz _new = quartz.clone();
+			_new.setClose(true);
+			_new.setRemove(false);
+			_new.setConfig(config);
+			addQuartz(_new);
+			if(autoStart)
+				start(config.getId());
+			
+		}
+	}
+	
 	public final boolean closed(String id) {
 		return stoppedQuartz.containsKey(id);
 	}
@@ -453,12 +480,16 @@ public class QuartzFactory {
 	
 	public final void removeQuartz(BaseQuartz quartz) {
 		Set<BaseQuartz> groupQuartz = group.get(quartz.getConfig().getGroup());
-		getInstance().close(quartz.getConfig().getId());
-		
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
 			quartz.setRemove(true);
 		}
+		
+		if(quartz.isClosed()) {
+			/** Sync to Etcd by start method */
+			etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), true);
+		} else 
+			close(quartz);
 		
 		rebalance(quartz.getConfig().getGroup());
 	}
@@ -467,6 +498,20 @@ public class QuartzFactory {
 		BaseQuartz quartz = findLast(groupName);
 		if(quartz != null) {
 			removeQuartz(quartz);
+		}
+	}
+	
+	public final void removeGroup(String groupName) {
+		Set<BaseQuartz> groupQuartz = group.get(groupName);
+		for(BaseQuartz quartz : groupQuartz) {
+			groupQuartz.remove(quartz);
+			quartz.setRemove(true);
+			
+			if(quartz.isClosed()) {
+				/** Sync to Etcd by start method */
+				etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), true);
+			} else 
+				close(quartz);
 		}
 	}
 	
@@ -520,7 +565,12 @@ public class QuartzFactory {
 		Assert.hasLength(groupName);
 		Set<BaseQuartz> groupQuartz = group.get(groupName);
 		if(!CollectionUtils.isEmpty(groupQuartz)) {
-			for(BaseQuartz quartz : groupQuartz) quartz.getConfig().setTotal(groupQuartz.size());
+			int idx = 0;
+			for(BaseQuartz quartz : groupQuartz) {
+				quartz.getConfig().setNum(idx);
+				quartz.getConfig().setTotal(groupQuartz.size());
+				idx ++;
+			}
 		}
 	}
 	
@@ -681,14 +731,20 @@ public class QuartzFactory {
 			
 			/** Create and start Etcd Scheduler */
 			try {
-				etcdQuartz = new EtcdQuartz(componentClasses, properties);
-				etcdQuartz.getConfig().getService().execute(etcdQuartz);
-				etcdQuartz.syncBaseDirTTL();
-				etcdQuartz.syncClass();
-				
-				/** Start Order Scheduler */
-				EtcdOrderWatcherQuartz etcdOrderQuartz = new EtcdOrderWatcherQuartz(etcdQuartz.getEtcd());
-				etcdOrderQuartz.getConfig().getService().execute(etcdOrderQuartz);
+				boolean enable = Boolean.parseBoolean(properties.getProperty(EtcdQuartz.ETCD_ENABLE, "false"));
+				if(enable) {
+					EtcdQuartz quartz = new EtcdQuartz(componentClasses, properties);
+					etcdQuartz = quartz;
+					quartz.getConfig().getService().execute(quartz);
+					quartz.syncBaseDirTTL();
+					quartz.syncInfo();
+					quartz.syncClass();
+					
+					/** Start Order Scheduler */
+					EtcdOrderWatcherQuartz etcdOrderQuartz = new EtcdOrderWatcherQuartz(quartz.getEtcd());
+					etcdOrderQuartz.getConfig().getService().execute(etcdOrderQuartz);
+				} else 
+					etcdQuartz = EtcdQuartzOperate.EMPTY;
 				
 			} catch(QuartzException e) {
 				LOG.error(e.getMessage(), e);

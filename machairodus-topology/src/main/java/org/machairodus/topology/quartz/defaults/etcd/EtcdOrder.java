@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults;
+package org.machairodus.topology.quartz.defaults.etcd;
 
 import org.machairodus.topology.entity.BaseEntity;
 import org.machairodus.topology.quartz.QuartzConfig;
@@ -28,26 +28,27 @@ public class EtcdOrder extends BaseEntity {
 	private Integer size;
 	private Boolean autoStart;
 	private QuartzConfig config;
+	private String className;
 
 	public boolean valid() {
-		if(action == null)
+		if (action == null)
 			return false;
-		
-		if(group == null || group.trim().length() == 0) 
+
+		if (group == null || group.trim().length() == 0)
 			return false;
-		
-		if(ObjectCompare.isInList(action, OrderAction.START, OrderAction.STOP, OrderAction.REMOVE) && (id == null || id.trim().length() == 0))
+
+		if (ObjectCompare.isInList(action, OrderAction.START, OrderAction.STOP, OrderAction.REMOVE) && (id == null || id.trim().length() == 0))
 			return false;
-		
-		if(action == OrderAction.ADD && config == null)
+
+		if (action == OrderAction.NEW && (config == null || className == null || className.trim().length() == 0))
 			return false;
-		
-		if(action == OrderAction.NEW && (size == null || autoStart == null))
+
+		if (action == OrderAction.APPEND && (size == null || size <= 0 || autoStart == null))
 			return false;
-		
+
 		return true;
 	}
-	
+
 	public OrderAction getAction() {
 		return action;
 	}
@@ -72,6 +73,22 @@ public class EtcdOrder extends BaseEntity {
 		this.id = id;
 	}
 
+	public Integer getSize() {
+		return size;
+	}
+
+	public void setSize(Integer size) {
+		this.size = size;
+	}
+
+	public Boolean getAutoStart() {
+		return autoStart;
+	}
+
+	public void setAutoStart(Boolean autoStart) {
+		this.autoStart = autoStart;
+	}
+
 	public QuartzConfig getConfig() {
 		return config;
 	}
@@ -80,7 +97,15 @@ public class EtcdOrder extends BaseEntity {
 		this.config = config;
 	}
 
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
 	public enum OrderAction {
-		NEW, ADD, START, STOP, REMOVE, START_GROUP, STOP_GROUP, REMOVE_GROUP, START_ALL, STOP_ALL, REMOVE_ALL; 
+		NEW, APPEND, START, STOP, REMOVE, START_GROUP, STOP_GROUP, REMOVE_GROUP, START_ALL, STOP_ALL, REMOVE_ALL;
 	}
 }

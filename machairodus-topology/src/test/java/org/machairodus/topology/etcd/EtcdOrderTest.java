@@ -16,8 +16,8 @@
 package org.machairodus.topology.etcd;
 
 import org.junit.Test;
-import org.machairodus.topology.quartz.defaults.EtcdOrder;
-import org.machairodus.topology.quartz.defaults.EtcdOrder.OrderAction;
+import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder;
+import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder.OrderAction;
 import org.nanoframework.commons.support.logging.Logger;
 import org.nanoframework.commons.support.logging.LoggerFactory;
 

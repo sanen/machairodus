@@ -18,6 +18,7 @@ package org.machairodus.topology;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,6 +95,13 @@ public class MachairodusPortal {
 			}
 			
 			try {
+				for(Entry<Object, Object> entry : properties.entrySet()) {
+					String key, value;
+					System.setProperty((key = (String) entry.getKey()), (value = (String) entry.getValue()));
+					if(LOG.isDebugEnabled()) 
+						LOG.debug("Put Property to System: ( " + key + ": " + value + " )");
+				}
+				
 				QuartzFactory.load(properties);
 				boolean autoRun = Boolean.valueOf(properties.getProperty(QuartzFactory.AUTO_RUN, "true"));
 				if(autoRun)

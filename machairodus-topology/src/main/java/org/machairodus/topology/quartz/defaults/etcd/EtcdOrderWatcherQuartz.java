@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults;
+package org.machairodus.topology.quartz.defaults.etcd;
 
 import static org.machairodus.topology.quartz.QuartzFactory.DEFAULT_QUARTZ_NAME_PREFIX;
 import static org.machairodus.topology.quartz.QuartzFactory.threadFactory;
@@ -141,9 +141,10 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 					EtcdOrder order = JSON.parseObject(value, type);
 					if(order != null && order.valid()) {
 						switch(order.getAction()) {
-							case ADD: 
-								break;
 							case NEW: 
+								break;
+							case APPEND: 
+								FACTORY.append(order.getGroup(), order.getSize(), order.getAutoStart());
 								break;
 							case START: 
 								FACTORY.start(order.getId());
@@ -167,7 +168,7 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 								FACTORY.removeQuartz(FACTORY.find(order.getId()));
 								break;
 							case REMOVE_GROUP: 
-								FACTORY.removeQuartz(order.getGroup());
+								FACTORY.removeGroup(order.getGroup());
 								break;
 							case REMOVE_ALL: 
 								break;

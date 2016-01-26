@@ -23,17 +23,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.machairodus.topology.cmd.Executor;
 import org.machairodus.topology.io.ClassPathResource;
 import org.machairodus.topology.io.Resource;
-import org.machairodus.topology.util.ContentType;
 import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.ResultMap;
 import org.machairodus.topology.util.StringUtils;
-import org.machairodus.topology.util.Token;
 import org.machairodus.topology.util.ZipUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
 
 public class MachairodusServlet extends HttpServlet {
 	private static final long serialVersionUID = 8516684399529206854L;
@@ -65,26 +64,26 @@ public class MachairodusServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setCharacterEncoding(UTF8);
-		response.setCharacterEncoding(UTF8);
-		response.setContentType(ContentType.APPLICATION_JSON);
-		String key;
-		if(StringUtils.isEmpty(key = request.getParameter(KEY))) {
-			Writer out = response.getWriter();
-			ResultMap resultMap = ResultMap.create(400, "无效的校验KEY", "ERROR");
-			out.write(resultMap.toString());
-			return ;
-		} else if(!key.equals(this.key) && !Token.decode(key)) {
-			Writer out = response.getWriter();
-			ResultMap resultMap = ResultMap.create(400, "校验KEY错误", "ERROR");
-			out.write(resultMap.toString());
-			return ;
-		}
+//		request.setCharacterEncoding(UTF8);
+//		response.setCharacterEncoding(UTF8);
+//		response.setContentType(ContentType.APPLICATION_JSON);
+//		String key;
+//		if(StringUtils.isEmpty(key = request.getParameter(KEY))) {
+//			Writer out = response.getWriter();
+//			ResultMap resultMap = ResultMap.create(400, "无效的校验KEY", "ERROR");
+//			out.write(resultMap.toString());
+//			return ;
+//		} else if(!key.equals(this.key) && !Token.decode(key)) {
+//			Writer out = response.getWriter();
+//			ResultMap resultMap = ResultMap.create(400, "校验KEY错误", "ERROR");
+//			out.write(resultMap.toString());
+//			return ;
+//		}
+//		
+//		Executor.execute(request, response);
 		
-		Executor.execute(request, response);
-		
-//		Writer out = response.getWriter();
-//		out.write(JSON.toJSONString(ResultMap.create(404, "Unknown resources", "WARN")));
+		Writer out = response.getWriter();
+		out.write(JSON.toJSONString(ResultMap.create(404, "Unknown resources", "WARN")));
 	}
 	
 	@Override
