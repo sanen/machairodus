@@ -15,8 +15,6 @@
  */
 package org.machairodus.topology.quartz.defaults.etcd;
 
-import java.sql.Timestamp;
-
 import org.machairodus.topology.entity.BaseEntity;
 
 public class EtcdAppInfo extends BaseEntity {
@@ -29,6 +27,7 @@ public class EtcdAppInfo extends BaseEntity {
 	private Long uptime;
 	private String hostName;
 	private String pid;
+	private Integer availableProcessors;
 
 	public String getSystemId() {
 		return systemId;
@@ -84,6 +83,14 @@ public class EtcdAppInfo extends BaseEntity {
 
 	public void setPid(String pid) {
 		this.pid = pid;
+	}
+
+	public Integer getAvailableProcessors() {
+		return availableProcessors;
+	}
+
+	public void setAvailableProcessors(Integer availableProcessors) {
+		this.availableProcessors = availableProcessors;
 	}
 
 }

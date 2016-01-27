@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 import org.machairodus.topology.quartz.QuartzStatus;
+import org.machairodus.topology.quartz.defaults.JmxMonitor;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
 import org.machairodus.topology.util.CollectionUtils;
@@ -51,7 +52,7 @@ public class EtcdOrderTest {
 	private void initEtcd() throws LoaderException, FileNotFoundException, IOException {
 		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:quartz-config.properties"));
 		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
-		String password = properties.getProperty(EtcdQuartz.ETCD_PASSWD);
+		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_PASSWD));
 		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
 		ROOT_RESOURCE = properties.getProperty(EtcdQuartz.ETCD_RESOURCE);
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {
@@ -85,6 +86,9 @@ public class EtcdOrderTest {
 				List<EtcdNode> nodes = response.node.nodes;
 				if(!CollectionUtils.isEmpty(nodes)) {
 					for(EtcdNode node : nodes) {
+						if(node.ttl == null || node.ttl == 0)
+							continue ;
+						
 						LOG.debug("SystemID: " + node.key.substring(resourceLen));
 					}
 				}
@@ -105,6 +109,9 @@ public class EtcdOrderTest {
 				List<EtcdNode> nodes = response.node.nodes;
 				if(!CollectionUtils.isEmpty(nodes)) {
 					for(EtcdNode node : nodes) {
+						if(node.ttl == null || node.ttl == 0)
+							continue ;
+						
 						systemIds.add(node.key.substring(resourceLen));
 					}
 				}
@@ -142,6 +149,9 @@ public class EtcdOrderTest {
 				List<EtcdNode> nodes = response.node.nodes;
 				if(!CollectionUtils.isEmpty(nodes)) {
 					for(EtcdNode node : nodes) {
+						if(node.ttl == null || node.ttl == 0)
+							continue ;
+						
 						systemIds.add(node.key.substring(resourceLen));
 					}
 				}
@@ -165,6 +175,50 @@ public class EtcdOrderTest {
 				for(QuartzStatus status : quartzStatus) {
 					LOG.debug(status.toString());
 				}
+			}
+		}
+	}
+	
+	@Test
+	public void readJmxStore() throws Throwable {
+		initEtcd();
+		if(etcd != null) {
+			List<String> systemIds = new ArrayList<String>();
+			
+			String resource;
+			int resourceLen = (resource = ROOT_RESOURCE + "/").length();
+			EtcdKeysResponse response = etcd.get(resource).sorted().dir().send().get();
+			if(response.node != null) {
+				List<EtcdNode> nodes = response.node.nodes;
+				if(!CollectionUtils.isEmpty(nodes)) {
+					for(EtcdNode node : nodes) {
+						if(node.ttl == null || node.ttl == 0)
+							continue ;
+						
+						systemIds.add(node.key.substring(resourceLen));
+					}
+				}
+			}
+			
+			for(int idx = 0; idx < 10; idx ++) {
+				List<JmxMonitor> jmxMonitors = new ArrayList<JmxMonitor>();
+				TypeReference<JmxMonitor> jmxMonitorType = new TypeReference<JmxMonitor>() { };
+				if(!CollectionUtils.isEmpty(systemIds)) {
+					for(String systemId : systemIds) {
+						response = etcd.get(resource + systemId + "/Jmx.store").send().get();
+						if(response.node != null) {
+							jmxMonitors.add(JSON.parseObject(CryptUtil.decrypt(response.node.value, systemId), jmxMonitorType));
+						}
+					}
+				}
+				
+				if(!CollectionUtils.isEmpty(jmxMonitors)) {
+					for(JmxMonitor jmx : jmxMonitors) {
+						LOG.debug(jmx.toString());
+					}
+				}
+				
+				Thread.sleep(1000L);
 			}
 		}
 	}

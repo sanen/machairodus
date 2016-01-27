@@ -32,6 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.machairodus.topology.quartz.defaults.LocalJmxMonitorQuartz;
 import org.machairodus.topology.quartz.defaults.StatisticQuartz;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdOrderWatcherQuartz;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
@@ -725,28 +726,37 @@ public class QuartzFactory {
 			}
 			
 			/** Create and start Etcd Scheduler */
-			try {
-				boolean enable = Boolean.parseBoolean(System.getProperty(EtcdQuartz.ETCD_ENABLE, "false"));
-				if(enable) {
-					EtcdQuartz quartz = new EtcdQuartz(componentClasses);
-					etcdQuartz = quartz;
-					quartz.getConfig().getService().execute(quartz);
-					quartz.syncBaseDirTTL();
-					quartz.syncInfo();
-					quartz.syncClass();
-					
-					/** Start Order Scheduler */
-					EtcdOrderWatcherQuartz etcdOrderQuartz = new EtcdOrderWatcherQuartz(quartz.getEtcd());
-					etcdOrderQuartz.getConfig().getService().execute(etcdOrderQuartz);
-				} else 
-					etcdQuartz = EtcdQuartzOperate.EMPTY;
-				
-			} catch(QuartzException e) {
-				LOG.error(e.getMessage(), e);
-			}
+			createEtcdScheduler(componentClasses);
 		}
 		
 		isLoaded = true;
+	}
+	
+	private static final void createEtcdScheduler(Set<Class<?>> componentClasses) {
+		try {
+			boolean enable = Boolean.parseBoolean(System.getProperty(EtcdQuartz.ETCD_ENABLE, "false"));
+			if(enable) {
+				EtcdQuartz quartz = new EtcdQuartz(componentClasses);
+				etcdQuartz = quartz;
+				quartz.getConfig().getService().execute(quartz);
+				quartz.syncBaseDirTTL();
+				quartz.syncInfo();
+				quartz.syncClass();
+				
+				/** Start Order Scheduler */
+				EtcdOrderWatcherQuartz etcdOrderQuartz = new EtcdOrderWatcherQuartz(quartz.getEtcd());
+				etcdOrderQuartz.getConfig().getService().execute(etcdOrderQuartz);
+				
+				if(LocalJmxMonitorQuartz.JMX_ENABLE) {
+					LocalJmxMonitorQuartz jmxQuartz = new LocalJmxMonitorQuartz(quartz.getEtcd());
+					jmxQuartz.getConfig().getService().execute(jmxQuartz);
+				}
+			} else 
+				etcdQuartz = EtcdQuartzOperate.EMPTY;
+			
+		} catch(QuartzException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 	
 	/**

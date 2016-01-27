@@ -50,8 +50,6 @@ import org.nanoframework.extension.etcd.client.retry.RetryWithExponentialBackOff
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
 
-import com.alibaba.fastjson.JSON;
-
 public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 
 	private final Set<Class<?>> clsSet;
@@ -64,7 +62,8 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String ETCD_APP_NAME = "context.quartz.app.name";
 	public static final String ETCD_RESOURCE = "context.quartz.etcd.resource";
 	
-	public static final String DIR = System.getProperty(ETCD_RESOURCE, "") + "/" + SYSTEM_ID;
+	public static final String ROOT_RESOURCE;
+	public static final String DIR = (ROOT_RESOURCE = System.getProperty(ETCD_RESOURCE, "")) + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Quartz.class";
 	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
 	public static final String INFO_KEY = DIR + "/App.info";
@@ -115,18 +114,22 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	
 	public void syncBaseDirTTL() {
 		try {
-			EtcdKeysResponse response;
 			if(!init) {
-				response = etcd.putDir(DIR).ttl(timeout).prevExist(false).send().get();
+				etcd.putDir(DIR).ttl(timeout).prevExist(false).send().get();
 				init = true;
 			} else 
-				response = etcd.putDir(DIR).ttl(timeout).prevExist(true).send().get();
+				etcd.putDir(DIR).ttl(timeout).prevExist(true).send().get();
 			
-			LOG.debug(JSON.toJSONString(response));
 		} catch(Exception e) {
 			LOG.error("Put base dir error: " + e.getMessage());
 			if(e.getMessage() != null && e.getMessage().indexOf("Key not found") > -1) {
 				reSync();
+				return ;
+			}
+			
+			if(e.getMessage() != null && e.getMessage().indexOf("Key already exists") > -1) {
+				init = true;
+				syncBaseDirTTL();
 				return ;
 			}
 			
@@ -158,6 +161,9 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		String[] rt = runtime.getName().split("@");
 		info.setHostName(rt[1]);
 		info.setPid(rt[0]);
+		
+		com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+		info.setAvailableProcessors(os.getAvailableProcessors());
 		
 		try {
 			info.setIp(Inet4Address.getLocalHost().getHostAddress());
@@ -231,7 +237,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	private final void initEtcdClient() {
 		/** create ETCD client instance */
 		String username = System.getProperty(ETCD_USER, "");
-		String password = System.getProperty(ETCD_PASSWD, "");
+		String password = CryptUtil.decrypt(System.getProperty(ETCD_PASSWD, ""));
 		APP_NAME = System.getProperty(ETCD_APP_NAME, "");
 		String[] uris = System.getProperty(ETCD_URI, "").split(",");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {
