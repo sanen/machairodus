@@ -20,16 +20,20 @@ import org.machairodus.topology.entity.BaseEntity;
 public class Pointer extends BaseEntity {
 	private static final long serialVersionUID = 7350989467756362845L;
 
-	private final String scene;
-	private final Long time;
-	private final Long tps;
-	
-	private Pointer(String scene, long time, long tps) { 
+	private String scene;
+	private Long time;
+	private Long tps;
+
+	public Pointer() {
+
+	}
+
+	private Pointer(String scene, long time, long tps) {
 		this.scene = scene;
 		this.time = time;
 		this.tps = tps;
 	}
-	
+
 	public static final Pointer create(String scene, long time, long tps) {
 		return new Pointer(scene, time, tps);
 	}
@@ -38,12 +42,24 @@ public class Pointer extends BaseEntity {
 		return scene;
 	}
 
+	public void setScene(String scene) {
+		this.scene = scene;
+	}
+
 	public Long getTime() {
 		return time;
 	}
 
+	public void setTime(Long time) {
+		this.time = time;
+	}
+
 	public Long getTps() {
 		return tps;
+	}
+
+	public void setTps(Long tps) {
+		this.tps = tps;
 	}
 
 }

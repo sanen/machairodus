@@ -1,6 +1,7 @@
 package org.machairodus.topology.quartz.defaults;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.machairodus.topology.entity.BaseEntity;
@@ -25,6 +26,9 @@ public class JmxMonitor extends BaseEntity {
 	private Integer threadCount = 0;
 	private Integer daemonThreadCount = 0;
 	private Integer peakThreadCount = 0;
+	
+	/** User defined */
+	private List<Pointer> tps;
 
 	private static final Map<MemoryUsage, Long> DEFAULT_MEMORY_STATUS = new HashMap<MemoryUsage, Long>() {
 		private static final long serialVersionUID = -3324580956350564994L; {
@@ -119,6 +123,14 @@ public class JmxMonitor extends BaseEntity {
 
 	public void setPeakThreadCount(Integer peakThreadCount) {
 		this.peakThreadCount = peakThreadCount;
+	}
+
+	public List<Pointer> getTps() {
+		return tps;
+	}
+
+	public void setTps(List<Pointer> tps) {
+		this.tps = tps;
 	}
 
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.quartz.QuartzStatus;
 import org.machairodus.topology.quartz.defaults.JmxMonitor;
@@ -179,6 +180,7 @@ public class EtcdOrderTest {
 		}
 	}
 	
+	@Ignore
 	@Test
 	public void readJmxStore() throws Throwable {
 		initEtcd();

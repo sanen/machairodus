@@ -106,6 +106,9 @@ public class LocalJmxMonitorQuartz extends BaseQuartz {
 			com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 			monitor.setCpuRatio(cpuRatio(JMX_RATE, true, os));
 			
+			/** User defined */
+			monitor.setTps(Statistic.getInstance().getPointer());
+			
 			etcd.put(JMX_KEY, CryptUtil.encrypt(monitor.toString(), EtcdQuartz.SYSTEM_ID)).send().get();
 		} catch(Throwable e) {
 			LOG.error(e.getMessage(), e);

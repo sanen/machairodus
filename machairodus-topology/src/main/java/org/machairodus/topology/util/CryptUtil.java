@@ -2,7 +2,7 @@ package org.machairodus.topology.util;
 
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import java.util.Base64;
+import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -38,7 +38,8 @@ public class CryptUtil {
 			cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化
 			byte[] result = cipher.doFinal(byteContent);//加密
 			
-			String encodeStr = new String(Base64.getEncoder().encode(parseByte2HexStr(result).getBytes()));
+			
+			String encodeStr = new String(BASE64.getInstance().encode(parseByte2HexStr(result).getBytes()));
 			int idx;
 			if((idx = encodeStr.indexOf("=")) > -1) {
 				String tmp = encodeStr.substring(0, idx);
@@ -73,7 +74,8 @@ public class CryptUtil {
 			data = tmp;
 		
 		try {
-			byte[] content = parseHexStr2Byte(new String(Base64.getDecoder().decode(data.getBytes())));
+			BASE64Decoder decoder = new BASE64Decoder();
+			byte[] content = parseHexStr2Byte(new String(decoder.decodeBuffer(data)));
 			KeyGenerator kgen = KeyGenerator.getInstance("AES");
 			SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 			random.setSeed(password.getBytes(Charset.forName("UTF-8")));

@@ -37,36 +37,36 @@ public class EtcdOrderCreatorTest {
 		order.setGroup("TestWorkerQuartz2");
 		order.setId("TestWorkerQuartz2-4");
 		
-		LOG.debug("STOP: " + CryptUtil.encrypt(order.toString(), "78de606a3559c4397d260dd2dce17de9"));
+		LOG.debug("STOP: " + CryptUtil.encrypt(order.toString(), "4b238cbb7565549833008d3f0ff2bbb6"));
 		
 		EtcdOrder stopGroup = new EtcdOrder();
 		stopGroup.setAction(OrderAction.STOP_GROUP);
 		stopGroup.setGroup("TestWorkerQuartz2");
 		
-		LOG.debug("STOP_GROUP: " + CryptUtil.encrypt(stopGroup.toString(), "78de606a3559c4397d260dd2dce17de9"));
+		LOG.debug("STOP_GROUP: " + CryptUtil.encrypt(stopGroup.toString(), "4b238cbb7565549833008d3f0ff2bbb6"));
 		
 		EtcdOrder removeGroup = new EtcdOrder();
 		removeGroup.setAction(OrderAction.REMOVE_GROUP);
 		removeGroup.setGroup("TestWorkerQuartz2");
 		
-		LOG.debug("REMOVE_GROUP: " + CryptUtil.encrypt(removeGroup.toString(), "78de606a3559c4397d260dd2dce17de9"));
+		LOG.debug("REMOVE_GROUP: " + CryptUtil.encrypt(removeGroup.toString(), "4b238cbb7565549833008d3f0ff2bbb6"));
 		
 		EtcdOrder stopAll = new EtcdOrder();
 		stopAll.setAction(OrderAction.STOP_ALL);
 		
-		LOG.debug("STOP_ALL" + CryptUtil.encrypt(stopAll.toString(), "78de606a3559c4397d260dd2dce17de9"));
+		LOG.debug("STOP_ALL" + CryptUtil.encrypt(stopAll.toString(), "4b238cbb7565549833008d3f0ff2bbb6"));
 		
 		EtcdOrder startAll = new EtcdOrder();
 		startAll.setAction(OrderAction.START_ALL);
 		
-		LOG.debug("START_ALL: " + CryptUtil.encrypt(startAll.toString(), "78de606a3559c4397d260dd2dce17de9"));
+		LOG.debug("START_ALL: " + CryptUtil.encrypt(startAll.toString(), "4b238cbb7565549833008d3f0ff2bbb6"));
 	}
 	
 	@Ignore
 	@Test
 	public void decodeAppInfo() {
 		String value = "Rjg3NTU3NDIwRTY3RjlFRTIzMDJFNDhENzdFOEZCMjJDMUU2OThGQjNFRTA1QUQzMjQyRjMxRTRDMERCMEQ2RUY2ODVDQjM3QzQyNEEzMjhBNjU2RUFBMTNFOEJGQUU3QkM0NDJCNzM1OEJGQjc3NzM4QkE5QUQxNDJBRTNGQkVGQkFEQ0FFNkZGRUU1Qzc1NjhBMUJCMkU1MERGODU0OEQxRkRDOEUzMTE4RjM3NzAwQzA0QTVCQjI2QTk3Nzk3";
-		EtcdAppInfo info = JSON.parseObject(CryptUtil.decrypt(value, "78de606a3559c4397d260dd2dce17de9"), new TypeReference<EtcdAppInfo>() { });
+		EtcdAppInfo info = JSON.parseObject(CryptUtil.decrypt(value, "4b238cbb7565549833008d3f0ff2bbb6"), new TypeReference<EtcdAppInfo>() { });
 		LOG.debug(info.toString());
 	}
 }
