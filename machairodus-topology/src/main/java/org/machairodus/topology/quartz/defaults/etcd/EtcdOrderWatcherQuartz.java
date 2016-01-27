@@ -28,6 +28,7 @@ import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.util.CryptUtil;
 import org.machairodus.topology.util.StringUtils;
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeyAction;
@@ -138,11 +139,9 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 		public void execute() throws QuartzException {
 			if(!StringUtils.isEmpty(value)) {
 				try {
-					EtcdOrder order = JSON.parseObject(value, type);
+					EtcdOrder order = JSON.parseObject(CryptUtil.decrypt(value, EtcdQuartz.SYSTEM_ID), type);
 					if(order != null && order.valid()) {
 						switch(order.getAction()) {
-							case NEW: 
-								break;
 							case APPEND: 
 								FACTORY.append(order.getGroup(), order.getSize(), order.getAutoStart());
 								break;
@@ -169,8 +168,6 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 								break;
 							case REMOVE_GROUP: 
 								FACTORY.removeGroup(order.getGroup());
-								break;
-							case REMOVE_ALL: 
 								break;
 								
 						}

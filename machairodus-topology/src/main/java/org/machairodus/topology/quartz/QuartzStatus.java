@@ -20,10 +20,13 @@ import org.machairodus.topology.entity.BaseEntity;
 public class QuartzStatus extends BaseEntity {
 	private static final long serialVersionUID = 5876395587017572488L;
 
-	private final String group;
-	private final String id;
-	private final Status status;
-	
+	private String group;
+	private String id;
+	private Status status;
+
+	public QuartzStatus() {
+	}
+
 	public QuartzStatus(String group, String id, Status status) {
 		this.group = group;
 		this.id = id;
@@ -34,12 +37,24 @@ public class QuartzStatus extends BaseEntity {
 		return group;
 	}
 
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
 	public String getId() {
 		return id;
 	}
 
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public Status getStatus() {
 		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public enum Status {

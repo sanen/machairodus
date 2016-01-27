@@ -18,15 +18,17 @@ package org.machairodus.topology.quartz.defaults.etcd;
 import static org.machairodus.topology.quartz.QuartzFactory.DEFAULT_QUARTZ_NAME_PREFIX;
 import static org.machairodus.topology.quartz.QuartzFactory.threadFactory;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.Inet4Address;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -36,22 +38,23 @@ import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.CronExpression;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzException;
+import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.quartz.QuartzStatus;
 import org.machairodus.topology.quartz.QuartzStatus.Status;
 import org.machairodus.topology.util.Assert;
 import org.machairodus.topology.util.CollectionUtils;
+import org.machairodus.topology.util.CryptUtil;
 import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.StringUtils;
 import org.nanoframework.extension.etcd.client.retry.RetryWithExponentialBackOff;
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
 
+import com.alibaba.fastjson.JSON;
+
 public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 
 	private final Set<Class<?>> clsSet;
-	
-	@SuppressWarnings("unused")
-	private final Properties properties;
 	
 	public static final String SYSTEM_ID = MD5Utils.getMD5String(UUID.randomUUID().toString() + System.currentTimeMillis() + Math.random());
 	public static final String ETCD_ENABLE = "context.quartz.etcd.enable";
@@ -74,12 +77,10 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	private final int timeout = 75;
 	private EtcdClient etcd;
 	
-	public EtcdQuartz(Set<Class<?>> clsSet, Properties properties) {
-		Assert.notNull(properties);
+	public EtcdQuartz(Set<Class<?>> clsSet) {
 		Assert.notNull(clsSet);
 		
 		this.clsSet = clsSet;
-		this.properties = properties;
 		
 		QuartzConfig config = new QuartzConfig();
 		config.setId("EtcdQuartz-0");
@@ -95,7 +96,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		setConfig(config);
 		setClose(false);
 		
-		initEtcdClient(properties);
+		initEtcdClient();
 		if(etcd == null)
 			throw new QuartzException("Can not init Etcd Client");
 		
@@ -109,29 +110,65 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	@Override
 	public void execute() throws QuartzException {
 		syncBaseDirTTL();
+		syncInfo();
 	}
 	
 	public void syncBaseDirTTL() {
 		try {
+			EtcdKeysResponse response;
 			if(!init) {
-				etcd.putDir(DIR).ttl(timeout).prevExist(false).send().get();
+				response = etcd.putDir(DIR).ttl(timeout).prevExist(false).send().get();
 				init = true;
 			} else 
-				etcd.putDir(DIR).ttl(timeout).prevExist(true).send().get();
+				response = etcd.putDir(DIR).ttl(timeout).prevExist(true).send().get();
 			
+			LOG.debug(JSON.toJSONString(response));
 		} catch(Exception e) {
 			LOG.error("Put base dir error: " + e.getMessage());
+			if(e.getMessage() != null && e.getMessage().indexOf("Key not found") > -1) {
+				reSync();
+				return ;
+			}
+			
+			// 异常2秒重试
+			thisWait(2000);
+			syncBaseDirTTL();
 		}
+	}
+	
+	private void reSync() {
+		init = false;
+		clsIndex.clear();
+		indexMap.clear();
+		
+		syncBaseDirTTL();
+		syncInfo();
+		syncClass();
+		syncInstance();
 	}
 	
 	public void syncInfo() {
 		EtcdAppInfo info = new EtcdAppInfo();
+		info.setSystemId(SYSTEM_ID);
 		info.setAppName(APP_NAME);
+		
+		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+		info.setStartTime(runtime.getStartTime());
+		info.setUptime(runtime.getUptime());
+		String[] rt = runtime.getName().split("@");
+		info.setHostName(rt[1]);
+		info.setPid(rt[0]);
+		
 		try {
 			info.setIp(Inet4Address.getLocalHost().getHostAddress());
-			etcd.put(INFO_KEY, info.toString()).send().get();
+			String value = CryptUtil.encrypt(info.toString(), SYSTEM_ID);
+			etcd.put(INFO_KEY, value).send().get();
 		} catch (Exception e) {
 			LOG.error("Send App info error: " + e.getMessage());
+			
+			// 异常2秒重试
+			thisWait(2000);
+			syncBaseDirTTL();
 		}
 	}
 	
@@ -160,6 +197,27 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		}
 	}
 	
+	public void syncInstance() {
+		Collection<BaseQuartz> started = QuartzFactory.getInstance().getStartedQuartz();
+		Collection<BaseQuartz> stopping = QuartzFactory.getInstance().getStoppingQuartz();
+		Collection<BaseQuartz> stopped = QuartzFactory.getInstance().getStoppedQuratz();
+		
+		if(!CollectionUtils.isEmpty(started)) {
+			for(BaseQuartz quartz : started) 
+				start(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+		}
+		
+		if(!CollectionUtils.isEmpty(stopping)) {
+			for(BaseQuartz quartz : stopping) 
+				stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+		}
+		
+		if(!CollectionUtils.isEmpty(stopped)) {
+			for(BaseQuartz quartz : stopped) 
+				stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), false);
+		}
+	}
+	
 	@Override
 	public void after() throws QuartzException {
 
@@ -170,15 +228,12 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 
 	}
 	
-	private final void initEtcdClient(Properties properties) {
-		Assert.notNull(properties);
-		Assert.notEmpty(properties);
-		
+	private final void initEtcdClient() {
 		/** create ETCD client instance */
-		String username = properties.getProperty(ETCD_USER, "");
-		String password = properties.getProperty(ETCD_PASSWD, "");
-		APP_NAME = properties.getProperty(ETCD_APP_NAME, "");
-		String[] uris = properties.getProperty(ETCD_URI, "").split(",");
+		String username = System.getProperty(ETCD_USER, "");
+		String password = System.getProperty(ETCD_PASSWD, "");
+		APP_NAME = System.getProperty(ETCD_APP_NAME, "");
+		String[] uris = System.getProperty(ETCD_URI, "").split(",");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {
 			List<URI> uriList = new ArrayList<URI>();
 			for(String uri : uris) {
@@ -203,10 +258,11 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		try {
 			Long index;
 			EtcdKeysResponse response;
+			String value = CryptUtil.encrypt(status.toString(), SYSTEM_ID);
 			if((index = indexMap.get(status.getId())) != null) {
-				response = etcd.put(key + "/" + index, status.toString()).prevExist(true).send().get();
+				response = etcd.put(key + "/" + index, value).prevExist(true).send().get();
 			} else {
-				response = etcd.post(key, status.toString()).send().get();
+				response = etcd.post(key, value).send().get();
 				if(response.node != null && (index = response.node.createdIndex) != null) {
 					indexMap.put(status.getId(), index);
 				}

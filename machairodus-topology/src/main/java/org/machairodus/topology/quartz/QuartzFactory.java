@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -478,7 +477,7 @@ public class QuartzFactory {
 		rebalance(quartz.getConfig().getGroup());
 	}
 	
-	public final void removeQuartz(BaseQuartz quartz) {
+	public final int removeQuartz(BaseQuartz quartz) {
 		Set<BaseQuartz> groupQuartz = group.get(quartz.getConfig().getGroup());
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
@@ -492,27 +491,23 @@ public class QuartzFactory {
 			close(quartz);
 		
 		rebalance(quartz.getConfig().getGroup());
+		
+		return groupQuartz.size();
 	}
 	
-	public final void removeQuartz(String groupName) {
+	public final int removeQuartz(String groupName) {
 		BaseQuartz quartz = findLast(groupName);
 		if(quartz != null) {
-			removeQuartz(quartz);
+			return removeQuartz(quartz);
 		}
+		
+		return 0;
 	}
 	
 	public final void removeGroup(String groupName) {
-		Set<BaseQuartz> groupQuartz = group.get(groupName);
-		for(BaseQuartz quartz : groupQuartz) {
-			groupQuartz.remove(quartz);
-			quartz.setRemove(true);
-			
-			if(quartz.isClosed()) {
-				/** Sync to Etcd by start method */
-				etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), true);
-			} else 
-				close(quartz);
-		}
+		while(removeQuartz(groupName) > 1) ;
+		closeGroup(groupName);
+		
 	}
 	
 	public final int getGroupSize(String groupName) {
@@ -581,11 +576,11 @@ public class QuartzFactory {
 	 * @throws IllegalAccessException ?
 	 */
 	@SuppressWarnings("unchecked")
-	public static final void load(Properties properties) throws IllegalArgumentException, IllegalAccessException {
+	public static final void load() throws IllegalArgumentException, IllegalAccessException {
 		if(isLoaded) 
 			throw new QuartzException("Quartz已经加载，这里不再进行重复的加载，如需重新加载请调用reload方法");
 
-		String _package = properties.getProperty(BASE_PACKAGE);
+		String _package = System.getProperty(BASE_PACKAGE);
 		if(_package == null || _package.isEmpty())
 			throw new QuartzException("Property '" + BASE_PACKAGE + "' must not be null.");
 		
@@ -602,10 +597,10 @@ public class QuartzFactory {
 			LOG.info("Quartz size: " + componentClasses.size());
 		
 		if(componentClasses.size() > 0) {
-			String[] includes = properties.getProperty(INCLUDES, ".").split(",");
+			String[] includes = System.getProperty(INCLUDES, ".").split(",");
 			String[] exclusions;
-			if(!StringUtils.isEmpty(properties.getProperty(EXCLUSIONS)))
-				exclusions = properties.getProperty(EXCLUSIONS).split(",");
+			if(!StringUtils.isEmpty(System.getProperty(EXCLUSIONS)))
+				exclusions = System.getProperty(EXCLUSIONS).split(",");
 			else 
 				exclusions = new String[0];
 			
@@ -627,7 +622,7 @@ public class QuartzFactory {
 					int parallel = 0;
 					String cron = "";
 					String value;
-					if((value = properties.getProperty(parallelProperty)) != null && !value.isEmpty()) {
+					if(!StringUtils.isEmpty(parallelProperty) && (value = System.getProperty(parallelProperty)) != null && !value.isEmpty()) {
 						/** 采用最后设置的属性作为最终结果 */
 						try {
 							parallel = Integer.parseInt(value);
@@ -636,7 +631,7 @@ public class QuartzFactory {
 						}
 					}
 					
-					if((value = properties.getProperty(quartz.cronProperty())) != null && !value.isEmpty())
+					if(!StringUtils.isEmpty(quartz.cronProperty()) && (value = System.getProperty(quartz.cronProperty())) != null && !value.isEmpty())
 						cron = value;
 					
 					parallel = quartz.coreParallel() ? RuntimeUtil.AVAILABLE_PROCESSORS : parallel > 0 ? parallel : quartz.parallel();
@@ -668,7 +663,7 @@ public class QuartzFactory {
 							/** set Machairodus private proerty   START */
 							if(!StringUtils.isEmpty(quartz.workerClassProperty().trim())) {
 								try {
-									String className = properties.getProperty(quartz.workerClassProperty().trim());
+									String className = System.getProperty(quartz.workerClassProperty().trim());
 									if(!StringUtils.isEmpty(className)) {
 										Class<?> cls = Class.forName(className);
 										if(BaseQuartz.class.isAssignableFrom(cls))
@@ -687,7 +682,7 @@ public class QuartzFactory {
 								config.setWorkerClass(quartz.workerClass());
 							
 							if(!StringUtils.isEmpty(quartz.queueNameProperty().trim())) {
-								String queueName = properties.getProperty(quartz.queueNameProperty().trim());
+								String queueName = System.getProperty(quartz.queueNameProperty().trim());
 								if(!StringUtils.isEmpty(queueName)) {
 									config.setQueueName(queueName);
 								} else 
@@ -698,7 +693,7 @@ public class QuartzFactory {
 							
 							if(!StringUtils.isEmpty(quartz.closeTimeoutProperty())) {
 								try {
-									long timeout = Long.parseLong(properties.getProperty(quartz.closeTimeoutProperty()));
+									long timeout = Long.parseLong(System.getProperty(quartz.closeTimeoutProperty()));
 									config.setTimeout(timeout);
 								} catch(Exception e) { 
 									config.setTimeout(quartz.closeTimeout());
@@ -731,9 +726,9 @@ public class QuartzFactory {
 			
 			/** Create and start Etcd Scheduler */
 			try {
-				boolean enable = Boolean.parseBoolean(properties.getProperty(EtcdQuartz.ETCD_ENABLE, "false"));
+				boolean enable = Boolean.parseBoolean(System.getProperty(EtcdQuartz.ETCD_ENABLE, "false"));
 				if(enable) {
-					EtcdQuartz quartz = new EtcdQuartz(componentClasses, properties);
+					EtcdQuartz quartz = new EtcdQuartz(componentClasses);
 					etcdQuartz = quartz;
 					quartz.getConfig().getService().execute(quartz);
 					quartz.syncBaseDirTTL();
@@ -758,7 +753,7 @@ public class QuartzFactory {
 	 * 重新加载调度任务
 	 * @param injector Guice Injector
 	 */
-	public static final void reload(final Properties properties) {
+	public static final void reload() {
 		getInstance().stoppedQuartz.clear();
 		getInstance().closeAll();
 		service.execute(new Runnable() {
@@ -770,7 +765,7 @@ public class QuartzFactory {
 					LOG.info("所有任务已经全部关闭");
 				
 				try {
-					load(properties);
+					load();
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 				}

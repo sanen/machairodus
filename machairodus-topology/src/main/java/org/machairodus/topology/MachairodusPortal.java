@@ -102,7 +102,7 @@ public class MachairodusPortal {
 						LOG.debug("Put Property to System: ( " + key + ": " + value + " )");
 				}
 				
-				QuartzFactory.load(properties);
+				QuartzFactory.load();
 				boolean autoRun = Boolean.valueOf(properties.getProperty(QuartzFactory.AUTO_RUN, "true"));
 				if(autoRun)
 					QuartzFactory.getInstance().startAll();

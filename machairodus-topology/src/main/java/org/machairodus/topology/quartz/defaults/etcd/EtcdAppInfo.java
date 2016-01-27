@@ -15,13 +15,28 @@
  */
 package org.machairodus.topology.quartz.defaults.etcd;
 
+import java.sql.Timestamp;
+
 import org.machairodus.topology.entity.BaseEntity;
 
 public class EtcdAppInfo extends BaseEntity {
 	private static final long serialVersionUID = -5412741101794352940L;
 
+	private String systemId;
 	private String appName;
 	private String ip;
+	private Long startTime;
+	private Long uptime;
+	private String hostName;
+	private String pid;
+
+	public String getSystemId() {
+		return systemId;
+	}
+
+	public void setSystemId(String systemId) {
+		this.systemId = systemId;
+	}
 
 	public String getAppName() {
 		return appName;
@@ -37,6 +52,38 @@ public class EtcdAppInfo extends BaseEntity {
 
 	public void setIp(String ip) {
 		this.ip = ip;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getUptime() {
+		return uptime;
+	}
+
+	public void setUptime(Long uptime) {
+		this.uptime = uptime;
+	}
+
+	public String getHostName() {
+		return hostName;
+	}
+
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 }

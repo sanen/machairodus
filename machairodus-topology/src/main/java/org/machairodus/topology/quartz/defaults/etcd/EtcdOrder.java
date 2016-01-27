@@ -33,14 +33,15 @@ public class EtcdOrder extends BaseEntity {
 	public boolean valid() {
 		if (action == null)
 			return false;
+		
+		if(ObjectCompare.isInList(action, OrderAction.START_ALL, OrderAction.STOP_ALL))
+			return true;
 
 		if (group == null || group.trim().length() == 0)
 			return false;
 
-		if (ObjectCompare.isInList(action, OrderAction.START, OrderAction.STOP, OrderAction.REMOVE) && (id == null || id.trim().length() == 0))
-			return false;
-
-		if (action == OrderAction.NEW && (config == null || className == null || className.trim().length() == 0))
+		if (ObjectCompare.isInList(action, OrderAction.START, OrderAction.STOP, OrderAction.REMOVE)
+				&& (id == null || id.trim().length() == 0))
 			return false;
 
 		if (action == OrderAction.APPEND && (size == null || size <= 0 || autoStart == null))
@@ -106,6 +107,6 @@ public class EtcdOrder extends BaseEntity {
 	}
 
 	public enum OrderAction {
-		NEW, APPEND, START, STOP, REMOVE, START_GROUP, STOP_GROUP, REMOVE_GROUP, START_ALL, STOP_ALL, REMOVE_ALL;
+		APPEND, START, STOP, REMOVE, START_GROUP, STOP_GROUP, REMOVE_GROUP, START_ALL, STOP_ALL;
 	}
 }
