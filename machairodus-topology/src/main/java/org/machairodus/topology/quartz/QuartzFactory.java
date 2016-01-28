@@ -32,11 +32,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.machairodus.topology.quartz.defaults.LocalJmxMonitorQuartz;
-import org.machairodus.topology.quartz.defaults.StatisticQuartz;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdOrderWatcherQuartz;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartzOperate;
+import org.machairodus.topology.quartz.defaults.monitor.LocalJmxMonitorQuartz;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scan.ComponentScan;
 import org.machairodus.topology.util.Assert;
@@ -84,10 +83,6 @@ public class QuartzFactory {
 			synchronized (LOCK) {
 				if(FACTORY == null) {
 					FACTORY = new QuartzFactory();
-					
-					StatisticQuartz statistic = new StatisticQuartz();
-					statistic.getConfig().getService().execute(statistic);
-					
 					StatusMonitorQuartz statusMonitor = FACTORY.new StatusMonitorQuartz();
 					statusMonitor.getConfig().getService().execute(statusMonitor);
 					Runtime.getRuntime().addShutdownHook(new Thread(FACTORY.new ShutdownHook()));

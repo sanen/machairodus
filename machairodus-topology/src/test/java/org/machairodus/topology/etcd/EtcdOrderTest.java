@@ -25,9 +25,9 @@ import java.util.Properties;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.quartz.QuartzStatus;
-import org.machairodus.topology.quartz.defaults.JmxMonitor;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
+import org.machairodus.topology.quartz.defaults.monitor.JmxMonitor;
 import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.CryptUtil;
 import org.machairodus.topology.util.LoaderException;
@@ -53,7 +53,7 @@ public class EtcdOrderTest {
 	private void initEtcd() throws LoaderException, FileNotFoundException, IOException {
 		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:quartz-config.properties"));
 		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
-		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_PASSWD));
+		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID));
 		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
 		ROOT_RESOURCE = properties.getProperty(EtcdQuartz.ETCD_RESOURCE);
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {
@@ -180,7 +180,6 @@ public class EtcdOrderTest {
 		}
 	}
 	
-	@Ignore
 	@Test
 	public void readJmxStore() throws Throwable {
 		initEtcd();
@@ -202,7 +201,7 @@ public class EtcdOrderTest {
 				}
 			}
 			
-			for(int idx = 0; idx < 10; idx ++) {
+			for(int idx = 0; idx < 5; idx ++) {
 				List<JmxMonitor> jmxMonitors = new ArrayList<JmxMonitor>();
 				TypeReference<JmxMonitor> jmxMonitorType = new TypeReference<JmxMonitor>() { };
 				if(!CollectionUtils.isEmpty(systemIds)) {
@@ -220,7 +219,7 @@ public class EtcdOrderTest {
 					}
 				}
 				
-				Thread.sleep(1000L);
+				Thread.sleep(5000L);
 			}
 		}
 	}

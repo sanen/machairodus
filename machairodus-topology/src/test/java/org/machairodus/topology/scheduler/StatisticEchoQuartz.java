@@ -18,7 +18,7 @@ package org.machairodus.topology.scheduler;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.Statistic;
+import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;

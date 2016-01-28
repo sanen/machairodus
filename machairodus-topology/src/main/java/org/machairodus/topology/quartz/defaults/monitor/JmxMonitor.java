@@ -1,4 +1,4 @@
-package org.machairodus.topology.quartz.defaults;
+package org.machairodus.topology.quartz.defaults.monitor;
 
 import java.util.HashMap;
 import java.util.List;

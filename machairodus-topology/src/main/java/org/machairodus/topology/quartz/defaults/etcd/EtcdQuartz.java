@@ -58,12 +58,12 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String ETCD_ENABLE = "context.quartz.etcd.enable";
 	public static final String ETCD_URI = "context.quartz.etcd.uri";
 	public static final String ETCD_USER = "context.quartz.etcd.username";
-	public static final String ETCD_PASSWD = "context.quartz.etcd.passwd";
+	public static final String ETCD_CLIENT_ID = "context.quartz.etcd.clientid";
 	public static final String ETCD_APP_NAME = "context.quartz.app.name";
 	public static final String ETCD_RESOURCE = "context.quartz.etcd.resource";
 	
 	public static final String ROOT_RESOURCE;
-	public static final String DIR = (ROOT_RESOURCE = System.getProperty(ETCD_RESOURCE, "")) + "/" + SYSTEM_ID;
+	public static final String DIR = (ROOT_RESOURCE = System.getProperty(ETCD_RESOURCE, "/machairodus/" + System.getProperty(ETCD_USER, ""))) + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Quartz.class";
 	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
 	public static final String INFO_KEY = DIR + "/App.info";
@@ -237,10 +237,10 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	private final void initEtcdClient() {
 		/** create ETCD client instance */
 		String username = System.getProperty(ETCD_USER, "");
-		String password = CryptUtil.decrypt(System.getProperty(ETCD_PASSWD, ""));
+		String clientId = CryptUtil.decrypt(System.getProperty(ETCD_CLIENT_ID, ""));
 		APP_NAME = System.getProperty(ETCD_APP_NAME, "");
 		String[] uris = System.getProperty(ETCD_URI, "").split(",");
-		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {
+		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(clientId.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {
 			List<URI> uriList = new ArrayList<URI>();
 			for(String uri : uris) {
 				if(StringUtils.isEmpty(uri))
@@ -254,7 +254,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 			}
 			
 			if(uriList.size() > 0) {
-				etcd = new EtcdClient(username, password, uriList.toArray(new URI[uriList.size()]));
+				etcd = new EtcdClient(username, clientId, uriList.toArray(new URI[uriList.size()]));
 				etcd.setRetryHandler(new RetryWithExponentialBackOff(20, 4, -1));
 			}
 		}

@@ -1,4 +1,4 @@
-package org.machairodus.topology.quartz.defaults;
+package org.machairodus.topology.quartz.defaults.monitor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -79,13 +79,13 @@ public class Statistic implements StatisticMXBean {
 		return _val.get();
 	}
 	
-	public void setPointer(int time) {
+	public List<Pointer> setAndGetPointer(int time) {
 		final ReentrantLock lock = LOCK;
 		try {
 			lock.lock();
 			List<Pointer> pointers = new ArrayList<Pointer>();
 			for(Entry<String, AtomicLong> item : statisticMap.entrySet()) {
-				pointers.add(Pointer.create(item.getKey(), System.currentTimeMillis(), item.getValue().get()));
+				pointers.add(Pointer.create(item.getKey(), System.currentTimeMillis(), item.getValue().get() / time));
 			}
 			
 			if(!pointerQueue.offer(pointers)) {
@@ -98,6 +98,8 @@ public class Statistic implements StatisticMXBean {
 			}
 			
 			statisticMap.clear();
+			
+			return pointers;
 		} finally {
 			lock.unlock();
 		}

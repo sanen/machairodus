@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.machairodus.topology.quartz.QuartzFactory;
-import org.machairodus.topology.quartz.defaults.Statistic;
+import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.util.PropertiesLoader;
 import org.machairodus.topology.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -111,7 +111,6 @@ public class MachairodusPortal {
 				LOG.error("加载任务异常: " + e.getMessage());
 			}
 			
-//			Statistic.setMaxPointer(Integer.parseInt(properties.getProperty(QuartzFactory.MAX_POINTER, "1200")));
 			Statistic.getInstance().setMaxPointer(1);
 			isInit.set(true);
 		}

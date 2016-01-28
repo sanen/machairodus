@@ -23,7 +23,7 @@ import org.machairodus.topology.domain.Test;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.Statistic;
+import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 

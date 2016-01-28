@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzFactory;
-import org.machairodus.topology.quartz.defaults.Statistic;
+import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.ResultMap;
