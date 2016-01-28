@@ -22,6 +22,6 @@ public class CryptTest {
 
 	@Test
 	public void encode() {
-		System.out.println(CryptUtil.encrypt("machairodus"));
+		System.out.println(CryptUtil.encrypt("topology"));
 	}
 }

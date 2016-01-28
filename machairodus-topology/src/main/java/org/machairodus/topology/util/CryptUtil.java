@@ -38,7 +38,6 @@ public class CryptUtil {
 			cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化
 			byte[] result = cipher.doFinal(byteContent);//加密
 			
-			
 			String encodeStr = new String(BASE64.getInstance().encode(parseByte2HexStr(result).getBytes()));
 			int idx;
 			if((idx = encodeStr.indexOf("=")) > -1) {
