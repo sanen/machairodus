@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.quartz.QuartzStatus;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
@@ -55,7 +54,7 @@ public class EtcdOrderTest {
 		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
 		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID));
 		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
-		ROOT_RESOURCE = properties.getProperty(EtcdQuartz.ETCD_RESOURCE);
+		ROOT_RESOURCE = properties.getProperty(EtcdQuartz.ETCD_RESOURCE, "/machairodus/" + properties.getProperty(EtcdQuartz.ETCD_USER, ""));
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {
 			List<URI> uriList = new ArrayList<URI>();
 			for(String uri : uris) {
@@ -219,7 +218,9 @@ public class EtcdOrderTest {
 					}
 				}
 				
-				Thread.sleep(5000L);
+				if(idx < 5)
+					Thread.sleep(5000L);
+				
 			}
 		}
 	}
