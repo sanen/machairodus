@@ -72,6 +72,7 @@ public class LocalJmxMonitorQuartz extends BaseQuartz {
 		
 	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	public void execute() throws QuartzException {
 		try {
@@ -127,6 +128,7 @@ public class LocalJmxMonitorQuartz extends BaseQuartz {
 		
 	}
 
+	@SuppressWarnings("restriction")
 	public double cpuRatio(long time, boolean ifAvaProc, com.sun.management.OperatingSystemMXBean os) {
 		Long start = System.currentTimeMillis();  
         long startT = os.getProcessCpuTime();  

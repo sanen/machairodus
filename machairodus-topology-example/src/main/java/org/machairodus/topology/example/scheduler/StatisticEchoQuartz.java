@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.scheduler;
+package org.machairodus.topology.example.scheduler;
+
 
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;

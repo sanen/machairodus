@@ -2,18 +2,20 @@ package org.machairodus.topology.util;
 
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import sun.misc.BASE64Decoder;
+
 /**
  * 
  * @author yanghe
  * @date 2015年8月19日 上午8:59:44
  */
+@SuppressWarnings("restriction")
 public class CryptUtil {
 	
 	private static final String DEFAULT_PASSWORD = "nano-framework";

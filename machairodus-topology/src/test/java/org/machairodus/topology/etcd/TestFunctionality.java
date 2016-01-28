@@ -46,6 +46,7 @@ public class TestFunctionality {
    *
    * @throws Exception
    */
+  @SuppressWarnings("deprecation")
   @Test
   public void testOldVersion() {
     String version = etcd.getVersion();
@@ -77,7 +78,8 @@ public class TestFunctionality {
     EtcdSelfStatsResponse stats = etcd.getSelfStats();
     assertNotNull(stats);
     assertNotNull(stats.getLeaderInfo());
-    assertEquals(stats.getId(), stats.getLeaderInfo().getLeader());
+    // 集群环境下Id和Leader会出现不一致
+//    assertEquals(stats.getId(), stats.getLeaderInfo().getLeader());
   }
 
 
@@ -263,7 +265,7 @@ public class TestFunctionality {
   public void testWaitTimeout() throws IOException, EtcdException, EtcdAuthenticationException, InterruptedException, TimeoutException {
     EtcdResponsePromise<EtcdKeysResponse> p = etcd.get("etcd4j_test/test").waitForChange().timeout(10, TimeUnit.MILLISECONDS).send();
 
-    EtcdKeysResponse r = p.get();
+    p.get();
     // get should have thrown TimeoutException
     fail();
   }

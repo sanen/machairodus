@@ -1,4 +1,4 @@
-package org.machairodus.topology;
+package org.machairodus.topology.example;
 
 import org.nanoframework.server.JettyCustomServer;
 

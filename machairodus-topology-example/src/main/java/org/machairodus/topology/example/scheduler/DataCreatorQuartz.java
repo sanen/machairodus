@@ -13,41 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.scheduler;
+package org.machairodus.topology.example.scheduler;
 
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.machairodus.topology.domain.Test;
+import org.machairodus.topology.example.domain.Test;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
-import org.machairodus.topology.util.CollectionUtils;
+import org.nanoframework.commons.util.UUIDUtils;
 
-@Quartz(name = "TestWorkerQuartz2", queueName = "Test2", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
-public class TestWorkerQuartz2 extends BaseQuartz {
-	private List<Test> data;
-	private Random random = new Random();
+@Quartz(name = "DataCreatorQuartz", beforeAfterOnly = true, parallel = 1)
+public class DataCreatorQuartz extends BaseQuartz {
+	private AtomicLong id = new AtomicLong(0);
+	private Test test;
+	
+	static {
+		BlockingQueueFactory.getInstance().initQueue(Test.class.getName(), 10000);
+	}
 	
 	@Override
 	public void before() throws QuartzException {
-		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName() + "2", 100, 1000, TimeUnit.MILLISECONDS);
 		
 	}
 
 	@Override
 	public void execute() throws QuartzException {
-		if(!CollectionUtils.isEmpty(data)) {
-			for(@SuppressWarnings("unused") Test test : data) {
-				thisWait(random.nextInt(10));
-				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName() + "2");
-			}
-			
-//			LOG.debug("消费数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
-		}
+		if(test == null)
+			test = Test.create(id.incrementAndGet(), UUIDUtils.create());
+		
+		try { 
+			BlockingQueueFactory.getInstance().offer(Test.class.getName(), test, 1000L, TimeUnit.MILLISECONDS);
+			test = null;
+		} catch(InterruptedException e) { }
 	}
 
 	@Override

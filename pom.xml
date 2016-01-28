@@ -76,7 +76,8 @@
 		<module>machairodus-topology</module>
 		<module>machairodus-manager</module>
 		<module>machairodus-mappers</module>
-  </modules>
+		<module>machairodus-topology-example</module>
+	</modules>
 
 	<scm>
 		<connection>scm:git:git@github.com:machairodus-projects/machairodus.git</connection>

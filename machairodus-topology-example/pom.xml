@@ -8,12 +8,11 @@
 		<artifactId>machairodus</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>machairodus-topology</artifactId>
-	<name>Machairodus Topology</name>
+	<artifactId>machairodus-topology-example</artifactId>
+	<name>Machairodus Topology Example</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<log4j2-version>2.2</log4j2-version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -46,35 +45,33 @@
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		
+
 		<dependency>
 			<groupId>org.nanoframework</groupId>
-			<artifactId>nano-ext-etcd</artifactId>
+			<artifactId>nano-server</artifactId>
 		</dependency>
 		
+		<dependency>
+			<groupId>org.machairodus</groupId>
+			<artifactId>machairodus-topology</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin-version}</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>webRoot/**</exclude>
+					<exclude>assembly.xml</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<targetPath>${project.basedir}/</targetPath>
+				<includes>
+					<include>webRoot/**</include>
+				</includes>
+			</resource>
+		</resources>
 	</build>
 </project>

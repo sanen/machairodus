@@ -13,57 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.scheduler;
+package org.machairodus.topology.example.scheduler;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.machairodus.topology.domain.Test;
+import org.machairodus.topology.example.domain.Test;
 import org.machairodus.topology.quartz.BaseQuartz;
 import org.machairodus.topology.quartz.Quartz;
 import org.machairodus.topology.quartz.QuartzException;
+import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel")
-public class TestDataLoaderQuartz extends BaseQuartz {
+@Quartz(name = "TestWorkerQuartz", queueName = "Test", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
+public class TestWorkerQuartz extends BaseQuartz {
 	private List<Test> data;
-	
-	static {
-		BlockingQueueFactory.getInstance().initQueue(Test.class.getSimpleName(), 10000);
-	}
+	private Random random = new Random();
 	
 	@Override
 	public void before() throws QuartzException {
-		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName()).size() < 100) {
-			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
-//			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
-		} else {
-			thisWait(1000);
-		}
+		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName(), 100, 1000, TimeUnit.MILLISECONDS);
+		
 	}
 
 	@Override
 	public void execute() throws QuartzException {
 		if(!CollectionUtils.isEmpty(data)) {
-			for(Test item : data) {
-				boolean offed = false;
-				while(!offed) {
-					try { 
-						BlockingQueueFactory.getInstance().offer(Test.class.getSimpleName(), item, 1000, TimeUnit.MILLISECONDS);
-						offed = true;
-					} catch(InterruptedException e) { }
-				}
+			for(@SuppressWarnings("unused") Test test : data) {
+				thisWait(random.nextInt(10));
+				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName());
 			}
+			
+//			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 
 	@Override
 	public void after() throws QuartzException {
-		if(data != null) {
-			data.clear();
-			data = null;
-		}
+
 	}
 
 	@Override

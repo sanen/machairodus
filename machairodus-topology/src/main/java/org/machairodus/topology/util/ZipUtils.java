@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author yanghe
  * @date 2015年8月19日 上午9:04:40
  */
+@SuppressWarnings("restriction")
 public class ZipUtils {
 
 	private static Logger LOG = LoggerFactory.getLogger(ZipUtils.class);

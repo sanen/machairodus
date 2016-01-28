@@ -21,8 +21,8 @@ import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder.OrderAction;
 import org.machairodus.topology.util.CryptUtil;
-import org.nanoframework.commons.support.logging.Logger;
-import org.nanoframework.commons.support.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;

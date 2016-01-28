@@ -33,12 +33,12 @@ import org.machairodus.topology.util.LoaderException;
 import org.machairodus.topology.util.PropertiesLoader;
 import org.machairodus.topology.util.ResourceUtils;
 import org.machairodus.topology.util.StringUtils;
-import org.nanoframework.commons.support.logging.Logger;
-import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.extension.etcd.client.retry.RetryWithExponentialBackOff;
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse.EtcdNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -200,27 +200,21 @@ public class EtcdOrderTest {
 				}
 			}
 			
-			for(int idx = 0; idx < 5; idx ++) {
-				List<JmxMonitor> jmxMonitors = new ArrayList<JmxMonitor>();
-				TypeReference<JmxMonitor> jmxMonitorType = new TypeReference<JmxMonitor>() { };
-				if(!CollectionUtils.isEmpty(systemIds)) {
-					for(String systemId : systemIds) {
-						response = etcd.get(resource + systemId + "/Jmx.store").send().get();
-						if(response.node != null) {
-							jmxMonitors.add(JSON.parseObject(CryptUtil.decrypt(response.node.value, systemId), jmxMonitorType));
-						}
+			List<JmxMonitor> jmxMonitors = new ArrayList<JmxMonitor>();
+			TypeReference<JmxMonitor> jmxMonitorType = new TypeReference<JmxMonitor>() { };
+			if(!CollectionUtils.isEmpty(systemIds)) {
+				for(String systemId : systemIds) {
+					response = etcd.get(resource + systemId + "/Jmx.store").send().get();
+					if(response.node != null) {
+						jmxMonitors.add(JSON.parseObject(CryptUtil.decrypt(response.node.value, systemId), jmxMonitorType));
 					}
 				}
-				
-				if(!CollectionUtils.isEmpty(jmxMonitors)) {
-					for(JmxMonitor jmx : jmxMonitors) {
-						LOG.debug(jmx.toString());
-					}
+			}
+			
+			if(!CollectionUtils.isEmpty(jmxMonitors)) {
+				for(JmxMonitor jmx : jmxMonitors) {
+					LOG.debug(jmx.toString());
 				}
-				
-				if(idx < 5)
-					Thread.sleep(5000L);
-				
 			}
 		}
 	}

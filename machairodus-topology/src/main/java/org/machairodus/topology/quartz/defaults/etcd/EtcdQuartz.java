@@ -162,8 +162,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		info.setHostName(rt[1]);
 		info.setPid(rt[0]);
 		
-		com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-		info.setAvailableProcessors(os.getAvailableProcessors());
+		info.setAvailableProcessors(ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors());
 		
 		try {
 			info.setIp(Inet4Address.getLocalHost().getHostAddress());

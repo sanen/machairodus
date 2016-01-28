@@ -10,9 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.machairodus.topology.jmx.JmxManagementFactory;
-
-public class Statistic implements StatisticMXBean {
+public class Statistic {
 	private ConcurrentMap<String , AtomicLong> statisticMap = new ConcurrentHashMap<String , AtomicLong>();
 	private LinkedBlockingQueue<List<Pointer>> pointerQueue = new LinkedBlockingQueue<List<Pointer>>();
 	public static final String TOTAL = "total";
@@ -31,7 +29,6 @@ public class Statistic implements StatisticMXBean {
 				lock.lock();
 				if(DEFAULT == null) {
 					DEFAULT = new Statistic();
-					JmxManagementFactory.register(DEFAULT, STATISTIC_MXBEAN_NAME);
 				}
 			} finally {
 				lock.unlock();
@@ -105,7 +102,6 @@ public class Statistic implements StatisticMXBean {
 		}
 	}
 	
-	@Override
 	public List<Pointer> getPointer() {
 		Iterator<List<Pointer>> iter = pointerQueue.iterator();
 		if(iter.hasNext())
