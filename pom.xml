@@ -75,10 +75,7 @@
 		<module>machairodus-commons</module>
 		<module>machairodus-topology</module>
 		<module>machairodus-manager</module>
-		<module>machairodus-balancer</module>
-		<module>machairodus-scheduler</module>
 		<module>machairodus-mappers</module>
-    <module>machairodus-controller</module>
   </modules>
 
 	<scm>
@@ -402,16 +399,6 @@
 			<dependency>
 				<groupId>org.machairodus</groupId>
 				<artifactId>machairodus-manager</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-balancer</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-scheduler</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
