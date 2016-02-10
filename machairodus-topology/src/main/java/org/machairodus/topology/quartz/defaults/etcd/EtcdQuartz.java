@@ -41,6 +41,7 @@ import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.quartz.QuartzStatus;
 import org.machairodus.topology.quartz.QuartzStatus.Status;
+import org.machairodus.topology.quartz.defaults.monitor.LocalJmxMonitorQuartz;
 import org.machairodus.topology.util.Assert;
 import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.CryptUtil;
@@ -60,10 +61,9 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String ETCD_USER = "context.quartz.etcd.username";
 	public static final String ETCD_CLIENT_ID = "context.quartz.etcd.clientid";
 	public static final String ETCD_APP_NAME = "context.quartz.app.name";
-	public static final String ETCD_RESOURCE = "context.quartz.etcd.resource";
 	
-	public static final String ROOT_RESOURCE;
-	public static final String DIR = (ROOT_RESOURCE = System.getProperty(ETCD_RESOURCE, "/machairodus/" + System.getProperty(ETCD_USER, ""))) + "/" + SYSTEM_ID;
+	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
+	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Quartz.class";
 	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
 	public static final String INFO_KEY = DIR + "/App.info";
@@ -121,7 +121,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 				etcd.putDir(DIR).ttl(timeout).prevExist(true).send().get();
 			
 		} catch(Exception e) {
-			LOG.error("Put base dir error: " + e.getMessage());
+			LOG.error("Put base dir error: " + e.getMessage(), e);
 			if(e.getMessage() != null && e.getMessage().indexOf("Key not found") > -1) {
 				reSync();
 				return ;
@@ -154,6 +154,8 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		EtcdAppInfo info = new EtcdAppInfo();
 		info.setSystemId(SYSTEM_ID);
 		info.setAppName(APP_NAME);
+		info.setJmxEnable(LocalJmxMonitorQuartz.JMX_ENABLE);
+		info.setJmxRate(LocalJmxMonitorQuartz.JMX_RATE);
 		
 		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 		info.setStartTime(runtime.getStartTime());
@@ -236,7 +238,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	private final void initEtcdClient() {
 		/** create ETCD client instance */
 		String username = System.getProperty(ETCD_USER, "");
-		String clientId = CryptUtil.decrypt(System.getProperty(ETCD_CLIENT_ID, ""));
+		String clientId = CryptUtil.decrypt(System.getProperty(ETCD_CLIENT_ID, ""), username);
 		APP_NAME = System.getProperty(ETCD_APP_NAME, "");
 		String[] uris = System.getProperty(ETCD_URI, "").split(",");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(clientId.trim()) && !StringUtils.isEmpty(APP_NAME.trim()) && uris.length > 0) {

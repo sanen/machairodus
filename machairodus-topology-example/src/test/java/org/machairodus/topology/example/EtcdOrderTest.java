@@ -1,19 +1,4 @@
-/**
- * Copyright 2015-2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 			http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.machairodus.topology.etcd;
+package org.machairodus.topology.example;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,7 +37,7 @@ public class EtcdOrderTest {
 	private void initEtcd() throws LoaderException, FileNotFoundException, IOException {
 		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:quartz-config.properties"));
 		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
-		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID));
+		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID), username);
 		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
 		ROOT_RESOURCE = "/machairodus/" + properties.getProperty(EtcdQuartz.ETCD_USER, "");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {

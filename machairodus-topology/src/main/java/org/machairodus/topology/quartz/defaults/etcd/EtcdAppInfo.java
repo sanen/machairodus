@@ -28,6 +28,8 @@ public class EtcdAppInfo extends BaseEntity {
 	private String hostName;
 	private String pid;
 	private Integer availableProcessors;
+	private Boolean jmxEnable;
+	private Integer jmxRate;
 
 	public String getSystemId() {
 		return systemId;
@@ -91,6 +93,22 @@ public class EtcdAppInfo extends BaseEntity {
 
 	public void setAvailableProcessors(Integer availableProcessors) {
 		this.availableProcessors = availableProcessors;
+	}
+
+	public Boolean getJmxEnable() {
+		return jmxEnable;
+	}
+
+	public void setJmxEnable(Boolean jmxEnable) {
+		this.jmxEnable = jmxEnable;
+	}
+
+	public Integer getJmxRate() {
+		return jmxRate;
+	}
+
+	public void setJmxRate(Integer jmxRate) {
+		this.jmxRate = jmxRate;
 	}
 
 }
