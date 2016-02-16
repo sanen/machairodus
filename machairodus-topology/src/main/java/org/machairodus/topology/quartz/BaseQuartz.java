@@ -33,7 +33,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	
 	private QuartzConfig config;
 	private boolean close = true;
-	private boolean closed = false;
+	private boolean closed = true;
 	private boolean remove = false;
 	private boolean isRunning = false;
 	private int nowTimes = 0;
@@ -67,6 +67,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 				LOG.error("Lazy error: " + e.getMessage());
 			}
 			
+			close = false;
 			closed = false;
 			remove = false;
 			while(!close && !config.getService().isShutdown()) {
@@ -145,6 +146,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 					
 				} else {
 					close = true;
+					nowTimes = 0;
 				}
 			}
 		}
@@ -170,6 +172,12 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 			synchronized (LOCK) {
 				try { isLock.set(true); LOCK.wait(interval); } catch(InterruptedException e) { } finally { isLock.set(false); }
 			}
+		}
+	}
+	
+	protected void thisWait() {
+		synchronized (LOCK) {
+			try { isLock.set(true); LOCK.wait(); } catch(InterruptedException e) { } finally { isLock.set(false); }
 		}
 	}
 	
@@ -219,6 +227,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 
 	public void setClose(boolean close) {
 		this.close = close;
+		this.nowTimes = 0;
 	}
 	
 	public void setRemove(boolean remove) {

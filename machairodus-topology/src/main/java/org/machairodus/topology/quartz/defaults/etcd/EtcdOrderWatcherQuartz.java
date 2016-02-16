@@ -18,21 +18,25 @@ package org.machairodus.topology.quartz.defaults.etcd;
 import static org.machairodus.topology.quartz.QuartzFactory.DEFAULT_QUARTZ_NAME_PREFIX;
 import static org.machairodus.topology.quartz.QuartzFactory.threadFactory;
 
+import java.text.ParseException;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.machairodus.topology.quartz.BaseQuartz;
+import org.machairodus.topology.quartz.CronExpression;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.quartz.QuartzFactory;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.CryptUtil;
 import org.machairodus.topology.util.StringUtils;
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
-import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeyAction;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
+import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse.EtcdNode;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -46,6 +50,8 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 	private final EtcdClient etcd;
 	
 	private EtcdOrderExecuteQuartz etcdOrderExecuteQuartz;
+	
+	private EtcdOrderFetchQuartz etcdOrderFetchQuartz;
 	
 	public EtcdOrderWatcherQuartz(EtcdClient etcd) {
 		this.etcd = etcd;
@@ -73,33 +79,30 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 				}
 			}
 		}
+		
+		if(etcdOrderFetchQuartz == null) {
+			synchronized (this) {
+				if(etcdOrderFetchQuartz == null) {
+					etcdOrderFetchQuartz = this.new EtcdOrderFetchQuartz();
+					etcdOrderFetchQuartz.getConfig().getService().execute(etcdOrderFetchQuartz);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void execute() throws QuartzException {
-		EtcdKeysResponse response;
 		try {
-			response = etcd.get(ORDER).recursive().sorted().waitForChange().send().get();
+			etcd.get(ORDER).recursive().sorted().waitForChange().send().get();
+			etcdOrderFetchQuartz.active();
+			
 		} catch (Exception e) {
 			LOG.error("waitForChange error: " + e.getMessage());
 			return ;
 		} 
 		
-		fetch(response);
 	}
 	
-	private void fetch(EtcdKeysResponse response) {
-		if(response != null && response.action == EtcdKeyAction.create && response.node != null) {
-			LOG.debug("Receiver a order: " + response.node.value);
-			nodesQueue.add(response.node.value);
-			try {
-				etcd.delete(ORDER + "/" + response.node.createdIndex).send().get();
-			} catch(Exception e) {
-				LOG.error("Delete Order.list item error: " + e.getMessage());
-			}
-		}
-	}
-
 	@Override
 	public void after() throws QuartzException {
 
@@ -108,6 +111,77 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 	@Override
 	public void destroy() throws QuartzException {
 
+	}
+	
+	private class EtcdOrderFetchQuartz extends BaseQuartz {
+		private boolean active = false;
+		private int count = 0;
+		
+		public EtcdOrderFetchQuartz() {
+			QuartzConfig config = new QuartzConfig();
+			config.setId("EtcdOrderFetchQuartz-0");
+			config.setName(DEFAULT_QUARTZ_NAME_PREFIX + "EtcdOrderFetchQuartz-0");
+			config.setGroup("EtcdOrderFetchQuartz");
+			threadFactory.setBaseQuartz(this);
+			config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
+			config.setTotal(1);
+			config.setDaemon(true);
+			try { config.setCron(new CronExpression("* * * * * ?")); } catch (ParseException e) { }
+			setConfig(config);
+			
+		}
+		
+		@Override
+		public void before() throws QuartzException { }
+
+		@Override
+		public void execute() throws QuartzException {
+			if(active) {
+				try {
+					EtcdKeysResponse response = etcd.get(ORDER).sorted().send().get();
+					List<EtcdNode> nodes = response.node.nodes;
+					if(!CollectionUtils.isEmpty(nodes)) {
+						for(EtcdNode node : nodes) {
+							fetch(node);
+						}
+					}
+				} catch(Exception e) {
+					LOG.error("get Order Error: {}", e.getMessage());
+				} 
+				
+				count ++;
+			}
+			
+			if(count == 3) {
+				active = false;
+				count = 0;
+				thisWait();
+			}
+		}
+		
+		private void fetch(EtcdNode node) {
+			if(node != null) {
+				LOG.debug("Receiver a order: " + node.value);
+				nodesQueue.add(node.value);
+				try {
+					etcd.delete(ORDER + "/" + node.createdIndex).send().get();
+				} catch(Exception e) {
+					LOG.error("Delete Order.list item error: " + e.getMessage());
+				}
+			}
+		}
+		
+		public void active() {
+			this.active = true;
+			thisNotify();
+		}
+
+		@Override
+		public void after() throws QuartzException { }
+
+		@Override
+		public void destroy() throws QuartzException { }
+		
 	}
 
 	private class EtcdOrderExecuteQuartz extends BaseQuartz {
