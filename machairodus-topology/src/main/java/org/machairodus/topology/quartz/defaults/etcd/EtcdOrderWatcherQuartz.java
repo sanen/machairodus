@@ -161,10 +161,9 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 		
 		private void fetch(EtcdNode node) {
 			if(node != null) {
-				LOG.debug("Receiver a order: " + node.value);
 				nodesQueue.add(node.value);
 				try {
-					etcd.delete(ORDER + "/" + node.createdIndex).send().get();
+					etcd.delete(node.key).send().get();
 				} catch(Exception e) {
 					LOG.error("Delete Order.list item error: " + e.getMessage());
 				}
@@ -172,6 +171,7 @@ public class EtcdOrderWatcherQuartz extends BaseQuartz {
 		}
 		
 		public void active() {
+			this.count = 0;
 			this.active = true;
 			thisNotify();
 		}

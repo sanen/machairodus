@@ -69,8 +69,8 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String INFO_KEY = DIR + "/App.info";
 	private static String APP_NAME;
 	
-	private Map<Class<?>, Long> clsIndex = new HashMap<Class<?>, Long>();
-	private Map<String, Long> indexMap = new HashMap<String, Long>();
+	private Map<Class<?>, String> clsIndex = new HashMap<Class<?>, String>();
+	private Map<String, String> indexMap = new HashMap<String, String>();
 	
 	private boolean init = false;
 	private final int timeout = 75;
@@ -185,14 +185,15 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 			while(iter.hasNext()) {
 				try {
 					Class<?> cls = iter.next();
-					Long index;
+					String index;
 					EtcdKeysResponse response;
 					if((index = clsIndex.get(cls)) != null) {
 						response = etcd.put(CLS_KEY + "/" + index, cls.getName()).prevExist(true).send().get();
 					} else {
 						response = etcd.post(CLS_KEY, cls.getName()).send().get();
-						if(response.node != null && (index = response.node.createdIndex) != null) {
-							clsIndex.put(cls, index);
+						if(response.node != null) {
+							if((index = response.node.key.substring(response.node.key.lastIndexOf("/"))) != null)
+								clsIndex.put(cls, index);
 						}
 					}
 					
@@ -263,15 +264,16 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	
 	private EtcdKeysResponse put(String key, QuartzStatus status) {
 		try {
-			Long index;
+			String index;
 			EtcdKeysResponse response;
 			String value = CryptUtil.encrypt(status.toString(), SYSTEM_ID);
 			if((index = indexMap.get(status.getId())) != null) {
 				response = etcd.put(key + "/" + index, value).prevExist(true).send().get();
 			} else {
 				response = etcd.post(key, value).send().get();
-				if(response.node != null && (index = response.node.createdIndex) != null) {
-					indexMap.put(status.getId(), index);
+				if(response.node != null) {
+					if((index = response.node.key.substring(response.node.key.lastIndexOf("/"))) != null)
+						indexMap.put(status.getId(), index);
 				}
 			}
 			
@@ -285,7 +287,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	
 	private EtcdKeysResponse delete(String key, QuartzStatus status) {
 		try {
-			Long index;
+			String index;
 			EtcdKeysResponse response = null;
 			if((index = indexMap.get(status.getId())) != null) {
 				response = etcd.delete(key + "/" + index).send().get();

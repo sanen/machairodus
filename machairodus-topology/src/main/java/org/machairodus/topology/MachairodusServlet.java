@@ -1,11 +1,11 @@
 /**
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 			http://www.apache.org/licenses/LICENSE-2.0
+ * 		http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,10 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.machairodus.topology.io.ClassPathResource;
 import org.machairodus.topology.io.Resource;
-import org.machairodus.topology.util.MD5Utils;
 import org.machairodus.topology.util.ResultMap;
-import org.machairodus.topology.util.StringUtils;
-import org.machairodus.topology.util.ZipUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +37,10 @@ public class MachairodusServlet extends HttpServlet {
 	
 	public static final String QUARTZ_CONFIG = "quartz-config";
 	public static final String UTF8 = "UTF-8";
-	public static final String KEY = "key";
-	/** Default Key: 6a9d11e666414b11719ee140ab499b5d */
-	protected static String DEFAULT_KEY = MD5Utils.getMD5String(MD5Utils.getMD5String(ZipUtils.gzip("Machairodus Topology Servlet Default KEY")));
-	protected String key = DEFAULT_KEY;
 	
 	@Override
 	public void init() throws ServletException {
 		String configPath = this.getInitParameter(QUARTZ_CONFIG);
-		String key = this.getInitParameter(KEY);
-		if(key != null && !StringUtils.isEmpty(key.trim()))
-			this.key = key;
-		
 		MachairodusPortal portal = new MachairodusPortal(configPath);
 		try {
 			Resource resource = new ClassPathResource(configPath);
@@ -64,26 +53,8 @@ public class MachairodusServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//		request.setCharacterEncoding(UTF8);
-//		response.setCharacterEncoding(UTF8);
-//		response.setContentType(ContentType.APPLICATION_JSON);
-//		String key;
-//		if(StringUtils.isEmpty(key = request.getParameter(KEY))) {
-//			Writer out = response.getWriter();
-//			ResultMap resultMap = ResultMap.create(400, "无效的校验KEY", "ERROR");
-//			out.write(resultMap.toString());
-//			return ;
-//		} else if(!key.equals(this.key) && !Token.decode(key)) {
-//			Writer out = response.getWriter();
-//			ResultMap resultMap = ResultMap.create(400, "校验KEY错误", "ERROR");
-//			out.write(resultMap.toString());
-//			return ;
-//		}
-//		
-//		Executor.execute(request, response);
-		
 		Writer out = response.getWriter();
-		out.write(JSON.toJSONString(ResultMap.create(404, "Unknown resources", "WARN")));
+		out.write(JSON.toJSONString(ResultMap.create(200, "OK", "SUCCESS")));
 	}
 	
 	@Override

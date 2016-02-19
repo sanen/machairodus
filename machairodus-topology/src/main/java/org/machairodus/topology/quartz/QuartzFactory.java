@@ -422,7 +422,7 @@ public class QuartzFactory {
 			config.setName(DEFAULT_QUARTZ_NAME_PREFIX + config.getId());
 			BaseQuartz _new = quartz.clone();
 			_new.setClose(true);
-			_new.setClose(true);
+			_new.setClosed(true);
 			_new.setRemove(false);
 			_new.setConfig(config);
 			addQuartz(_new);
