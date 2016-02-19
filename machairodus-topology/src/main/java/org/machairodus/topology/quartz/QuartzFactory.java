@@ -418,15 +418,19 @@ public class QuartzFactory {
 			int total = config.getTotal();
 			config.setTotal(total + 1);
 			config.setNum(total);
-			config.setId(groupName + "-" + config.getNum());
+			config.setId(groupName + "-" + quartz.getIndex(groupName));
 			config.setName(DEFAULT_QUARTZ_NAME_PREFIX + config.getId());
 			BaseQuartz _new = quartz.clone();
+			_new.setClose(true);
 			_new.setClose(true);
 			_new.setRemove(false);
 			_new.setConfig(config);
 			addQuartz(_new);
 			if(autoStart)
 				start(config.getId());
+			else {
+				etcdQuartz.stopped(_new.getConfig().getGroup(), _new.getConfig().getId(), false);
+			}
 			
 		}
 	}
@@ -642,8 +646,9 @@ public class QuartzFactory {
 						for(int p = 0; p < parallel; p ++) {
 							BaseQuartz baseQuartz = (BaseQuartz) clz.newInstance();
 							QuartzConfig config = new QuartzConfig();
-							config.setId(quartz.name() + "-" + p);
-							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + quartz.name() + "-" + p);
+							long idx = baseQuartz.getIndex(quartz.name());
+							config.setId(quartz.name() + "-" + idx);
+							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + quartz.name() + "-" + idx);
 							config.setGroup(quartz.name());
 							config.setService(service);
 							config.setBeforeAfterOnly(quartz.beforeAfterOnly());

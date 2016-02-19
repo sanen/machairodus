@@ -16,7 +16,10 @@
 package org.machairodus.topology.quartz;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +42,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	private int nowTimes = 0;
 	private Object LOCK = new Object();
 	private AtomicBoolean isLock = new AtomicBoolean(false);
+	private static Map<String, AtomicLong> index = new HashMap<String, AtomicLong>();
 	
 	public BaseQuartz() {
 		
@@ -230,6 +234,10 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 		this.nowTimes = 0;
 	}
 	
+	public void setClosed(boolean closed) {
+		this.closed = closed;
+	}
+	
 	public void setRemove(boolean remove) {
 		this.remove = remove;
 	}
@@ -244,6 +252,14 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	
 	public void setConfig(QuartzConfig config) {
 		this.config = config;
+	}
+	
+	public long getIndex(String group) {
+		AtomicLong idx;
+		if((idx = index.get(group)) == null)
+			index.put(group, idx = new AtomicLong());
+		
+		return idx.getAndIncrement();
 	}
 	
 	@Override
