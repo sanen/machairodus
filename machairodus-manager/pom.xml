@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.machairodus</groupId>
 		<artifactId>machairodus</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>machairodus-manager</artifactId>
 	<packaging>jar</packaging>
