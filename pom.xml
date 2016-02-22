@@ -4,7 +4,7 @@
 
 	<groupId>org.machairodus</groupId>
 	<artifactId>machairodus</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>pom</packaging>
 	<inceptionYear>2015</inceptionYear>
 
@@ -83,7 +83,7 @@
 		<connection>scm:git:git@github.com:machairodus-projects/machairodus.git</connection>
 		<developerConnection>scm:git:git@github.com:machairodus-projects/machairodus.git</developerConnection>
 		<url>https://github.com/machairodus-projects/machairodus</url>
-		<tag>HEAD</tag>
+		<tag>machairodus-0.0.1</tag>
 	</scm>
 
 	<dependencyManagement>
