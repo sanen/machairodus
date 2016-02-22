@@ -15,17 +15,30 @@
  */
 package org.machairodus.manager.component.impl;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
+import org.machairodus.commons.util.ResponseStatus;
 import org.machairodus.manager.component.UsersComponent;
+import org.machairodus.topology.util.ResultMap;
+import org.nanoframework.commons.support.logging.Logger;
+import org.nanoframework.commons.support.logging.LoggerFactory;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 import org.nanoframework.web.server.mvc.support.ForwardView;
 
-public class UsersComponentImpl implements UsersComponent {
+import com.google.common.collect.Maps;
 
+public class UsersComponentImpl implements UsersComponent {
+	private Logger LOG = LoggerFactory.getLogger(UsersComponentImpl.class);
+	
 	@Override
 	public View login(HttpServletRequest request, Model model) {
 		String errorClassName = (String) request.getAttribute("shiroLoginFailure");
@@ -41,4 +54,20 @@ public class UsersComponentImpl implements UsersComponent {
 		return new ForwardView("/pages/login.jsp", true);
 	}
 
+	@Override
+	public Object remoteLogin(String username, String passwd, Boolean rememberMe, String host) {
+		Subject subject = SecurityUtils.getSubject();
+		UsernamePasswordToken token = new UsernamePasswordToken(username, passwd, rememberMe, host);
+		try {
+			subject.login(token);
+			Map<String, Object> result = Maps.newHashMap();
+			result.put("sid", subject.getSession().getId());
+			return result;
+		} catch(AuthenticationException e) {
+			LOG.error("权限认证失败: {}", new Object[] { e.getMessage() });
+			Map<String, Object> result = ResponseStatus.FAIL_MAP;
+			result.put(ResultMap.MESSAGE, "权限认证失败");
+			return result;
+		}
+	}
 }

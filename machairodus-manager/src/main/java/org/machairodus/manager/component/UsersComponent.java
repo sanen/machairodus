@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.machairodus.manager.component.impl.UsersComponentImpl;
 import org.nanoframework.core.component.stereotype.Component;
 import org.nanoframework.core.component.stereotype.bind.RequestMapping;
+import org.nanoframework.core.component.stereotype.bind.RequestMethod;
+import org.nanoframework.core.component.stereotype.bind.RequestParam;
 import org.nanoframework.web.server.mvc.Model;
 import org.nanoframework.web.server.mvc.View;
 
@@ -31,6 +33,11 @@ import com.google.inject.ImplementedBy;
 public interface UsersComponent {
 	@RequestMapping(value = "/login")
 	View login(HttpServletRequest request, Model model);
-	
-	
+
+	@RequestMapping(value = "/login/remote", method = { RequestMethod.POST })
+	Object remoteLogin(
+			@RequestParam(name = "username") String username, 
+			@RequestParam(name = "password") String passwd,
+			@RequestParam(name = "rememberMe", required = false, defaultValue = "false") Boolean rememberMe,
+			@RequestParam(name = "host", required = false) String host);
 }
