@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.quartz.QuartzStatus;
 import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 
+@Ignore
 public class EtcdOrderTest {
 	private Logger LOG = LoggerFactory.getLogger(EtcdOrderTest.class);
 	private EtcdClient etcd = null;
@@ -52,7 +54,7 @@ public class EtcdOrderTest {
 	private void initEtcd() throws LoaderException, FileNotFoundException, IOException {
 		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:quartz-config.properties"));
 		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
-		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID));
+		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID), username);
 		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
 		ROOT_RESOURCE = "/machairodus/" + properties.getProperty(EtcdQuartz.ETCD_USER, "");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {

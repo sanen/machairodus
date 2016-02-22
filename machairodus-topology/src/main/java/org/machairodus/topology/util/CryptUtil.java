@@ -1,3 +1,18 @@
+/**
+ * Copyright 2015- the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 			http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.machairodus.topology.util;
 
 import java.nio.charset.Charset;
@@ -7,7 +22,6 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import sun.misc.BASE64Decoder;
 
 /**
@@ -15,6 +29,7 @@ import sun.misc.BASE64Decoder;
  * @author yanghe
  * @date 2015年8月19日 上午8:59:44
  */
+
 @SuppressWarnings("restriction")
 public class CryptUtil {
 	
@@ -39,7 +54,7 @@ public class CryptUtil {
 			byte[] byteContent = (content).getBytes("UTF-8");
 			cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化
 			byte[] result = cipher.doFinal(byteContent);//加密
-			
+
 			String encodeStr = new String(BASE64.getInstance().encode(parseByte2HexStr(result).getBytes()));
 			int idx;
 			if((idx = encodeStr.indexOf("=")) > -1) {
@@ -56,8 +71,8 @@ public class CryptUtil {
 
 	}
 	
-	public static String decrypt(String date) {
-		return decrypt(date, DEFAULT_PASSWORD);
+	public static String decrypt(String data) {
+		return decrypt(data, DEFAULT_PASSWORD);
 	}
 
 	public static String decrypt(String data, String password) {
