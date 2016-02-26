@@ -480,14 +480,15 @@ public class QuartzFactory {
 	
 	public final int removeQuartz(BaseQuartz quartz) {
 		Set<BaseQuartz> groupQuartz = group.get(quartz.getConfig().getGroup());
+		boolean remove = false;
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
-			quartz.setRemove(true);
+			quartz.setRemove(remove = true);
 		}
 		
 		if(quartz.isClosed()) {
 			/** Sync to Etcd by start method */
-			etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), true);
+			etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), remove);
 		} else 
 			close(quartz);
 		
@@ -561,11 +562,10 @@ public class QuartzFactory {
 		Assert.hasLength(groupName);
 		Set<BaseQuartz> groupQuartz = group.get(groupName);
 		if(!CollectionUtils.isEmpty(groupQuartz)) {
-			int idx = 0;
+			AtomicInteger idx = new AtomicInteger(0);
 			for(BaseQuartz quartz : groupQuartz) {
-				quartz.getConfig().setNum(idx);
+				quartz.getConfig().setNum(idx.getAndIncrement());
 				quartz.getConfig().setTotal(groupQuartz.size());
-				idx ++;
 			}
 		}
 	}
@@ -646,9 +646,8 @@ public class QuartzFactory {
 						for(int p = 0; p < parallel; p ++) {
 							BaseQuartz baseQuartz = (BaseQuartz) clz.newInstance();
 							QuartzConfig config = new QuartzConfig();
-							long idx = baseQuartz.getIndex(quartz.name());
-							config.setId(quartz.name() + "-" + idx);
-							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + quartz.name() + "-" + idx);
+							config.setId(quartz.name() + "-" + baseQuartz.getIndex(quartz.name()));
+							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + config.getId());
 							config.setGroup(quartz.name());
 							config.setService(service);
 							config.setBeforeAfterOnly(quartz.beforeAfterOnly());
