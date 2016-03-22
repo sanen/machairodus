@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.machairodus.topology.example.domain.Test;
-import org.machairodus.topology.quartz.BaseQuartz;
-import org.machairodus.topology.quartz.Quartz;
-import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.scheduler.BaseScheduler;
+import org.machairodus.topology.scheduler.Scheduler;
+import org.machairodus.topology.scheduler.SchedulerException;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestDataLoaderQuartz", workerClassProperty = "quartz.data-loader.test.worker.class", parallelProperty = "quartz.data-loader.test.parallel")
-public class TestDataLoaderQuartz extends BaseQuartz {
+@Scheduler(workerClass = TestWorkerScheduler2.class, parallelProperty = "scheduler.data-loader.test.parallel")
+public class TestDataLoaderScheduler2 extends BaseScheduler {
 	private List<Test> data;
 	
 	static {
@@ -34,23 +34,23 @@ public class TestDataLoaderQuartz extends BaseQuartz {
 	}
 	
 	@Override
-	public void before() throws QuartzException {
-		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName()).size() < 100) {
+	public void before() throws SchedulerException {
+		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName() + "2").size() < 100) {
 			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
-//			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+//			LOG.debug("抓取数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		} else {
 			thisWait(1000);
 		}
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() throws SchedulerException {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(Test item : data) {
 				boolean offed = false;
 				while(!offed) {
 					try { 
-						BlockingQueueFactory.getInstance().offer(Test.class.getSimpleName(), item, 1000, TimeUnit.MILLISECONDS);
+						BlockingQueueFactory.getInstance().offer(Test.class.getSimpleName() + "2", item, 1000, TimeUnit.MILLISECONDS);
 						offed = true;
 					} catch(InterruptedException e) { }
 				}
@@ -59,7 +59,7 @@ public class TestDataLoaderQuartz extends BaseQuartz {
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() throws SchedulerException {
 		if(data != null) {
 			data.clear();
 			data = null;
@@ -67,7 +67,7 @@ public class TestDataLoaderQuartz extends BaseQuartz {
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() throws SchedulerException {
 
 	}
 

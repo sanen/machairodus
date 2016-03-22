@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults.etcd;
+package org.machairodus.topology.scheduler.defaults.etcd;
 
 import org.machairodus.topology.entity.BaseEntity;
-import org.machairodus.topology.quartz.QuartzConfig;
+import org.machairodus.topology.scheduler.SchedulerConfig;
 import org.machairodus.topology.util.ObjectCompare;
 
 public class EtcdOrder extends BaseEntity {
@@ -27,7 +27,7 @@ public class EtcdOrder extends BaseEntity {
 	private String id;
 	private Integer size;
 	private Boolean autoStart;
-	private QuartzConfig config;
+	private SchedulerConfig config;
 	private String className;
 
 	public boolean valid() {
@@ -90,11 +90,11 @@ public class EtcdOrder extends BaseEntity {
 		this.autoStart = autoStart;
 	}
 
-	public QuartzConfig getConfig() {
+	public SchedulerConfig getConfig() {
 		return config;
 	}
 
-	public void setConfig(QuartzConfig config) {
+	public void setConfig(SchedulerConfig config) {
 		this.config = config;
 	}
 

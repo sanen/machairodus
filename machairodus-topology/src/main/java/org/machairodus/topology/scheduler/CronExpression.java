@@ -1,4 +1,4 @@
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import java.io.Serializable;
 import java.text.ParseException;

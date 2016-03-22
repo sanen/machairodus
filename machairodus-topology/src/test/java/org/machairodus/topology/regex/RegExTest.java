@@ -22,10 +22,10 @@ public class RegExTest {
 
 	@Test
 	public void test0() {
-		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderQuartz", "."));
-		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderQuartz", ".\n"));
-		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderQuartz", "Test.*?Quartz"));
-		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderQuartz", "Test.*?Quartz2"));
-		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderQuartz", "TestDataLoaderQuartz"));
+		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderScheduler", "."));
+		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderScheduler", ".\n"));
+		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderScheduler", "Test.*?Scheduler"));
+		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderScheduler", "Test.*?Scheduler2"));
+		System.out.println(ObjectCompare.isInListByRegEx("TestDataLoaderScheduler", "TestDataLoaderScheduler"));
 	}
 }

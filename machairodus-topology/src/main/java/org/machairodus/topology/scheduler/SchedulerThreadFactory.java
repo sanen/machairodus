@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import java.util.concurrent.ThreadFactory;
 
@@ -21,24 +21,24 @@ import java.util.concurrent.ThreadFactory;
  * @author yanghe
  * @date 2015年12月03日 下午8:31:13 
  */
-public class QuartzThreadFactory implements ThreadFactory {
-	private BaseQuartz baseQuartz;
+public class SchedulerThreadFactory implements ThreadFactory {
+	private BaseScheduler baseScheduler;
 	
 	@Override
 	public Thread newThread(Runnable runnable) {
-		if(baseQuartz == null) {
+		if(baseScheduler == null) {
 			Thread thread = new Thread(runnable);
-			thread.setName("Quartz-Thread-" + System.currentTimeMillis());
+			thread.setName("Scheduler-Thread-" + System.currentTimeMillis());
 			return thread;
 		}
 		
-		Thread thread = new Thread(baseQuartz);
-		thread.setName(baseQuartz.getConfig().getName());
-		thread.setDaemon(baseQuartz.getConfig().getDaemon());
+		Thread thread = new Thread(baseScheduler);
+		thread.setName(baseScheduler.getConfig().getName());
+		thread.setDaemon(baseScheduler.getConfig().getDaemon());
 		return thread;
 	}
 
-	public void setBaseQuartz(BaseQuartz baseQuartz) {
-		this.baseQuartz = baseQuartz;
+	public void setBaseScheduler(BaseScheduler baseScheduler) {
+		this.baseScheduler = baseScheduler;
 	}
 }

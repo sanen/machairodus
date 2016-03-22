@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 /**
  * 调度任务异常
@@ -22,19 +22,19 @@ package org.machairodus.topology.quartz;
  * @date 2015年6月11日 下午2:59:02 
  *
  */
-public class QuartzException extends RuntimeException {
+public class SchedulerException extends RuntimeException {
 	private static final long serialVersionUID = -2775206802007728986L;
 
-	public QuartzException() {
+	public SchedulerException() {
 
 	}
 	
-	public QuartzException(String message) {
+	public SchedulerException(String message) {
 		super(message);
 		
 	}
 	
-	public QuartzException(String message, Throwable cause) {
+	public SchedulerException(String message, Throwable cause) {
 		super(message, cause);
 		
 	}

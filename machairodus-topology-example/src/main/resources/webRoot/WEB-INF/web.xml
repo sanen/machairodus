@@ -8,8 +8,8 @@
 		<servlet-class>org.machairodus.topology.MachairodusServlet</servlet-class>
 		<!-- 任务调度扩展配置文件 -->
 		<init-param>
-			<param-name>quartz-config</param-name>
-			<param-value>classpath:quartz-config.properties</param-value>
+			<param-name>scheduler-config</param-name>
+			<param-value>classpath:scheduler-config.properties</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

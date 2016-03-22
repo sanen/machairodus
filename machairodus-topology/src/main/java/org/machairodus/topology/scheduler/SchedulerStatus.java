@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import org.machairodus.topology.entity.BaseEntity;
 
-public class QuartzStatus extends BaseEntity {
+public class SchedulerStatus extends BaseEntity {
 	private static final long serialVersionUID = 5876395587017572488L;
 
 	private Long key;
@@ -25,10 +25,10 @@ public class QuartzStatus extends BaseEntity {
 	private String id;
 	private Status status;
 
-	public QuartzStatus() {
+	public SchedulerStatus() {
 	}
 
-	public QuartzStatus(String group, String id, Status status) {
+	public SchedulerStatus(String group, String id, Status status) {
 		this.group = group;
 		this.id = id;
 		this.status = status;

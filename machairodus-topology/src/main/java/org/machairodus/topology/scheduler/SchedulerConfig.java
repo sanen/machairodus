@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -23,7 +23,7 @@ import org.machairodus.topology.entity.BaseEntity;
  * @author yanghe
  * @date 2015年12月3日 下午10:15:05
  */
-public class QuartzConfig extends BaseEntity {
+public class SchedulerConfig extends BaseEntity {
 	private static final long serialVersionUID = 428169936271582176L;
 	
 	private String id;
@@ -39,7 +39,7 @@ public class QuartzConfig extends BaseEntity {
 	private Boolean daemon = false;
 	private Boolean lazy = false;
 	private String queueName = "";
-	private Class<? extends BaseQuartz> workerClass;
+	private Class<? extends BaseScheduler> workerClass;
 	private Long timeout = 0L;
 	
 	public String getId() {
@@ -150,11 +150,11 @@ public class QuartzConfig extends BaseEntity {
 		return timeout;
 	}
 
-	public Class<? extends BaseQuartz> getWorkerClass() {
+	public Class<? extends BaseScheduler> getWorkerClass() {
 		return workerClass;
 	}
 
-	public void setWorkerClass(Class<? extends BaseQuartz> workerClass) {
+	public void setWorkerClass(Class<? extends BaseScheduler> workerClass) {
 		this.workerClass = workerClass;
 	}
 

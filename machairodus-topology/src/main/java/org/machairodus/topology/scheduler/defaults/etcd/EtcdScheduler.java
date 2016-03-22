@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults.etcd;
+package org.machairodus.topology.scheduler.defaults.etcd;
 
-import static org.machairodus.topology.quartz.QuartzFactory.DEFAULT_QUARTZ_NAME_PREFIX;
-import static org.machairodus.topology.quartz.QuartzFactory.threadFactory;
+import static org.machairodus.topology.scheduler.SchedulerFactory.DEFAULT_SCHEDULER_NAME_PREFIX;
+import static org.machairodus.topology.scheduler.SchedulerFactory.threadFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -34,14 +34,14 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.machairodus.topology.quartz.BaseQuartz;
-import org.machairodus.topology.quartz.CronExpression;
-import org.machairodus.topology.quartz.QuartzConfig;
-import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.QuartzFactory;
-import org.machairodus.topology.quartz.QuartzStatus;
-import org.machairodus.topology.quartz.QuartzStatus.Status;
-import org.machairodus.topology.quartz.defaults.monitor.LocalJmxMonitorQuartz;
+import org.machairodus.topology.scheduler.BaseScheduler;
+import org.machairodus.topology.scheduler.CronExpression;
+import org.machairodus.topology.scheduler.SchedulerConfig;
+import org.machairodus.topology.scheduler.SchedulerException;
+import org.machairodus.topology.scheduler.SchedulerFactory;
+import org.machairodus.topology.scheduler.SchedulerStatus;
+import org.machairodus.topology.scheduler.SchedulerStatus.Status;
+import org.machairodus.topology.scheduler.defaults.monitor.LocalJmxMonitorScheduler;
 import org.machairodus.topology.util.Assert;
 import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.CryptUtil;
@@ -51,21 +51,21 @@ import org.nanoframework.extension.etcd.client.retry.RetryWithExponentialBackOff
 import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
 import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse;
 
-public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
+public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate {
 
 	private final Set<Class<?>> clsSet;
 	
 	public static final String SYSTEM_ID = MD5Utils.getMD5String(UUID.randomUUID().toString() + System.currentTimeMillis() + Math.random());
-	public static final String ETCD_ENABLE = "context.quartz.etcd.enable";
-	public static final String ETCD_URI = "context.quartz.etcd.uri";
-	public static final String ETCD_USER = "context.quartz.etcd.username";
-	public static final String ETCD_CLIENT_ID = "context.quartz.etcd.clientid";
-	public static final String ETCD_APP_NAME = "context.quartz.app.name";
+	public static final String ETCD_ENABLE = "context.scheduler.etcd.enable";
+	public static final String ETCD_URI = "context.scheduler.etcd.uri";
+	public static final String ETCD_USER = "context.scheduler.etcd.username";
+	public static final String ETCD_CLIENT_ID = "context.scheduler.etcd.clientid";
+	public static final String ETCD_APP_NAME = "context.scheduler.app.name";
 	
 	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
 	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
-	public static final String CLS_KEY = DIR + "/Quartz.class";
-	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
+	public static final String CLS_KEY = DIR + "/Scheduler.class";
+	public static final String INSTANCE_KEY = DIR + "/Scheduler.list";
 	public static final String INFO_KEY = DIR + "/App.info";
 	private static String APP_NAME;
 	
@@ -76,16 +76,16 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	private final int timeout = 75;
 	private EtcdClient etcd;
 	
-	public EtcdQuartz(Set<Class<?>> clsSet) {
+	public EtcdScheduler(Set<Class<?>> clsSet) {
 		Assert.notNull(clsSet);
 		
 		this.clsSet = clsSet;
 		
-		QuartzConfig config = new QuartzConfig();
-		config.setId("EtcdQuartz-0");
-		config.setName(DEFAULT_QUARTZ_NAME_PREFIX + "EtcdQuartz-0");
-		config.setGroup("EtcdQuartz");
-		threadFactory.setBaseQuartz(this);
+		SchedulerConfig config = new SchedulerConfig();
+		config.setId("EtcdScheduler-0");
+		config.setName(DEFAULT_SCHEDULER_NAME_PREFIX + "EtcdScheduler-0");
+		config.setGroup("EtcdScheduler");
+		threadFactory.setBaseScheduler(this);
 		config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
 		try { config.setCron(new CronExpression("0 */1 * * * ?")); } catch(ParseException e) {}
 		config.setTotal(1);
@@ -97,17 +97,17 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		
 		initEtcdClient();
 		if(etcd == null)
-			throw new QuartzException("Can not init Etcd Client");
+			throw new SchedulerException("Can not init Etcd Client");
 		
 	}
 	
 	@Override
-	public void before() throws QuartzException {
+	public void before() throws SchedulerException {
 		
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() throws SchedulerException {
 		syncBaseDirTTL();
 		syncInfo();
 	}
@@ -154,8 +154,8 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		EtcdAppInfo info = new EtcdAppInfo();
 		info.setSystemId(SYSTEM_ID);
 		info.setAppName(APP_NAME);
-		info.setJmxEnable(LocalJmxMonitorQuartz.JMX_ENABLE);
-		info.setJmxRate(LocalJmxMonitorQuartz.JMX_RATE);
+		info.setJmxEnable(LocalJmxMonitorScheduler.JMX_ENABLE);
+		info.setJmxRate(LocalJmxMonitorScheduler.JMX_RATE);
 		
 		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 		info.setStartTime(runtime.getStartTime());
@@ -206,33 +206,33 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	}
 	
 	public void syncInstance() {
-		Collection<BaseQuartz> started = QuartzFactory.getInstance().getStartedQuartz();
-		Collection<BaseQuartz> stopping = QuartzFactory.getInstance().getStoppingQuartz();
-		Collection<BaseQuartz> stopped = QuartzFactory.getInstance().getStoppedQuratz();
+		Collection<BaseScheduler> started = SchedulerFactory.getInstance().getStartedScheduler();
+		Collection<BaseScheduler> stopping = SchedulerFactory.getInstance().getStoppingScheduler();
+		Collection<BaseScheduler> stopped = SchedulerFactory.getInstance().getStoppedQuratz();
 		
 		if(!CollectionUtils.isEmpty(started)) {
-			for(BaseQuartz quartz : started) 
-				start(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+			for(BaseScheduler scheduler : started) 
+				start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
 		}
 		
 		if(!CollectionUtils.isEmpty(stopping)) {
-			for(BaseQuartz quartz : stopping) 
-				stopping(quartz.getConfig().getGroup(), quartz.getConfig().getId());
+			for(BaseScheduler scheduler : stopping) 
+				stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
 		}
 		
 		if(!CollectionUtils.isEmpty(stopped)) {
-			for(BaseQuartz quartz : stopped) 
-				stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), false);
+			for(BaseScheduler scheduler : stopped) 
+				stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), false);
 		}
 	}
 	
 	@Override
-	public void after() throws QuartzException {
+	public void after() throws SchedulerException {
 
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() throws SchedulerException {
 
 	}
 	
@@ -262,7 +262,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		}
 	}
 	
-	private EtcdKeysResponse put(String key, QuartzStatus status) {
+	private EtcdKeysResponse put(String key, SchedulerStatus status) {
 		try {
 			String index;
 			EtcdKeysResponse response;
@@ -285,7 +285,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		return null;
 	}
 	
-	private EtcdKeysResponse delete(String key, QuartzStatus status) {
+	private EtcdKeysResponse delete(String key, SchedulerStatus status) {
 		try {
 			String index;
 			EtcdKeysResponse response = null;
@@ -303,15 +303,15 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	}
 	
 	public void start(String group, String id) {
-		put(INSTANCE_KEY, new QuartzStatus(group, id, Status.STARTED));
+		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STARTED));
 	}
 	
 	public void stopping(String group, String id) {
-		put(INSTANCE_KEY, new QuartzStatus(group, id, Status.STOPPING));
+		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STOPPING));
 	}
 	
 	public void stopped(String group, String id, boolean isRemove) {
-		QuartzStatus status = new QuartzStatus(group, id, Status.STOPPED);
+		SchedulerStatus status = new SchedulerStatus(group, id, Status.STOPPED);
 		if(!isRemove)
 			put(INSTANCE_KEY, status);
 		else 

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults.etcd;
+package org.machairodus.topology.scheduler.defaults.etcd;
 
-public interface EtcdQuartzOperate {
-	final EtcdQuartzOperate EMPTY = new EtcdQuartzOperate() {
+public interface EtcdSchedulerOperate {
+	final EtcdSchedulerOperate EMPTY = new EtcdSchedulerOperate() {
 		@Override
 		public void stopping(String group, String id) { }
 		

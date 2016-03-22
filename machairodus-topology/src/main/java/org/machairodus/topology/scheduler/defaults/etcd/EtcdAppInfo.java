@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz.defaults.etcd;
+package org.machairodus.topology.scheduler.defaults.etcd;
 
 import org.machairodus.topology.entity.BaseEntity;
 

@@ -35,12 +35,12 @@ public class MachairodusServlet extends HttpServlet {
 	private static final long serialVersionUID = 8516684399529206854L;
 	private static final Logger LOG = LoggerFactory.getLogger(MachairodusServlet.class);
 	
-	public static final String QUARTZ_CONFIG = "quartz-config";
+	public static final String SCHEDULER_CONFIG = "scheduler-config";
 	public static final String UTF8 = "UTF-8";
 	
 	@Override
 	public void init() throws ServletException {
-		String configPath = this.getInitParameter(QUARTZ_CONFIG);
+		String configPath = this.getInitParameter(SCHEDULER_CONFIG);
 		MachairodusPortal portal = new MachairodusPortal(configPath);
 		try {
 			Resource resource = new ClassPathResource(configPath);

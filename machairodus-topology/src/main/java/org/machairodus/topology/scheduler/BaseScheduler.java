@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
  * @date 2015年6月8日 下午5:10:18 
  *
  */
-public abstract class BaseQuartz implements Runnable, Cloneable {
-	protected static Logger LOG = LoggerFactory.getLogger(BaseQuartz.class);
+public abstract class BaseScheduler implements Runnable, Cloneable {
+	protected static Logger LOG = LoggerFactory.getLogger(BaseScheduler.class);
 	
-	private QuartzConfig config;
+	private SchedulerConfig config;
 	private boolean close = true;
 	private boolean closed = true;
 	private boolean remove = false;
@@ -44,16 +44,16 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	private AtomicBoolean isLock = new AtomicBoolean(false);
 	private static Map<String, AtomicLong> index = new HashMap<String, AtomicLong>();
 	
-	public BaseQuartz() {
+	public BaseScheduler() {
 		
 	}
 			
-	public BaseQuartz(QuartzConfig config) {
+	public BaseScheduler(SchedulerConfig config) {
 		if(config == null)
-			throw new QuartzException("QuartzConfig can not be null.");
+			throw new SchedulerException("SchedulerConfig can not be null.");
 		
 		if(config.getRunNumberOfTimes() != null && config.getRunNumberOfTimes() < 0)
-			throw new QuartzException("运行次数不能小于0.");
+			throw new SchedulerException("运行次数不能小于0.");
 		
 		this.config = config;
 	}
@@ -126,7 +126,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 			}
 		} finally {
 			closed = true;
-			QuartzFactory.getInstance().unbind(this);
+			SchedulerFactory.getInstance().unbind(this);
 			destroy();
 		}
 	}
@@ -136,7 +136,7 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	 */
 	private void finallyProcess() {
 		if(config.getService() == null) 
-			throw new QuartzException("ThreadPoolExecutor不能为空");
+			throw new SchedulerException("ThreadPoolExecutor不能为空");
 		
 		if(!close && !config.getService().isShutdown()) {
 			long interval = delay();
@@ -195,27 +195,27 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	
 	/**
 	 * 逻辑执行前操作
-	 * @throws QuartzException 任务异常
+	 * @throws SchedulerException 任务异常
 	 */
-	public abstract void before() throws QuartzException;
+	public abstract void before() throws SchedulerException;
 	
 	/**
 	 * 逻辑执行操作
-	 * @throws QuartzException 任务异常
+	 * @throws SchedulerException 任务异常
 	 */
-	public abstract void execute() throws QuartzException;
+	public abstract void execute() throws SchedulerException;
 	
 	/**
 	 * 逻辑执行后操作
-	 * @throws QuartzException 任务异常
+	 * @throws SchedulerException 任务异常
 	 */
-	public abstract void after() throws QuartzException;
+	public abstract void after() throws SchedulerException;
 	
 	/**
 	 * 任务结束后销毁资源操作
-	 * @throws QuartzException 任务异常
+	 * @throws SchedulerException 任务异常
 	 */
-	public abstract void destroy() throws QuartzException;
+	public abstract void destroy() throws SchedulerException;
 
 	public boolean isRunning() {
 		return isRunning;
@@ -246,11 +246,11 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 		return remove;
 	}
 
-	public QuartzConfig getConfig() {
+	public SchedulerConfig getConfig() {
 		return config;
 	}
 	
-	public void setConfig(QuartzConfig config) {
+	public void setConfig(SchedulerConfig config) {
 		this.config = config;
 	}
 	
@@ -263,11 +263,11 @@ public abstract class BaseQuartz implements Runnable, Cloneable {
 	}
 	
 	@Override
-	public BaseQuartz clone() {
+	public BaseScheduler clone() {
 		try {
-			return (BaseQuartz) super.clone();
+			return (BaseScheduler) super.clone();
 		} catch(CloneNotSupportedException e) {
-			throw new QuartzException(e.getMessage(), e);
+			throw new SchedulerException(e.getMessage(), e);
 		}
 	}
 }

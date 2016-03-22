@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.topology.quartz;
+package org.machairodus.topology.scheduler;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -31,13 +31,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Quartz {
-	
-	/**
-	 * 调度任务名称
-	 * @return String
-	 */
-	String name();
+public @interface Scheduler {
 	
 	/**
 	 * 调度任务before()和after()方法是否在整个任务生命周期中只执行一次, 为true时只执行, 默认: false
@@ -76,9 +70,9 @@ public @interface Quartz {
 	boolean coreParallel() default false;
 	
 	/**
-	 * Quartz cron表达式
+	 * cron表达式
 	 * @return
-	 * @see org.nanoframework.extension.concurrent.quartz.CronExpression
+	 * @see org.nanoframework.extension.concurrent.scheduler.CronExpression
 	 */
 	String cron() default "";
 	
@@ -104,7 +98,7 @@ public @interface Quartz {
 	 * 针对剑齿虎扩展包的扩展实现, 只在数据获取线程中有效
 	 * @return
 	 */
-	Class<? extends BaseQuartz> workerClass() default BaseQuartz.class;
+	Class<? extends BaseScheduler> workerClass() default BaseScheduler.class;
 	
 	String workerClassProperty() default "";
 	

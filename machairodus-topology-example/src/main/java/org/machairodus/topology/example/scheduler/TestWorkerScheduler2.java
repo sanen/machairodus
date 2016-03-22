@@ -20,43 +20,43 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.machairodus.topology.example.domain.Test;
-import org.machairodus.topology.quartz.BaseQuartz;
-import org.machairodus.topology.quartz.Quartz;
-import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.monitor.Statistic;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.scheduler.BaseScheduler;
+import org.machairodus.topology.scheduler.Scheduler;
+import org.machairodus.topology.scheduler.SchedulerException;
+import org.machairodus.topology.scheduler.defaults.monitor.Statistic;
 import org.machairodus.topology.util.CollectionUtils;
 
-@Quartz(name = "TestWorkerQuartz", queueName = "Test", closeTimeout = 180000, parallelProperty = "quartz.worker.test.parallel")
-public class TestWorkerQuartz extends BaseQuartz {
+@Scheduler(queueName = "Test2", closeTimeout = 180000, parallelProperty = "scheduler.worker.test.parallel")
+public class TestWorkerScheduler2 extends BaseScheduler {
 	private List<Test> data;
 	private Random random = new Random();
 	
 	@Override
-	public void before() throws QuartzException {
-		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName(), 100, 1000, TimeUnit.MILLISECONDS);
+	public void before() throws SchedulerException {
+		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName() + "2", 100, 1000, TimeUnit.MILLISECONDS);
 		
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() throws SchedulerException {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
 				thisWait(random.nextInt(10));
-				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName());
+				Statistic.getInstance().incrementAndGet(Test.class.getSimpleName() + "2");
 			}
 			
-//			LOG.debug("消费数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
+//			LOG.debug("消费数据2[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
 		}
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() throws SchedulerException {
 
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() throws SchedulerException {
 
 	}
 

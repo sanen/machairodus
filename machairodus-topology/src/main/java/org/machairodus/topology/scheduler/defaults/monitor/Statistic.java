@@ -1,4 +1,4 @@
-package org.machairodus.topology.quartz.defaults.monitor;
+package org.machairodus.topology.scheduler.defaults.monitor;
 
 import java.util.ArrayList;
 import java.util.Iterator;

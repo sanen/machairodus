@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.quartz;
+package org.machairodus.manager.scheduler;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +29,8 @@ import org.machairodus.mappers.domain.JmxMonitor.MemoryUsage;
 import org.machairodus.mappers.domain.NodeType;
 import org.nanoframework.commons.util.CollectionUtils;
 import org.nanoframework.commons.util.StringUtils;
-import org.nanoframework.extension.concurrent.exception.QuartzException;
-import org.nanoframework.extension.concurrent.quartz.BaseQuartz;
-import org.nanoframework.extension.concurrent.quartz.Quartz;
+import org.nanoframework.extension.concurrent.scheduler.BaseScheduler;
+import org.nanoframework.extension.concurrent.scheduler.Scheduler;
 import org.nanoframework.extension.websocket.ChannelGroupSupport;
 import org.nanoframework.orm.jedis.GlobalRedisClient;
 import org.nanoframework.orm.jedis.RedisClient;
@@ -41,18 +40,18 @@ import com.alibaba.fastjson.TypeReference;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-@Quartz(name = "LoadQuartz", beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
-public class LoadQuartz extends BaseQuartz {
+@Scheduler(group = LoadScheduler.class, beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
+public class LoadScheduler extends BaseScheduler {
 	private RedisClient redisClient = GlobalRedisClient.get(RedisClientNames.MANAGER.value());
 	private TypeReference<JmxMonitor> typeReference = new TypeReference<JmxMonitor>() { };
 	
 	@Override
-	public void before() throws QuartzException {
+	public void before() {
 
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() {
 		Map<String, Map<String, String>> servers = new HashMap<>();
 		ChannelGroupSupport.GROUP.entrySet().parallelStream().forEach(entry -> {
 			String key = entry.getKey();
@@ -138,12 +137,12 @@ public class LoadQuartz extends BaseQuartz {
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() {
 
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() {
 
 	}
 
