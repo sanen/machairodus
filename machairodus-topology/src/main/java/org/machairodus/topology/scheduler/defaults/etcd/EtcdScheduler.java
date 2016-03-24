@@ -61,6 +61,7 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	public static final String ETCD_USER = "context.scheduler.etcd.username";
 	public static final String ETCD_CLIENT_ID = "context.scheduler.etcd.clientid";
 	public static final String ETCD_APP_NAME = "context.scheduler.app.name";
+	public static final String ETCD_MAX_RETRY_COUNT = "context.scheduler.etcd.max.retry.count";
 	
 	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
 	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
@@ -68,6 +69,7 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	public static final String INSTANCE_KEY = DIR + "/Scheduler.list";
 	public static final String INFO_KEY = DIR + "/App.info";
 	private static String APP_NAME;
+	private final int maxRetryCount = Integer.parseInt(System.getProperty(ETCD_MAX_RETRY_COUNT, "1"));
 	
 	private Map<Class<?>, String> clsIndex = new HashMap<Class<?>, String>();
 	private Map<String, String> indexMap = new HashMap<String, String>();
@@ -257,7 +259,7 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 			
 			if(uriList.size() > 0) {
 				etcd = new EtcdClient(username, clientId, uriList.toArray(new URI[uriList.size()]));
-				etcd.setRetryHandler(new RetryWithExponentialBackOff(20, 4, -1));
+				etcd.setRetryHandler(new RetryWithExponentialBackOff(20, maxRetryCount, -1));
 			}
 		}
 	}

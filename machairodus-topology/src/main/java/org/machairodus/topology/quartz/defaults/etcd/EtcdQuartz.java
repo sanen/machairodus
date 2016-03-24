@@ -62,6 +62,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String ETCD_USER = "context.quartz.etcd.username";
 	public static final String ETCD_CLIENT_ID = "context.quartz.etcd.clientid";
 	public static final String ETCD_APP_NAME = "context.quartz.app.name";
+	public static final String ETCD_MAX_RETRY_COUNT = "context.quartz.etcd.max.retry.count";
 	
 	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
 	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
@@ -69,6 +70,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 	public static final String INSTANCE_KEY = DIR + "/Quartz.list";
 	public static final String INFO_KEY = DIR + "/App.info";
 	private static String APP_NAME;
+	private final int maxRetryCount = Integer.parseInt(System.getProperty(ETCD_MAX_RETRY_COUNT, "1"));
 	
 	private Map<Class<?>, String> clsIndex = new HashMap<Class<?>, String>();
 	private Map<String, String> indexMap = new HashMap<String, String>();
@@ -258,7 +260,7 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 			
 			if(uriList.size() > 0) {
 				etcd = new EtcdClient(username, clientId, uriList.toArray(new URI[uriList.size()]));
-				etcd.setRetryHandler(new RetryWithExponentialBackOff(20, 4, -1));
+				etcd.setRetryHandler(new RetryWithExponentialBackOff(20, maxRetryCount, -1));
 			}
 		}
 	}
