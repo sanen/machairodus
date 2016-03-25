@@ -95,6 +95,12 @@ public @interface Scheduler {
 	boolean lazy() default false;
 	
 	/**
+	 * 用户自定义属性
+	 * @return
+	 */
+	String[] defined() default { };
+	
+	/**
 	 * 针对剑齿虎扩展包的扩展实现, 只在数据获取线程中有效
 	 * @return
 	 */

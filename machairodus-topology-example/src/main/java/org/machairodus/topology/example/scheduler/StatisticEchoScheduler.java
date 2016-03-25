@@ -18,7 +18,6 @@ package org.machairodus.topology.example.scheduler;
 
 import org.machairodus.topology.scheduler.BaseScheduler;
 import org.machairodus.topology.scheduler.Scheduler;
-import org.machairodus.topology.scheduler.SchedulerException;
 import org.machairodus.topology.scheduler.defaults.monitor.Statistic;
 
 import com.alibaba.fastjson.JSON;
@@ -28,22 +27,22 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 public class StatisticEchoScheduler extends BaseScheduler {
 	
 	@Override
-	public void before() throws SchedulerException {
+	public void before() {
 		
 	}
 
 	@Override
-	public void execute() throws SchedulerException {
+	public void execute() {
 		LOG.info(JSON.toJSONString(Statistic.getInstance().getPointer(), SerializerFeature.WriteDateUseDateFormat));
 	}
 
 	@Override
-	public void after() throws SchedulerException {
+	public void after() {
 		
 	}
 
 	@Override
-	public void destroy() throws SchedulerException {
+	public void destroy() {
 		
 	}
 

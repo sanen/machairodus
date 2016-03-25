@@ -22,7 +22,6 @@ import org.machairodus.topology.example.domain.Test;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scheduler.BaseScheduler;
 import org.machairodus.topology.scheduler.Scheduler;
-import org.machairodus.topology.scheduler.SchedulerException;
 import org.machairodus.topology.util.CollectionUtils;
 
 @Scheduler(workerClassProperty = "scheduler.data-loader.test.worker.class", parallelProperty = "scheduler.data-loader.test.parallel")
@@ -34,7 +33,7 @@ public class TestDataLoaderScheduler extends BaseScheduler {
 	}
 	
 	@Override
-	public void before() throws SchedulerException {
+	public void before() {
 		if(CollectionUtils.isEmpty(data) && BlockingQueueFactory.getInstance().getQueue(Test.class.getSimpleName()).size() < 100) {
 			data = BlockingQueueFactory.getInstance().poll(Test.class.getName(), 1000, 1000, TimeUnit.MILLISECONDS);
 //			LOG.debug("抓取数据[" + getConfig().getTotal() + "-" + getConfig().getNum() + "]: " + data.size());
@@ -44,7 +43,7 @@ public class TestDataLoaderScheduler extends BaseScheduler {
 	}
 
 	@Override
-	public void execute() throws SchedulerException {
+	public void execute() {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(Test item : data) {
 				boolean offed = false;
@@ -59,7 +58,7 @@ public class TestDataLoaderScheduler extends BaseScheduler {
 	}
 
 	@Override
-	public void after() throws SchedulerException {
+	public void after() {
 		if(data != null) {
 			data.clear();
 			data = null;
@@ -67,7 +66,7 @@ public class TestDataLoaderScheduler extends BaseScheduler {
 	}
 
 	@Override
-	public void destroy() throws SchedulerException {
+	public void destroy() {
 
 	}
 

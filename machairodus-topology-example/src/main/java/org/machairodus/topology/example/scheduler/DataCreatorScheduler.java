@@ -22,7 +22,6 @@ import org.machairodus.topology.example.domain.Test;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scheduler.BaseScheduler;
 import org.machairodus.topology.scheduler.Scheduler;
-import org.machairodus.topology.scheduler.SchedulerException;
 import org.nanoframework.commons.util.UUIDUtils;
 
 @Scheduler(beforeAfterOnly = true, parallel = 1)
@@ -35,12 +34,12 @@ public class DataCreatorScheduler extends BaseScheduler {
 	}
 	
 	@Override
-	public void before() throws SchedulerException {
+	public void before() {
 		
 	}
 
 	@Override
-	public void execute() throws SchedulerException {
+	public void execute() {
 		if(test == null)
 			test = Test.create(id.incrementAndGet(), UUIDUtils.create());
 		
@@ -51,12 +50,12 @@ public class DataCreatorScheduler extends BaseScheduler {
 	}
 
 	@Override
-	public void after() throws SchedulerException {
+	public void after() {
 
 	}
 
 	@Override
-	public void destroy() throws SchedulerException {
+	public void destroy() {
 
 	}
 

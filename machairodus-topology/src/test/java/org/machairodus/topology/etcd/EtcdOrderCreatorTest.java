@@ -19,7 +19,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.scheduler.defaults.etcd.EtcdAppInfo;
 import org.machairodus.topology.scheduler.defaults.etcd.EtcdOrder;
-import org.machairodus.topology.scheduler.defaults.etcd.EtcdOrder.OrderAction;
+import org.machairodus.topology.scheduler.defaults.etcd.OrderAction;
 import org.machairodus.topology.util.CryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

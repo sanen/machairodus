@@ -23,7 +23,6 @@ import org.machairodus.topology.example.domain.Test;
 import org.machairodus.topology.queue.BlockingQueueFactory;
 import org.machairodus.topology.scheduler.BaseScheduler;
 import org.machairodus.topology.scheduler.Scheduler;
-import org.machairodus.topology.scheduler.SchedulerException;
 import org.machairodus.topology.scheduler.defaults.monitor.Statistic;
 import org.machairodus.topology.util.CollectionUtils;
 
@@ -33,13 +32,13 @@ public class TestWorkerScheduler2 extends BaseScheduler {
 	private Random random = new Random();
 	
 	@Override
-	public void before() throws SchedulerException {
+	public void before() {
 		data = BlockingQueueFactory.getInstance().poll(Test.class.getSimpleName() + "2", 100, 1000, TimeUnit.MILLISECONDS);
 		
 	}
 
 	@Override
-	public void execute() throws SchedulerException {
+	public void execute() {
 		if(!CollectionUtils.isEmpty(data)) {
 			for(@SuppressWarnings("unused") Test test : data) {
 				thisWait(random.nextInt(10));
@@ -51,12 +50,12 @@ public class TestWorkerScheduler2 extends BaseScheduler {
 	}
 
 	@Override
-	public void after() throws SchedulerException {
+	public void after() {
 
 	}
 
 	@Override
-	public void destroy() throws SchedulerException {
+	public void destroy() {
 
 	}
 

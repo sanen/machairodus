@@ -181,7 +181,7 @@ public class SchedulerFactory {
 		if(scheduler != null && !scheduler.isClose()) {
 			if(scheduler.getConfig().getWorkerClass() != BaseScheduler.class) {
 				/** Sync to Etcd by stop method */
-				etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+				etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 				
 				scheduler.setClose(true);
 				stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -202,7 +202,7 @@ public class SchedulerFactory {
 				
 				if(size > 1) {
 					/** Sync to Etcd by stop method */
-					etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+					etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 					
 					scheduler.setClose(true);
 					stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -210,7 +210,7 @@ public class SchedulerFactory {
 				} else if(size == 1) {
 					for(BaseScheduler _scheduler : dataLoaders) {
 						/** Sync to Etcd by stop method */
-						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 						
 						_scheduler.setClose(true);
 						stoppingScheduler.put(_scheduler.getConfig().getId(), _scheduler);
@@ -244,7 +244,7 @@ public class SchedulerFactory {
 		
 		for(BaseScheduler scheduler : dataLoaders) {
 			/** Sync to Etcd by stop method */
-			etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+			etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 			
 			scheduler.setClose(true);
 			stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -257,7 +257,7 @@ public class SchedulerFactory {
 					closeByQueue(scheduler, scheduler.getConfig().getQueueName());
 				else {
 					/** Sync to Etcd by stop method */
-					etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+					etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 					
 					scheduler.setClose(true);
 					stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -290,7 +290,7 @@ public class SchedulerFactory {
 		
 		if(StringUtils.isEmpty(queueName)) {
 			/** Sync to Etcd by stop method */
-			etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+			etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 			
 			scheduler.setClose(true);
 			stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -319,7 +319,7 @@ public class SchedulerFactory {
 						LOG.info("队列数据消费结束: " + scheduler.getConfig().getId());
 						
 						/** Sync to Etcd by stop method */
-						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 						
 						scheduler.setClose(true);
 						stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -328,7 +328,7 @@ public class SchedulerFactory {
 						future.get(timeout, TimeUnit.MILLISECONDS);
 						
 						/** Sync to Etcd by stop method */
-						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+						etcdScheduler.stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 						
 						scheduler.setClose(true);
 						stoppingScheduler.put(scheduler.getConfig().getId(), scheduler);
@@ -357,7 +357,7 @@ public class SchedulerFactory {
 				service.execute(scheduler);
 				
 				/** Sync to Etcd by start method */
-				etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+				etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 			}
 			
 			stoppedScheduler.clear();
@@ -381,7 +381,7 @@ public class SchedulerFactory {
 						keys.add(id);
 						
 						/** Sync to Etcd by start method */
-						etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+						etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 					}
 				}
 			}
@@ -404,7 +404,7 @@ public class SchedulerFactory {
 			stoppedScheduler.remove(id);
 			
 			/** Sync to Etcd by start method */
-			etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+			etcdScheduler.start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 		}
 	}
 	
@@ -429,7 +429,7 @@ public class SchedulerFactory {
 			if(autoStart)
 				start(config.getId());
 			else {
-				etcdScheduler.stopped(_new.getConfig().getGroup(), _new.getConfig().getId(), false);
+				etcdScheduler.stopped(_new.getConfig().getGroup(), _new.getConfig().getId(), false, scheduler.getAnalysis());
 			}
 			
 		}
@@ -488,7 +488,7 @@ public class SchedulerFactory {
 		
 		if(scheduler.isClosed()) {
 			/** Sync to Etcd by start method */
-			etcdScheduler.stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), remove);
+			etcdScheduler.stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), remove, scheduler.getAnalysis());
 		} else 
 			close(scheduler);
 		
@@ -657,6 +657,7 @@ public class SchedulerFactory {
 						
 							config.setLazy(scheduler.lazy());
 							config.setDaemon(scheduler.daemon());
+							config.setDefined(scheduler.defined());
 							
 							/** set Machairodus private proerty   START */
 							if(!StringUtils.isEmpty(scheduler.workerClassProperty().trim())) {
@@ -820,7 +821,7 @@ public class SchedulerFactory {
 				stoppingScheduler.remove(id, scheduler);
 				
 				/** Sync to Etcd by stopped method */
-				etcdScheduler.stopped(scheduler.getConfig().getGroup(), id, scheduler.isRemove());
+				etcdScheduler.stopped(scheduler.getConfig().getGroup(), id, scheduler.isRemove(), scheduler.getAnalysis());
 			}
 			
 			/** 删除在停止列表中被标记为remove的任务 */

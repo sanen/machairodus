@@ -90,7 +90,8 @@ public class EtcdQuartz extends BaseQuartz implements EtcdQuartzOperate {
 		config.setGroup("EtcdQuartz");
 		threadFactory.setBaseQuartz(this);
 		config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
-		try { config.setCron(new CronExpression("0 */1 * * * ?")); } catch(ParseException e) {}
+//		try { config.setCron(new CronExpression("0 */1 * * * ?")); } catch(ParseException e) {}
+		config.setInterval(60000L);
 		config.setTotal(1);
 		config.setDaemon(true);
 		config.setBeforeAfterOnly(true);

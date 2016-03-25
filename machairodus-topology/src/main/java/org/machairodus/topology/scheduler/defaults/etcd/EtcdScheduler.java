@@ -22,7 +22,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.Inet4Address;
 import java.net.URI;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.machairodus.topology.scheduler.BaseScheduler;
-import org.machairodus.topology.scheduler.CronExpression;
+import org.machairodus.topology.scheduler.SchedulerAnalysis;
 import org.machairodus.topology.scheduler.SchedulerConfig;
 import org.machairodus.topology.scheduler.SchedulerException;
 import org.machairodus.topology.scheduler.SchedulerFactory;
@@ -62,18 +61,20 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	public static final String ETCD_CLIENT_ID = "context.scheduler.etcd.clientid";
 	public static final String ETCD_APP_NAME = "context.scheduler.app.name";
 	public static final String ETCD_MAX_RETRY_COUNT = "context.scheduler.etcd.max.retry.count";
+	public static final String ETCD_SCHEDULER_ANALYSIS = "context.scheduler.analysis.enable";
 	
 	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
 	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Scheduler.class";
 	public static final String INSTANCE_KEY = DIR + "/Scheduler.list";
 	public static final String INFO_KEY = DIR + "/App.info";
-	private static String APP_NAME;
 	private final int maxRetryCount = Integer.parseInt(System.getProperty(ETCD_MAX_RETRY_COUNT, "1"));
+	public static final boolean SCHEDULER_ANALYSIS_ENABLE = Boolean.parseBoolean(System.getProperty(ETCD_SCHEDULER_ANALYSIS, "false"));
 	
 	private Map<Class<?>, String> clsIndex = new HashMap<Class<?>, String>();
 	private Map<String, String> indexMap = new HashMap<String, String>();
-	
+
+	private static String APP_NAME;
 	private boolean init = false;
 	private final int timeout = 75;
 	private EtcdClient etcd;
@@ -89,7 +90,8 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 		config.setGroup("EtcdScheduler");
 		threadFactory.setBaseScheduler(this);
 		config.setService((ThreadPoolExecutor) Executors.newFixedThreadPool(1, threadFactory));
-		try { config.setCron(new CronExpression("0 */1 * * * ?")); } catch(ParseException e) {}
+//		try { config.setCron(new CronExpression("0 */1 * * * ?")); } catch(ParseException e) {}
+		config.setInterval(60000L);
 		config.setTotal(1);
 		config.setDaemon(true);
 		config.setBeforeAfterOnly(true);
@@ -112,6 +114,9 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	public void execute() throws SchedulerException {
 		syncBaseDirTTL();
 		syncInfo();
+		
+		if(SCHEDULER_ANALYSIS_ENABLE)
+			syncInstance();
 	}
 	
 	public void syncBaseDirTTL() {
@@ -214,17 +219,17 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 		
 		if(!CollectionUtils.isEmpty(started)) {
 			for(BaseScheduler scheduler : started) 
-				start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+				start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 		}
 		
 		if(!CollectionUtils.isEmpty(stopping)) {
 			for(BaseScheduler scheduler : stopping) 
-				stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId());
+				stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
 		}
 		
 		if(!CollectionUtils.isEmpty(stopped)) {
 			for(BaseScheduler scheduler : stopped) 
-				stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), false);
+				stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), false, scheduler.getAnalysis());
 		}
 	}
 	
@@ -304,16 +309,16 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 		return null;
 	}
 	
-	public void start(String group, String id) {
-		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STARTED));
+	public void start(String group, String id, SchedulerAnalysis analysis) {
+		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STARTED, analysis));
 	}
 	
-	public void stopping(String group, String id) {
-		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STOPPING));
+	public void stopping(String group, String id, SchedulerAnalysis analysis) {
+		put(INSTANCE_KEY, new SchedulerStatus(group, id, Status.STOPPING, analysis));
 	}
 	
-	public void stopped(String group, String id, boolean isRemove) {
-		SchedulerStatus status = new SchedulerStatus(group, id, Status.STOPPED);
+	public void stopped(String group, String id, boolean isRemove, SchedulerAnalysis analysis) {
+		SchedulerStatus status = new SchedulerStatus(group, id, Status.STOPPED, analysis);
 		if(!isRemove)
 			put(INSTANCE_KEY, status);
 		else 
