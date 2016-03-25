@@ -17,6 +17,7 @@ package org.machairodus.topology.quartz.defaults.etcd;
 
 import org.machairodus.topology.entity.BaseEntity;
 
+@Deprecated
 public class EtcdAppInfo extends BaseEntity {
 	private static final long serialVersionUID = -5412741101794352940L;
 

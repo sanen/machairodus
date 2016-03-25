@@ -15,6 +15,7 @@
  */
 package org.machairodus.topology.quartz.defaults.etcd;
 
+@Deprecated
 public interface EtcdQuartzOperate {
 	final EtcdQuartzOperate EMPTY = new EtcdQuartzOperate() {
 		@Override

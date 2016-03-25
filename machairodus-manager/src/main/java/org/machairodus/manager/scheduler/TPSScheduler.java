@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.machairodus.manager.quartz;
+package org.machairodus.manager.scheduler;
 
 import java.io.IOException;
 import java.rmi.ConnectException;
@@ -30,9 +30,8 @@ import org.machairodus.manager.service.impl.StatisticImpl;
 import org.machairodus.manager.websocket.MonitorHandler;
 import org.nanoframework.commons.util.CollectionUtils;
 import org.nanoframework.commons.util.StringUtils;
-import org.nanoframework.extension.concurrent.exception.QuartzException;
-import org.nanoframework.extension.concurrent.quartz.BaseQuartz;
-import org.nanoframework.extension.concurrent.quartz.Quartz;
+import org.nanoframework.extension.concurrent.scheduler.BaseScheduler;
+import org.nanoframework.extension.concurrent.scheduler.Scheduler;
 import org.nanoframework.extension.websocket.ChannelGroupSupport;
 import org.nanoframework.jmx.client.JmxClient;
 import org.nanoframework.jmx.client.JmxClientManager;
@@ -41,17 +40,17 @@ import com.alibaba.fastjson.JSON;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-@Quartz(name = "TPSQuartz", beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
-public class TPSQuartz extends BaseQuartz {
+@Scheduler(group = TPSScheduler.class, beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
+public class TPSScheduler extends BaseScheduler {
 	private Map<String, Map<String, Object>> serverMap = new HashMap<>();
 	
 	@Override
-	public void before() throws QuartzException {
+	public void before() {
 
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() {
 		Map<String, String> servers = new HashMap<>();
 		ChannelGroupSupport.GROUP.entrySet().parallelStream().forEach(entry -> {
 			String key = entry.getKey();
@@ -127,12 +126,12 @@ public class TPSQuartz extends BaseQuartz {
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() {
 
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() {
 
 	}
 

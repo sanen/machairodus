@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Deprecated
 public class Statistic {
 	private ConcurrentMap<String , AtomicLong> statisticMap = new ConcurrentHashMap<String , AtomicLong>();
 	private LinkedBlockingQueue<List<Pointer>> pointerQueue = new LinkedBlockingQueue<List<Pointer>>();

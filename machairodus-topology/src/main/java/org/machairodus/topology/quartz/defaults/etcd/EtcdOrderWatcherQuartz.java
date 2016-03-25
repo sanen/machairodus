@@ -41,6 +41,7 @@ import org.nanoframework.extension.etcd.etcd4j.responses.EtcdKeysResponse.EtcdNo
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 
+@Deprecated
 public class EtcdOrderWatcherQuartz extends BaseQuartz {
 	
 	public static final String ORDER = EtcdQuartz.DIR + "/Order.list";

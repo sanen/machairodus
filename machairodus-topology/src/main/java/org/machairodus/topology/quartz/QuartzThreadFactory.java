@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadFactory;
  * @author yanghe
  * @date 2015年12月03日 下午8:31:13 
  */
+@Deprecated
 public class QuartzThreadFactory implements ThreadFactory {
 	private BaseQuartz baseQuartz;
 	

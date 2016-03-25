@@ -23,6 +23,7 @@ import org.machairodus.topology.entity.BaseEntity;
  * @author yanghe
  * @date 2015年12月3日 下午10:15:05
  */
+@Deprecated
 public class QuartzConfig extends BaseEntity {
 	private static final long serialVersionUID = 428169936271582176L;
 	

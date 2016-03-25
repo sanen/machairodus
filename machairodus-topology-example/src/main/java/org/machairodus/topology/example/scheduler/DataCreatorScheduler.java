@@ -19,14 +19,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.machairodus.topology.example.domain.Test;
-import org.machairodus.topology.quartz.BaseQuartz;
-import org.machairodus.topology.quartz.Quartz;
-import org.machairodus.topology.quartz.QuartzException;
 import org.machairodus.topology.queue.BlockingQueueFactory;
+import org.machairodus.topology.scheduler.BaseScheduler;
+import org.machairodus.topology.scheduler.Scheduler;
 import org.nanoframework.commons.util.UUIDUtils;
 
-@Quartz(name = "DataCreatorQuartz", beforeAfterOnly = true, parallel = 1)
-public class DataCreatorQuartz extends BaseQuartz {
+@Scheduler(beforeAfterOnly = true, parallel = 1)
+public class DataCreatorScheduler extends BaseScheduler {
 	private AtomicLong id = new AtomicLong(0);
 	private Test test;
 	
@@ -35,12 +34,12 @@ public class DataCreatorQuartz extends BaseQuartz {
 	}
 	
 	@Override
-	public void before() throws QuartzException {
+	public void before() {
 		
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() {
 		if(test == null)
 			test = Test.create(id.incrementAndGet(), UUIDUtils.create());
 		
@@ -51,12 +50,12 @@ public class DataCreatorQuartz extends BaseQuartz {
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() {
 
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() {
 
 	}
 

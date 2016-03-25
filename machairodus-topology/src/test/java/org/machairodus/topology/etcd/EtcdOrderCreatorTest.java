@@ -17,9 +17,9 @@ package org.machairodus.topology.etcd;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
-import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder;
-import org.machairodus.topology.quartz.defaults.etcd.EtcdOrder.OrderAction;
+import org.machairodus.topology.scheduler.defaults.etcd.EtcdAppInfo;
+import org.machairodus.topology.scheduler.defaults.etcd.EtcdOrder;
+import org.machairodus.topology.scheduler.defaults.etcd.OrderAction;
 import org.machairodus.topology.util.CryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,20 +34,20 @@ public class EtcdOrderCreatorTest {
 	public void createOrder() {
 		EtcdOrder order = new EtcdOrder();
 		order.setAction(OrderAction.STOP);
-		order.setGroup("TestWorkerQuartz2");
-		order.setId("TestWorkerQuartz2-4");
+		order.setGroup("TestWorkerScheduler2");
+		order.setId("TestWorkerScheduler2-4");
 		
 		LOG.debug("STOP: " + CryptUtil.encrypt(order.toString(), "3a5e93c00786099381534c93af339ac8"));
 		
 		EtcdOrder stopGroup = new EtcdOrder();
 		stopGroup.setAction(OrderAction.STOP_GROUP);
-		stopGroup.setGroup("TestWorkerQuartz2");
+		stopGroup.setGroup("TestWorkerScheduler2");
 		
 		LOG.debug("STOP_GROUP: " + CryptUtil.encrypt(stopGroup.toString(), "3a5e93c00786099381534c93af339ac8"));
 		
 		EtcdOrder removeGroup = new EtcdOrder();
 		removeGroup.setAction(OrderAction.REMOVE_GROUP);
-		removeGroup.setGroup("TestWorkerQuartz2");
+		removeGroup.setGroup("TestWorkerScheduler2");
 		
 		LOG.debug("REMOVE_GROUP: " + CryptUtil.encrypt(removeGroup.toString(), "3a5e93c00786099381534c93af339ac8"));
 		

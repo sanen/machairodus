@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
-import org.machairodus.topology.quartz.QuartzStatus;
-import org.machairodus.topology.quartz.defaults.etcd.EtcdAppInfo;
-import org.machairodus.topology.quartz.defaults.etcd.EtcdQuartz;
-import org.machairodus.topology.quartz.defaults.monitor.JmxMonitor;
+import org.machairodus.topology.scheduler.SchedulerStatus;
+import org.machairodus.topology.scheduler.defaults.etcd.EtcdAppInfo;
+import org.machairodus.topology.scheduler.defaults.etcd.EtcdScheduler;
+import org.machairodus.topology.scheduler.defaults.monitor.JmxMonitor;
 import org.machairodus.topology.util.CollectionUtils;
 import org.machairodus.topology.util.CryptUtil;
 import org.machairodus.topology.util.LoaderException;
@@ -35,11 +35,11 @@ public class EtcdOrderTest {
 	private String ROOT_RESOURCE;
 	
 	private void initEtcd() throws LoaderException, FileNotFoundException, IOException {
-		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:quartz-config.properties"));
-		String username = properties.getProperty(EtcdQuartz.ETCD_USER);
-		String password = CryptUtil.decrypt(properties.getProperty(EtcdQuartz.ETCD_CLIENT_ID), username);
-		String[] uris = properties.getProperty(EtcdQuartz.ETCD_URI, "").split(",");
-		ROOT_RESOURCE = "/machairodus/" + properties.getProperty(EtcdQuartz.ETCD_USER, "");
+		properties = PropertiesLoader.load(ResourceUtils.getFile("classpath:scheduler-config.properties"));
+		String username = properties.getProperty(EtcdScheduler.ETCD_USER);
+		String password = CryptUtil.decrypt(properties.getProperty(EtcdScheduler.ETCD_CLIENT_ID), username);
+		String[] uris = properties.getProperty(EtcdScheduler.ETCD_URI, "").split(",");
+		ROOT_RESOURCE = "/machairodus/" + properties.getProperty(EtcdScheduler.ETCD_USER, "");
 		if(!StringUtils.isEmpty(username.trim()) && !StringUtils.isEmpty(password.trim()) && uris.length > 0) {
 			List<URI> uriList = new ArrayList<URI>();
 			for(String uri : uris) {
@@ -122,7 +122,7 @@ public class EtcdOrderTest {
 	}
 	
 	@Test
-	public void readQuartzList() throws Throwable {
+	public void readSchedulerList() throws Throwable {
 		initEtcd();
 		if(etcd != null) {
 			List<String> systemIds = new ArrayList<String>();
@@ -142,22 +142,22 @@ public class EtcdOrderTest {
 				}
 			}
 			
-			List<QuartzStatus> quartzStatus = new ArrayList<QuartzStatus>();
-			TypeReference<QuartzStatus> quartzStatusType = new TypeReference<QuartzStatus>() { };
+			List<SchedulerStatus> schedulerStatus = new ArrayList<SchedulerStatus>();
+			TypeReference<SchedulerStatus> schedulerStatusType = new TypeReference<SchedulerStatus>() { };
 			if(!CollectionUtils.isEmpty(systemIds)) {
 				for(String systemId : systemIds) {
-					response = etcd.get(resource + systemId + "/Quartz.list").send().get();
+					response = etcd.get(resource + systemId + "/Scheduler.list").send().get();
 					List<EtcdNode> nodes;
 					if(response.node != null && !CollectionUtils.isEmpty(nodes = response.node.nodes)) {
 						for(EtcdNode node : nodes) {
-							quartzStatus.add(JSON.parseObject(CryptUtil.decrypt(node.value, systemId), quartzStatusType));
+							schedulerStatus.add(JSON.parseObject(CryptUtil.decrypt(node.value, systemId), schedulerStatusType));
 						}
 					}
 				}
 			}
 			
-			if(!CollectionUtils.isEmpty(quartzStatus)) {
-				for(QuartzStatus status : quartzStatus) {
+			if(!CollectionUtils.isEmpty(schedulerStatus)) {
+				for(SchedulerStatus status : schedulerStatus) {
 					LOG.debug(status.toString());
 				}
 			}

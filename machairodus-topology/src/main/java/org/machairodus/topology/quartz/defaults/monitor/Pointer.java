@@ -17,6 +17,7 @@ package org.machairodus.topology.quartz.defaults.monitor;
 
 import org.machairodus.topology.entity.BaseEntity;
 
+@Deprecated
 public class Pointer extends BaseEntity {
 	private static final long serialVersionUID = 7350989467756362845L;
 

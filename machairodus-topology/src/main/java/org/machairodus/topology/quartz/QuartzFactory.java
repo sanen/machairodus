@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author yanghe
  * @date 2015年6月8日 下午5:24:13 
  */
+@Deprecated
 public class QuartzFactory {
 	private static Logger LOG = LoggerFactory.getLogger(QuartzFactory.class);
 	private static QuartzFactory FACTORY;
@@ -480,15 +481,14 @@ public class QuartzFactory {
 	
 	public final int removeQuartz(BaseQuartz quartz) {
 		Set<BaseQuartz> groupQuartz = group.get(quartz.getConfig().getGroup());
-		boolean remove = false;
 		if(groupQuartz.size() > 1) {
 			groupQuartz.remove(quartz);
-			quartz.setRemove(remove = true);
+			quartz.setRemove(true);
 		}
 		
 		if(quartz.isClosed()) {
 			/** Sync to Etcd by start method */
-			etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), remove);
+			etcdQuartz.stopped(quartz.getConfig().getGroup(), quartz.getConfig().getId(), true);
 		} else 
 			close(quartz);
 		
@@ -562,10 +562,11 @@ public class QuartzFactory {
 		Assert.hasLength(groupName);
 		Set<BaseQuartz> groupQuartz = group.get(groupName);
 		if(!CollectionUtils.isEmpty(groupQuartz)) {
-			AtomicInteger idx = new AtomicInteger(0);
+			int idx = 0;
 			for(BaseQuartz quartz : groupQuartz) {
-				quartz.getConfig().setNum(idx.getAndIncrement());
+				quartz.getConfig().setNum(idx);
 				quartz.getConfig().setTotal(groupQuartz.size());
+				idx ++;
 			}
 		}
 	}
@@ -646,8 +647,9 @@ public class QuartzFactory {
 						for(int p = 0; p < parallel; p ++) {
 							BaseQuartz baseQuartz = (BaseQuartz) clz.newInstance();
 							QuartzConfig config = new QuartzConfig();
-							config.setId(quartz.name() + "-" + baseQuartz.getIndex(quartz.name()));
-							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + config.getId());
+							long idx = baseQuartz.getIndex(quartz.name());
+							config.setId(quartz.name() + "-" + idx);
+							config.setName(DEFAULT_QUARTZ_NAME_PREFIX + quartz.name() + "-" + idx);
 							config.setGroup(quartz.name());
 							config.setService(service);
 							config.setBeforeAfterOnly(quartz.beforeAfterOnly());

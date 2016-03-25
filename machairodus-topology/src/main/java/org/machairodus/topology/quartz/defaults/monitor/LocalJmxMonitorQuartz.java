@@ -44,6 +44,7 @@ import org.nanoframework.extension.etcd.etcd4j.EtcdClient;
  * @author yanghe
  * @date 2016年1月8日 上午9:46:03
  */
+@Deprecated
 public class LocalJmxMonitorQuartz extends BaseQuartz {
 	private final EtcdClient etcd;
 	

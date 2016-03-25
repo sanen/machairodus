@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.machairodus.topology.entity.BaseEntity;
 
+@Deprecated
 public class JmxMonitor extends BaseEntity {
 	private static final long serialVersionUID = 743543178402183287L;
 

@@ -16,34 +16,33 @@
 package org.machairodus.topology.example.scheduler;
 
 
-import org.machairodus.topology.quartz.BaseQuartz;
-import org.machairodus.topology.quartz.Quartz;
-import org.machairodus.topology.quartz.QuartzException;
-import org.machairodus.topology.quartz.defaults.monitor.Statistic;
+import org.machairodus.topology.scheduler.BaseScheduler;
+import org.machairodus.topology.scheduler.Scheduler;
+import org.machairodus.topology.scheduler.defaults.monitor.Statistic;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-@Quartz(name = "StatisticEchoQuartz", beforeAfterOnly = true, interval = 1000, parallel = 0)
-public class StatisticEchoQuartz extends BaseQuartz {
+@Scheduler(beforeAfterOnly = true, interval = 1000, parallel = 0)
+public class StatisticEchoScheduler extends BaseScheduler {
 	
 	@Override
-	public void before() throws QuartzException {
+	public void before() {
 		
 	}
 
 	@Override
-	public void execute() throws QuartzException {
+	public void execute() {
 		LOG.info(JSON.toJSONString(Statistic.getInstance().getPointer(), SerializerFeature.WriteDateUseDateFormat));
 	}
 
 	@Override
-	public void after() throws QuartzException {
+	public void after() {
 		
 	}
 
 	@Override
-	public void destroy() throws QuartzException {
+	public void destroy() {
 		
 	}
 

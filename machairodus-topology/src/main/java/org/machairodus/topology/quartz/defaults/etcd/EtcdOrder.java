@@ -19,6 +19,7 @@ import org.machairodus.topology.entity.BaseEntity;
 import org.machairodus.topology.quartz.QuartzConfig;
 import org.machairodus.topology.util.ObjectCompare;
 
+@Deprecated
 public class EtcdOrder extends BaseEntity {
 	private static final long serialVersionUID = 6645140062880311456L;
 
@@ -106,7 +107,4 @@ public class EtcdOrder extends BaseEntity {
 		this.className = className;
 	}
 
-	public enum OrderAction {
-		APPEND, START, STOP, REMOVE, START_GROUP, STOP_GROUP, REMOVE_GROUP, START_ALL, STOP_ALL;
-	}
 }

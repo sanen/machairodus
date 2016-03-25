@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * @date 2015年6月8日 下午5:10:18 
  *
  */
+@Deprecated
 public abstract class BaseQuartz implements Runnable, Cloneable {
 	protected static Logger LOG = LoggerFactory.getLogger(BaseQuartz.class);
 	

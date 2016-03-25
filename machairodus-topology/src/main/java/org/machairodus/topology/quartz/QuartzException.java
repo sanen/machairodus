@@ -22,6 +22,7 @@ package org.machairodus.topology.quartz;
  * @date 2015年6月11日 下午2:59:02 
  *
  */
+@Deprecated
 public class QuartzException extends RuntimeException {
 	private static final long serialVersionUID = -2775206802007728986L;
 

@@ -20,7 +20,7 @@
 		<maven-javadoc-plugin-version>2.9.1</maven-javadoc-plugin-version>
 		<maven-release-plugin-version>2.5.2</maven-release-plugin-version>
 
-		<nano-version>1.2.11</nano-version>
+		<nano-version>1.3.0</nano-version>
 		<junit-version>4.9</junit-version>
 		<slf4j-version>1.7.7</slf4j-version>
 		<log4j2-version>2.5</log4j2-version>
