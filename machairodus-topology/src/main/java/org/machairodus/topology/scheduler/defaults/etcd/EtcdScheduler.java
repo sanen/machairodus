@@ -76,7 +76,7 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 
 	private static String APP_NAME;
 	private boolean init = false;
-	private final int timeout = 75;
+	private final int timeout = 300;
 	private EtcdClient etcd;
 	
 	public EtcdScheduler(Set<Class<?>> clsSet) {
