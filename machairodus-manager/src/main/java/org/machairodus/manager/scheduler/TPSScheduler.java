@@ -40,7 +40,7 @@ import com.alibaba.fastjson.JSON;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-@Scheduler(group = TPSScheduler.class, beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
+@Scheduler(beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
 public class TPSScheduler extends BaseScheduler {
 	private Map<String, Map<String, Object>> serverMap = new HashMap<>();
 	

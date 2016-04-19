@@ -40,7 +40,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-@Scheduler(group = LoadScheduler.class, beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
+@Scheduler(beforeAfterOnly = true, cron = "* * * * * ?", parallel = 1)
 public class LoadScheduler extends BaseScheduler {
 	private RedisClient redisClient = GlobalRedisClient.get(RedisClientNames.MANAGER.value());
 	private TypeReference<JmxMonitor> typeReference = new TypeReference<JmxMonitor>() { };

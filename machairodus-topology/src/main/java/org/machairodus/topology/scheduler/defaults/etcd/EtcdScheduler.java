@@ -62,21 +62,22 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	public static final String ETCD_APP_NAME = "context.scheduler.app.name";
 	public static final String ETCD_MAX_RETRY_COUNT = "context.scheduler.etcd.max.retry.count";
 	public static final String ETCD_SCHEDULER_ANALYSIS = "context.scheduler.analysis.enable";
+	public static final String ETCD_KEY_TTL = "context.scheduler.etcd.key.ttl";
 	
 	public static final String ROOT_RESOURCE = "/machairodus/" + System.getProperty(ETCD_USER, "");
 	public static final String DIR = ROOT_RESOURCE + "/" + SYSTEM_ID;
 	public static final String CLS_KEY = DIR + "/Scheduler.class";
 	public static final String INSTANCE_KEY = DIR + "/Scheduler.list";
 	public static final String INFO_KEY = DIR + "/App.info";
-	private final int maxRetryCount = Integer.parseInt(System.getProperty(ETCD_MAX_RETRY_COUNT, "1"));
 	public static final boolean SCHEDULER_ANALYSIS_ENABLE = Boolean.parseBoolean(System.getProperty(ETCD_SCHEDULER_ANALYSIS, "false"));
+	private static String APP_NAME;
+	
+	private final int maxRetryCount = Integer.parseInt(System.getProperty(ETCD_MAX_RETRY_COUNT, "1"));
+	private final int timeout = Integer.parseInt(System.getProperty(ETCD_KEY_TTL, "120"));
 	
 	private Map<Class<?>, String> clsIndex = new HashMap<Class<?>, String>();
 	private Map<String, String> indexMap = new HashMap<String, String>();
-
-	private static String APP_NAME;
 	private boolean init = false;
-	private final int timeout = 300;
 	private EtcdClient etcd;
 	
 	public EtcdScheduler(Set<Class<?>> clsSet) {
@@ -115,8 +116,9 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 		syncBaseDirTTL();
 		syncInfo();
 		
-		if(SCHEDULER_ANALYSIS_ENABLE)
+		if(SCHEDULER_ANALYSIS_ENABLE) {
 			syncInstance();
+		}
 	}
 	
 	public void syncBaseDirTTL() {
@@ -218,18 +220,21 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 		Collection<BaseScheduler> stopped = SchedulerFactory.getInstance().getStoppedQuratz();
 		
 		if(!CollectionUtils.isEmpty(started)) {
-			for(BaseScheduler scheduler : started) 
+			for(BaseScheduler scheduler : started) {
 				start(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
+			}
 		}
 		
 		if(!CollectionUtils.isEmpty(stopping)) {
-			for(BaseScheduler scheduler : stopping) 
+			for(BaseScheduler scheduler : stopping) { 
 				stopping(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), scheduler.getAnalysis());
+			}
 		}
 		
 		if(!CollectionUtils.isEmpty(stopped)) {
-			for(BaseScheduler scheduler : stopped) 
+			for(BaseScheduler scheduler : stopped) { 
 				stopped(scheduler.getConfig().getGroup(), scheduler.getConfig().getId(), false, scheduler.getAnalysis());
+			}
 		}
 	}
 	
@@ -319,11 +324,11 @@ public class EtcdScheduler extends BaseScheduler implements EtcdSchedulerOperate
 	
 	public void stopped(String group, String id, boolean isRemove, SchedulerAnalysis analysis) {
 		SchedulerStatus status = new SchedulerStatus(group, id, Status.STOPPED, analysis);
-		if(!isRemove)
+		if(!isRemove) {
 			put(INSTANCE_KEY, status);
-		else 
+		} else { 
 			delete(INSTANCE_KEY, status);
-		
+		}
 	}
 	
 	public EtcdClient getEtcd() {

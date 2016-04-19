@@ -27,7 +27,7 @@ import org.machairodus.manager.service.LayoutService;
 import org.machairodus.manager.service.PermissionService;
 import org.machairodus.mappers.domain.Func;
 import org.nanoframework.commons.util.CollectionUtils;
-import org.nanoframework.commons.util.Constants;
+import org.nanoframework.core.context.ApplicationContext;
 import org.nanoframework.web.server.mvc.Model;
 
 import com.google.common.collect.Maps;
@@ -38,7 +38,7 @@ public class LayoutServiceImpl implements LayoutService {
 	@Inject
 	private PermissionService permissionService;
 	
-	private final String context = System.getProperty(Constants.CONTEXT_ROOT);
+	private final String context = System.getProperty(ApplicationContext.CONTEXT_ROOT);
 	
 	@Override
 	public void buildSidebar(Set<Long> itemIds, Model model) {

@@ -48,8 +48,9 @@ public class SchedulerAnalysis {
 	}
 	
 	public String performCycle() {
-		if(!EtcdScheduler.SCHEDULER_ANALYSIS_ENABLE)
+		if(!EtcdScheduler.SCHEDULER_ANALYSIS_ENABLE) {
 			return DISABLED;
+		}
 		
 		return  performCycle.get(Cycle.LESS_100).get() + ", " +
 				performCycle.get(Cycle.BETWEEN_101_500).get() + ", " +
