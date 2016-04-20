@@ -72,10 +72,7 @@
 	</issueManagement>
 
 	<modules>
-		<module>machairodus-commons</module>
 		<module>machairodus-topology</module>
-		<module>machairodus-manager</module>
-		<module>machairodus-mappers</module>
 		<module>machairodus-topology-example</module>
 	</modules>
 
@@ -390,22 +387,7 @@
 
 			<dependency>
 				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-commons</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
 				<artifactId>machairodus-topology</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-manager</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.machairodus</groupId>
-				<artifactId>machairodus-mappers</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
