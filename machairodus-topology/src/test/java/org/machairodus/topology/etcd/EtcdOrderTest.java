@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.machairodus.topology.scheduler.SchedulerStatus;
 import org.machairodus.topology.scheduler.defaults.etcd.EtcdAppInfo;
@@ -44,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 
-@Ignore
 public class EtcdOrderTest {
 	private Logger LOG = LoggerFactory.getLogger(EtcdOrderTest.class);
 	private EtcdClient etcd = null;
